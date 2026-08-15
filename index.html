@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta
+      name="description"
+      content="Color Studio is a modern color palette generator with palette management and WCAG contrast checking."
+    />
+
+    <meta name="theme-color" content="#ffffff" />
+
+    <title>Color Studio</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+
+  <body>
+    <div id="app" class="color-studio-app">
+      <!-- Header -->
+      <header id="appHeader" class="app-header border-bottom">
+        <div class="container">
+          <div
+            class="app-header__inner d-flex align-items-center justify-content-between"
+          >
+            <!-- Brand -->
+            <a
+              id="brandLink"
+              class="app-brand text-decoration-none"
+              href="#"
+              aria-label="Color Studio Home"
+            >
+              <span class="app-brand__icon" aria-hidden="true">
+                <i class="fa-solid fa-palette"></i>
+              </span>
+
+              <span class="app-brand__name"> Color Studio </span>
+            </a>
+
+            <!-- Header Actions -->
+            <nav
+              id="headerNavigation"
+              class="app-header__navigation"
+              aria-label="Main navigation"
+            >
+              <button
+                id="savedPalettesButton"
+                class="btn btn-outline-secondary"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#savedPalettesOffcanvas"
+                aria-controls="savedPalettesOffcanvas"
+              >
+                <i class="fa-solid fa-bookmark me-2" aria-hidden="true"></i>
+
+                Saved Palettes
+
+                <span
+                  id="savedPalettesCount"
+                  class="badge text-bg-secondary ms-2"
+                >
+                  0
+                </span>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main id="mainContent" class="app-main">
+        <!-- Palette Generator  -->
+        <section
+          id="paletteGenerator"
+          class="palette-generator"
+          aria-labelledby="paletteGeneratorTitle"
+        >
+          <div class="container">
+            <!-- Section Header -->
+            <div class="palette-generator__header row align-items-end g-4">
+              <div class="col-lg-8">
+                <p class="section-eyebrow mb-2">COLOR STUDIO</p>
+
+                <h1 id="paletteGeneratorTitle" class="section-title">
+                  Create your perfect color palette
+                </h1>
+
+                <p class="section-description mb-0">
+                  Generate beautiful color combinations, customize individual
+                  colors, and save your favorite palettes.
+                </p>
+              </div>
+
+              <!-- Generator Actions -->
+              <div class="col-lg-4">
+                <div
+                  class="palette-generator__actions d-flex flex-wrap gap-2 justify-content-lg-end"
+                >
+                  <button
+                    id="generatePaletteButton"
+                    class="btn btn-primary"
+                    type="button"
+                  >
+                    <i
+                      class="fa-solid fa-wand-magic-sparkles me-2"
+                      aria-hidden="true"
+                    ></i>
+
+                    Generate Palette
+                  </button>
+
+                  <button
+                    id="randomizePaletteButton"
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    title="Generate a random palette"
+                  >
+                    <i class="fa-solid fa-shuffle" aria-hidden="true"></i>
+
+                    <span class="visually-hidden"> Randomize Palette </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Palette Generator Controls -->
+            <div
+              id="paletteGeneratorControls"
+              class="palette-generator__controls"
+            >
+              <div class="row g-3 align-items-end">
+                <!-- Palette Type -->
+                <div class="col-md-4">
+                  <label for="paletteTypeSelect" class="form-label">
+                    Palette Type
+                  </label>
+
+                  <select id="paletteTypeSelect" class="form-select">
+                    <option value="random">Random</option>
+
+                    <option value="monochromatic">Monochromatic</option>
+
+                    <option value="analogous">Analogous</option>
+
+                    <option value="complementary">Complementary</option>
+
+                    <option value="triadic">Triadic</option>
+
+                    <option value="split-complementary">
+                      Split Complementary
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Color Count -->
+                <div class="col-md-4">
+                  <label for="colorCountSelect" class="form-label">
+                    Colors
+                  </label>
+
+                  <select id="colorCountSelect" class="form-select">
+                    <option value="3">3 Colors</option>
+
+                    <option value="4">4 Colors</option>
+
+                    <option value="5" selected>5 Colors</option>
+
+                    <option value="6">6 Colors</option>
+
+                    <option value="7">7 Colors</option>
+                  </select>
+                </div>
+
+                <!-- Base Color -->
+                <div class="col-md-4">
+                  <label for="baseColorInput" class="form-label">
+                    Base Color
+                  </label>
+
+                  <div class="input-group">
+                    <input
+                      id="baseColorInput"
+                      class="form-control"
+                      type="text"
+                      value="#6366F1"
+                      maxlength="7"
+                      placeholder="#6366F1"
+                      aria-label="Base color HEX value"
+                    />
+
+                    <input
+                      id="baseColorPicker"
+                      class="form-control form-control-color"
+                      type="color"
+                      value="#6366F1"
+                      title="Choose base color"
+                      aria-label="Choose base color"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!--  Current Palette -->
+            <div
+              id="currentPalette"
+              class="current-palette"
+              aria-live="polite"
+              aria-label="Current color palette"
+            >
+              <!-- Color cards will be rendered here by JavaScript -->
+            </div>
+
+            <!-- Palette Footer Actions -->
+            <div
+              class="palette-generator__footer d-flex flex-wrap align-items-center justify-content-between gap-3"
+            >
+              <div
+                id="paletteStatus"
+                class="palette-status"
+                role="status"
+                aria-live="polite"
+              >
+                Ready to generate a palette.
+              </div>
+
+              <div class="palette-generator__footer-actions d-flex gap-2">
+                <button
+                  id="clearPaletteButton"
+                  class="btn btn-outline-secondary"
+                  type="button"
+                >
+                  <i
+                    class="fa-solid fa-rotate-left me-2"
+                    aria-hidden="true"
+                  ></i>
+
+                  Reset
+                </button>
+
+                <button
+                  id="saveCurrentPaletteButton"
+                  class="btn btn-dark"
+                  type="button"
+                >
+                  <i class="fa-solid fa-bookmark me-2" aria-hidden="true"></i>
+
+                  Save Palette
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Contrast Checker -->
+        <section
+          id="contrastChecker"
+          class="contrast-checker"
+          aria-labelledby="contrastCheckerTitle"
+        >
+          <div class="container">
+            <!-- Section Header -->
+            <div class="section-header">
+              <p class="section-eyebrow mb-2">ACCESSIBILITY</p>
+
+              <h2 id="contrastCheckerTitle" class="section-title">
+                Contrast Checker
+              </h2>
+
+              <p class="section-description">
+                Check the contrast between foreground and background colors
+                against WCAG accessibility guidelines.
+              </p>
+            </div>
+
+            <div class="row g-4">
+              <!-- Contrast Controls -->
+              <div class="col-lg-5">
+                <div id="contrastControls" class="contrast-controls">
+                  <!-- Foreground Color -->
+                  <div class="contrast-color-control">
+                    <label for="foregroundHexInput" class="form-label">
+                      Foreground
+                    </label>
+
+                    <div class="input-group">
+                      <input
+                        id="foregroundHexInput"
+                        class="form-control"
+                        type="text"
+                        value="#FFFFFF"
+                        maxlength="7"
+                        placeholder="#FFFFFF"
+                        autocomplete="off"
+                      />
+
+                      <input
+                        id="foregroundColorPicker"
+                        class="form-control form-control-color"
+                        type="color"
+                        value="#FFFFFF"
+                        title="Choose foreground color"
+                        aria-label="Choose foreground color"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Background Color -->
+                  <div class="contrast-color-control">
+                    <label for="backgroundHexInput" class="form-label">
+                      Background
+                    </label>
+
+                    <div class="input-group">
+                      <input
+                        id="backgroundHexInput"
+                        class="form-control"
+                        type="text"
+                        value="#111827"
+                        maxlength="7"
+                        placeholder="#111827"
+                        autocomplete="off"
+                      />
+
+                      <input
+                        id="backgroundColorPicker"
+                        class="form-control form-control-color"
+                        type="color"
+                        value="#111827"
+                        title="Choose background color"
+                        aria-label="Choose background color"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Swap Colors -->
+                  <button
+                    id="swapContrastColorsButton"
+                    class="btn btn-outline-secondary"
+                    type="button"
+                  >
+                    <i
+                      class="fa-solid fa-right-left me-2"
+                      aria-hidden="true"
+                    ></i>
+
+                    Swap Colors
+                  </button>
+                </div>
+              </div>
+
+              <!-- Contrast Preview -->
+              <div class="col-lg-7">
+                <div
+                  id="contrastPreview"
+                  class="contrast-preview"
+                  style="color: #ffffff; background-color: #111827"
+                >
+                  <span
+                    id="contrastPreviewLabel"
+                    class="contrast-preview__label"
+                  >
+                    Contrast Preview
+                  </span>
+
+                  <strong
+                    id="contrastPreviewHeading"
+                    class="contrast-preview__heading"
+                  >
+                    Aa
+                  </strong>
+
+                  <p
+                    id="contrastPreviewText"
+                    class="contrast-preview__text mb-0"
+                  >
+                    The quick brown fox jumps over the lazy dog.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Contrast Results -->
+              <div class="col-12">
+                <div id="contrastResults" class="contrast-results">
+                  <!-- Contrast Ratio -->
+                  <div class="contrast-result-card">
+                    <span class="contrast-result-card__label">
+                      Contrast Ratio
+                    </span>
+
+                    <strong
+                      id="contrastRatio"
+                      class="contrast-result-card__value"
+                    >
+                      1.00 : 1
+                    </strong>
+                  </div>
+
+                  <!-- Normal Text -->
+                  <div id="normalTextResult" class="contrast-result-card">
+                    <span class="contrast-result-card__label">
+                      Normal Text
+                    </span>
+
+                    <strong
+                      id="normalTextStatus"
+                      class="contrast-result-card__status"
+                    >
+                      --
+                    </strong>
+
+                    <small
+                      id="normalTextLevel"
+                      class="contrast-result-card__description"
+                    >
+                      WCAG AA / AAA
+                    </small>
+                  </div>
+
+                  <!-- Large Text -->
+                  <div id="largeTextResult" class="contrast-result-card">
+                    <span class="contrast-result-card__label">
+                      Large Text
+                    </span>
+
+                    <strong
+                      id="largeTextStatus"
+                      class="contrast-result-card__status"
+                    >
+                      --
+                    </strong>
+
+                    <small
+                      id="largeTextLevel"
+                      class="contrast-result-card__description"
+                    >
+                      WCAG AA / AAA
+                    </small>
+                  </div>
+
+                  <!-- UI Components -->
+                  <div id="uiComponentResult" class="contrast-result-card">
+                    <span class="contrast-result-card__label">
+                      UI Components
+                    </span>
+
+                    <strong
+                      id="uiComponentStatus"
+                      class="contrast-result-card__status"
+                    >
+                      --
+                    </strong>
+
+                    <small
+                      id="uiComponentLevel"
+                      class="contrast-result-card__description"
+                    >
+                      WCAG 1.4.11
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer id="appFooter" class="app-footer border-top">
+        <div class="container">
+          <div
+            class="app-footer__inner d-flex flex-column flex-md-row align-items-center justify-content-between gap-2"
+          >
+            <p class="mb-0">
+              &copy;
+              <span id="currentYear"></span>
+              Color Studio
+            </p>
+
+            <p class="mb-0">
+                Made with 
+                <i class="fa-regular fa-heart"></i>
+                by Ayman Kz
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Saved Palettes Offcanvas -->
+    <div
+      id="savedPalettesOffcanvas"
+      class="offcanvas offcanvas-end"
+      tabindex="-1"
+      aria-labelledby="savedPalettesOffcanvasTitle"
+    >
+      <div class="offcanvas-header">
+        <h2 id="savedPalettesOffcanvasTitle" class="offcanvas-title">
+          Saved Palettes
+        </h2>
+
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="offcanvas-body">
+        <!-- Empty State -->
+        <div
+          id="savedPalettesEmptyState"
+          class="saved-palettes-empty-state text-center"
+        >
+          <div class="saved-palettes-empty-state__icon" aria-hidden="true">
+            <i class="fa-regular fa-bookmark"></i>
+          </div>
+
+          <h3>No saved palettes</h3>
+
+          <p>Save a palette and it will appear here.</p>
+        </div>
+
+        <!-- Saved Palettes List -->
+        <div id="savedPalettesList" class="saved-palettes-list">
+          <!-- Saved palettes will be rendered here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Palette Modal -->
+    <div
+      id="savePaletteModal"
+      class="modal fade"
+      tabindex="-1"
+      aria-labelledby="savePaletteModalTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 id="savePaletteModalTitle" class="modal-title fs-5">
+              Save Palette
+            </h2>
+
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+
+          <div class="modal-body">
+            <label for="paletteNameInput" class="form-label">
+              Palette Name
+            </label>
+
+            <input
+              id="paletteNameInput"
+              class="form-control"
+              type="text"
+              maxlength="50"
+              placeholder="e.g. Ocean Breeze"
+              autocomplete="off"
+            />
+
+            <div id="paletteNameError" class="invalid-feedback">
+              Please enter a palette name.
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+
+            <button
+              id="confirmSavePaletteButton"
+              type="button"
+              class="btn btn-primary"
+            >
+              <i class="fa-solid fa-bookmark me-2" aria-hidden="true"></i>
+
+              Save Palette
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div
+      class="toast-container position-fixed bottom-0 end-0 p-3"
+      id="toastContainer"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <div
+        id="appToast"
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header">
+          <span id="toastIcon" class="me-2" aria-hidden="true">
+            <i class="fa-solid fa-circle-check"></i>
+          </span>
+
+          <strong id="toastTitle" class="me-auto"> Color Studio </strong>
+
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <div id="toastMessage" class="toast-body">
+          Palette saved successfully.
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript-->
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>
