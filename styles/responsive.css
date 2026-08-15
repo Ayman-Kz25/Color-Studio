@@ -1,0 +1,661 @@
+/* =========================================================
+   Color Studio
+   Responsive Stylesheet
+   ========================================================= */
+
+
+/* =========================================================
+   1. Large Screens
+   ========================================================= */
+
+@media (max-width: 1199.98px) {
+
+    :root {
+        --section-padding-y: 4rem;
+    }
+
+
+    .current-palette {
+        grid-template-columns:
+            repeat(5, minmax(0, 1fr));
+    }
+
+
+    .color-card__content {
+        padding: var(--space-3);
+    }
+
+
+    .color-card__hex {
+        font-size: 0.8125rem;
+    }
+
+
+    .contrast-results {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+/* =========================================================
+   2. Tablet
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+
+    :root {
+        --section-padding-y: 3.5rem;
+    }
+
+
+    /* -----------------------------------------------------
+       Header
+       ----------------------------------------------------- */
+
+    .app-header__inner {
+        min-height: 68px;
+    }
+
+
+    /* -----------------------------------------------------
+       Section Header
+       ----------------------------------------------------- */
+
+    .palette-generator__header {
+        margin-bottom: var(--space-6);
+    }
+
+
+    .section-title {
+        font-size: clamp(
+            2rem,
+            5vw,
+            2.75rem
+        );
+    }
+
+
+    /* -----------------------------------------------------
+       Palette Generator
+       ----------------------------------------------------- */
+
+    .palette-generator__actions {
+        justify-content: flex-start !important;
+
+        margin-top: var(--space-2);
+    }
+
+
+    /*
+     * Five columns become a wrapped grid.
+     * This gives each color enough space on tablets.
+     */
+
+    .current-palette {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+        min-height: auto;
+    }
+
+
+    .color-card {
+        min-height: 320px;
+
+        border-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+
+    .color-card:nth-child(3n) {
+        border-right: 0;
+    }
+
+
+    .color-card__preview {
+        min-height: 230px;
+    }
+
+
+    /* -----------------------------------------------------
+       Contrast Checker
+       ----------------------------------------------------- */
+
+    .contrast-preview {
+        min-height: 360px;
+    }
+
+
+    .contrast-results {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+/* =========================================================
+   3. Small Tablets
+   ========================================================= */
+
+@media (max-width: 767.98px) {
+
+    :root {
+        --section-padding-y: 3rem;
+    }
+
+
+    /* -----------------------------------------------------
+       Header
+       ----------------------------------------------------- */
+
+    .app-header__inner {
+        min-height: 64px;
+    }
+
+
+    .app-brand__name {
+        font-size: 1rem;
+    }
+
+
+    .app-brand__icon {
+        width: 36px;
+        height: 36px;
+    }
+
+
+    #savedPalettesButton {
+        min-height: 40px;
+    }
+
+
+    #savedPalettesButton .badge {
+        display: none;
+    }
+
+
+    /* -----------------------------------------------------
+       Section Typography
+       ----------------------------------------------------- */
+
+    .section-header {
+        margin-bottom: var(--space-6);
+    }
+
+
+    .section-title {
+        margin-bottom: var(--space-3);
+
+        font-size: 2rem;
+    }
+
+
+    .section-description {
+        font-size: 0.9375rem;
+    }
+
+
+    /* -----------------------------------------------------
+       Palette Controls
+       ----------------------------------------------------- */
+
+    .palette-generator__controls {
+        padding: var(--space-4);
+    }
+
+
+    /* -----------------------------------------------------
+       Palette
+       ----------------------------------------------------- */
+
+    .current-palette {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        border-radius: var(--radius-lg);
+    }
+
+
+    .color-card {
+        min-height: 300px;
+    }
+
+
+    .color-card:nth-child(3n) {
+        border-right: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+
+    .color-card:nth-child(2n) {
+        border-right: 0;
+    }
+
+
+    .color-card__preview {
+        min-height: 210px;
+    }
+
+
+    .color-card__content {
+        min-height: 68px;
+
+        padding: var(--space-3);
+    }
+
+
+    .color-card__actions {
+        gap: 0;
+    }
+
+
+    .color-card__action {
+        width: 32px;
+        height: 32px;
+    }
+
+
+    /* -----------------------------------------------------
+       Palette Footer
+       ----------------------------------------------------- */
+
+    .palette-generator__footer {
+        align-items: flex-start !important;
+    }
+
+
+    .palette-generator__footer-actions {
+        width: 100%;
+    }
+
+
+    .palette-generator__footer-actions .btn {
+        flex: 1;
+    }
+
+
+    /* -----------------------------------------------------
+       Contrast
+       ----------------------------------------------------- */
+
+    .contrast-controls {
+        padding: var(--space-4);
+    }
+
+
+    .contrast-preview {
+        min-height: 300px;
+
+        padding: var(--space-6);
+    }
+
+
+    .contrast-preview__heading {
+        font-size: 4rem;
+    }
+
+
+    .contrast-results {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+
+    /* -----------------------------------------------------
+       Saved Palettes
+       ----------------------------------------------------- */
+
+    .offcanvas {
+        --bs-offcanvas-width: min(420px, 92vw);
+    }
+
+
+    /* -----------------------------------------------------
+       Footer
+       ----------------------------------------------------- */
+
+    .app-footer__inner {
+        min-height: 64px;
+
+        padding-top: var(--space-4);
+        padding-bottom: var(--space-4);
+
+        text-align: center;
+    }
+
+}
+
+
+/* =========================================================
+   4. Mobile
+   ========================================================= */
+
+@media (max-width: 575.98px) {
+
+    :root {
+        --section-padding-y: 2.5rem;
+    }
+
+
+    /* -----------------------------------------------------
+       Global
+       ----------------------------------------------------- */
+
+    .container {
+        --bs-gutter-x: 1.25rem;
+    }
+
+
+    /* -----------------------------------------------------
+       Header
+       ----------------------------------------------------- */
+
+    .app-header__inner {
+        gap: var(--space-3);
+    }
+
+
+    .app-brand {
+        gap: var(--space-2);
+    }
+
+
+    .app-brand__icon {
+        width: 34px;
+        height: 34px;
+
+        font-size: 0.875rem;
+    }
+
+
+    .app-brand__name {
+        font-size: 0.9375rem;
+    }
+
+
+    #savedPalettesButton {
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+    }
+
+
+    #savedPalettesButton i {
+        margin-right: 0 !important;
+    }
+
+
+    #savedPalettesButton {
+        font-size: 0;
+    }
+
+
+    #savedPalettesButton i {
+        font-size: 0.875rem;
+    }
+
+
+    /* -----------------------------------------------------
+       Section
+       ----------------------------------------------------- */
+
+    .palette-generator,
+    .contrast-checker {
+        padding-top: var(--section-padding-y);
+        padding-bottom: var(--section-padding-y);
+    }
+
+
+    .section-eyebrow {
+        font-size: 0.6875rem;
+    }
+
+
+    .section-title {
+        font-size: 1.75rem;
+        letter-spacing: -0.03em;
+    }
+
+
+    .section-description {
+        font-size: 0.875rem;
+        line-height: 1.6;
+    }
+
+
+    /* -----------------------------------------------------
+       Palette Header
+       ----------------------------------------------------- */
+
+    .palette-generator__header {
+        margin-bottom: var(--space-5);
+    }
+
+
+    .palette-generator__actions {
+        width: 100%;
+    }
+
+
+    #generatePaletteButton {
+        flex: 1;
+    }
+
+
+    #randomizePaletteButton {
+        width: 44px;
+    }
+
+
+    /* -----------------------------------------------------
+       Palette Controls
+       ----------------------------------------------------- */
+
+    .palette-generator__controls {
+        margin-bottom: var(--space-5);
+    }
+
+
+    /* -----------------------------------------------------
+       Current Palette
+       ----------------------------------------------------- */
+
+    .current-palette {
+        grid-template-columns:
+            1fr;
+
+        border-radius: var(--radius-lg);
+    }
+
+
+    .color-card {
+        min-height: 280px;
+
+        border-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+
+    .color-card:last-child {
+        border-bottom: 0;
+    }
+
+
+    .color-card:nth-child(2n),
+    .color-card:nth-child(3n) {
+        border-right: 0;
+    }
+
+
+    .color-card__preview {
+        min-height: 220px;
+    }
+
+
+    .color-card__content {
+        min-height: 64px;
+
+        padding: var(--space-3);
+    }
+
+
+    .color-card__hex {
+        font-size: 0.8125rem;
+    }
+
+
+    .color-card__format {
+        font-size: 0.625rem;
+    }
+
+
+    /* -----------------------------------------------------
+       Palette Footer
+       ----------------------------------------------------- */
+
+    .palette-generator__footer {
+        gap: var(--space-4) !important;
+    }
+
+
+    .palette-status {
+        width: 100%;
+    }
+
+
+    .palette-generator__footer-actions {
+        flex-direction: column;
+
+        width: 100%;
+    }
+
+
+    .palette-generator__footer-actions .btn {
+        width: 100%;
+    }
+
+
+    /* -----------------------------------------------------
+       Contrast Controls
+       ----------------------------------------------------- */
+
+    .contrast-controls {
+        gap: var(--space-4);
+    }
+
+
+    .contrast-controls .btn {
+        width: 100%;
+    }
+
+
+    /* -----------------------------------------------------
+       Contrast Preview
+       ----------------------------------------------------- */
+
+    .contrast-preview {
+        min-height: 260px;
+
+        padding: var(--space-5);
+    }
+
+
+    .contrast-preview__heading {
+        font-size: 3.5rem;
+    }
+
+
+    .contrast-preview__text {
+        font-size: 0.875rem;
+    }
+
+
+    /* -----------------------------------------------------
+       Contrast Results
+       ----------------------------------------------------- */
+
+    .contrast-results {
+        grid-template-columns: 1fr;
+
+        gap: var(--space-3);
+    }
+
+
+    .contrast-result-card {
+        min-height: 125px;
+    }
+
+
+    .contrast-result-card__value {
+        font-size: 1.5rem;
+    }
+
+
+    /* -----------------------------------------------------
+       Saved Palette Cards
+       ----------------------------------------------------- */
+
+    .saved-palette-card {
+        padding: var(--space-3);
+    }
+
+
+    .saved-palette-card__colors {
+        height: 48px;
+    }
+
+
+    /* -----------------------------------------------------
+       Modal
+       ----------------------------------------------------- */
+
+    .modal-dialog {
+        margin-right: var(--space-3);
+        margin-left: var(--space-3);
+    }
+
+
+    /* -----------------------------------------------------
+       Toast
+       ----------------------------------------------------- */
+
+    #appToast {
+        width: calc(100vw - 2rem);
+        min-width: 0;
+    }
+
+}
+
+
+/* =========================================================
+   5. Extra Small Devices
+   ========================================================= */
+
+@media (max-width: 374.98px) {
+
+    .app-brand__name {
+        display: none;
+    }
+
+
+    .current-palette {
+        border-radius: var(--radius-md);
+    }
+
+
+    .color-card__preview {
+        min-height: 200px;
+    }
+
+
+    .section-title {
+        font-size: 1.625rem;
+    }
+
+
+    .contrast-preview__heading {
+        font-size: 3rem;
+    }
+
+}

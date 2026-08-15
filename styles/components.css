@@ -1,0 +1,713 @@
+/* =========================================================
+   Color Studio
+   Component Stylesheet
+   ========================================================= */
+
+
+/* =========================================================
+   1. Current Palette
+   ========================================================= */
+
+.current-palette {
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
+    min-height: 360px;
+
+    overflow: hidden;
+
+    background-color: var(--color-white);
+
+    border: 1px solid var(--app-border);
+    border-radius: var(--radius-xl);
+
+    box-shadow: var(--shadow-md);
+}
+
+
+/* =========================================================
+   2. Color Card
+   ========================================================= */
+
+.color-card {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+
+    background-color: var(--color-white);
+
+    border-right: 1px solid rgba(255, 255, 255, 0.18);
+
+    overflow: hidden;
+
+    transition:
+        transform var(--transition-base),
+        flex var(--transition-base);
+}
+
+
+.color-card:last-child {
+    border-right: 0;
+}
+
+
+.color-card:hover {
+    z-index: 2;
+
+    transform: scale(1.015);
+
+    box-shadow: var(--shadow-md);
+}
+
+
+/* =========================================================
+   3. Color Preview
+   ========================================================= */
+
+.color-card__preview {
+    position: relative;
+
+    flex: 1;
+
+    min-height: 270px;
+
+    background-color: var(--color-gray-200);
+
+    cursor: pointer;
+
+    transition:
+        filter var(--transition-base);
+}
+
+
+.color-card__preview:hover {
+    filter: brightness(1.03);
+}
+
+
+/* =========================================================
+   4. Color Card Content
+   ========================================================= */
+
+.color-card__content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+
+    min-height: 72px;
+
+    padding: var(--space-4);
+
+    background-color: var(--color-white);
+}
+
+
+.color-card__information {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    min-width: 0;
+}
+
+
+.color-card__hex {
+    overflow: hidden;
+
+    color: var(--color-gray-900);
+
+    font-size: 0.875rem;
+    font-weight: 700;
+
+    letter-spacing: 0.02em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.color-card__format {
+    color: var(--color-gray-500);
+
+    font-size: 0.6875rem;
+    font-weight: 500;
+
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+
+/* =========================================================
+   5. Color Card Actions
+   ========================================================= */
+
+.color-card__actions {
+    display: flex;
+    align-items: center;
+
+    flex-shrink: 0;
+
+    gap: var(--space-1);
+}
+
+
+.color-card__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    padding: 0;
+
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+
+    background-color: transparent;
+    color: var(--color-gray-500);
+
+    transition:
+        color var(--transition-fast),
+        background-color var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+
+.color-card__action:hover {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-900);
+}
+
+
+.color-card__action:focus-visible {
+    border-color: var(--color-primary);
+}
+
+
+.color-card__action.is-active {
+    background-color: rgba(99, 102, 241, 0.1);
+    color: var(--color-primary);
+}
+
+
+/* =========================================================
+   6. Lock Indicator
+   ========================================================= */
+
+.color-card__lock {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: var(--radius-full);
+
+    background-color: rgba(0, 0, 0, 0.28);
+    color: var(--color-white);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    opacity: 0;
+
+    transition:
+        opacity var(--transition-fast),
+        background-color var(--transition-fast);
+}
+
+
+.color-card:hover .color-card__lock,
+.color-card__lock.is-visible {
+    opacity: 1;
+}
+
+
+.color-card__lock:hover {
+    background-color: rgba(0, 0, 0, 0.45);
+}
+
+
+/* =========================================================
+   7. Color Picker
+   ========================================================= */
+
+.color-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+
+.color-picker-preview {
+    flex-shrink: 0;
+
+    width: 40px;
+    height: 40px;
+
+    border: 1px solid var(--app-border);
+
+    border-radius: var(--radius-md);
+
+    background-color: var(--color-gray-200);
+}
+
+
+.color-picker-input {
+    flex: 1;
+}
+
+
+/* =========================================================
+   8. Palette Status
+   ========================================================= */
+
+.palette-status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+
+.palette-status__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 24px;
+    height: 24px;
+
+    border-radius: var(--radius-full);
+
+    background-color: var(--color-gray-100);
+
+    color: var(--color-gray-500);
+
+    font-size: 0.7rem;
+}
+
+
+.palette-status.is-success .palette-status__icon {
+    background-color: var(--color-success-light);
+    color: var(--color-success);
+}
+
+
+.palette-status.is-error .palette-status__icon {
+    background-color: var(--color-danger-light);
+    color: var(--color-danger);
+}
+
+
+/* =========================================================
+   9. Contrast Controls
+   ========================================================= */
+
+.contrast-color-control + .contrast-color-control {
+    margin-top: var(--space-2);
+}
+
+
+.contrast-controls .input-group {
+    align-items: stretch;
+}
+
+
+.contrast-controls .form-control-color {
+    flex: 0 0 52px;
+}
+
+
+/* =========================================================
+   10. Contrast Preview States
+   ========================================================= */
+
+.contrast-preview.is-pass {
+    box-shadow:
+        inset 0 0 0 2px rgba(22, 163, 74, 0.35);
+}
+
+
+.contrast-preview.is-fail {
+    box-shadow:
+        inset 0 0 0 2px rgba(220, 38, 38, 0.35);
+}
+
+
+/* =========================================================
+   11. Contrast Result States
+   ========================================================= */
+
+.contrast-result-card {
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+.contrast-result-card::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 3px;
+
+    background-color: var(--color-gray-300);
+
+    transition:
+        background-color var(--transition-base);
+}
+
+
+.contrast-result-card.is-pass::before {
+    background-color: var(--color-success);
+}
+
+
+.contrast-result-card.is-fail::before {
+    background-color: var(--color-danger);
+}
+
+
+.contrast-result-card.is-pass
+.contrast-result-card__status {
+    color: var(--color-success);
+}
+
+
+.contrast-result-card.is-fail
+.contrast-result-card__status {
+    color: var(--color-danger);
+}
+
+
+.contrast-result-card__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+
+.contrast-result-card__status-icon {
+    font-size: 0.875rem;
+}
+
+
+/* =========================================================
+   12. Saved Palettes
+   ========================================================= */
+
+.saved-palettes-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: var(--space-4);
+}
+
+
+/* =========================================================
+   13. Saved Palette Card
+   ========================================================= */
+
+.saved-palette-card {
+    padding: var(--space-4);
+
+    background-color: var(--color-white);
+
+    border: 1px solid var(--app-border);
+    border-radius: var(--radius-lg);
+
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+
+.saved-palette-card:hover {
+    border-color: var(--color-gray-300);
+
+    box-shadow: var(--shadow-sm);
+}
+
+
+.saved-palette-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+
+    margin-bottom: var(--space-3);
+}
+
+
+.saved-palette-card__name {
+    margin: 0;
+
+    overflow: hidden;
+
+    color: var(--app-text);
+
+    font-size: 0.875rem;
+    font-weight: 600;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.saved-palette-card__actions {
+    display: flex;
+    align-items: center;
+
+    flex-shrink: 0;
+
+    gap: var(--space-1);
+}
+
+
+.saved-palette-card__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 32px;
+    height: 32px;
+
+    padding: 0;
+
+    border: 0;
+    border-radius: var(--radius-sm);
+
+    background-color: transparent;
+    color: var(--color-gray-500);
+
+    transition:
+        color var(--transition-fast),
+        background-color var(--transition-fast);
+}
+
+
+.saved-palette-card__action:hover {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-900);
+}
+
+
+.saved-palette-card__action--delete:hover {
+    background-color: var(--color-danger-light);
+    color: var(--color-danger);
+}
+
+
+/* =========================================================
+   14. Saved Palette Colors
+   ========================================================= */
+
+.saved-palette-card__colors {
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
+    height: 56px;
+
+    overflow: hidden;
+
+    border-radius: var(--radius-md);
+}
+
+
+.saved-palette-card__color {
+    min-width: 0;
+
+    background-color: var(--color-gray-200);
+
+    cursor: pointer;
+
+    transition:
+        transform var(--transition-fast),
+        filter var(--transition-fast);
+}
+
+
+.saved-palette-card__color:hover {
+    position: relative;
+    z-index: 1;
+
+    transform: scaleY(1.08);
+
+    filter: brightness(1.04);
+}
+
+
+.saved-palette-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+
+    margin-top: var(--space-3);
+}
+
+
+.saved-palette-card__date {
+    color: var(--color-gray-500);
+
+    font-size: 0.6875rem;
+}
+
+
+/* =========================================================
+   15. Modal Form
+   ========================================================= */
+
+#paletteNameInput {
+    min-height: 46px;
+}
+
+
+#paletteNameInput.is-invalid {
+    border-color: var(--color-danger);
+}
+
+
+#paletteNameError {
+    margin-top: var(--space-2);
+}
+
+
+/* =========================================================
+   16. Toast
+   ========================================================= */
+
+#appToast {
+    min-width: 300px;
+}
+
+
+#toastIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--color-success);
+}
+
+
+#toastMessage {
+    color: var(--app-text-secondary);
+}
+
+
+/* =========================================================
+   17. Empty State
+   ========================================================= */
+
+.saved-palettes-empty-state.is-hidden {
+    display: none;
+}
+
+
+.saved-palettes-list.is-hidden {
+    display: none;
+}
+
+
+/* =========================================================
+   18. Loading State
+   ========================================================= */
+
+.is-loading {
+    pointer-events: none;
+    user-select: none;
+}
+
+
+.is-loading::after {
+    content: "";
+
+    display: inline-block;
+
+    width: 1rem;
+    height: 1rem;
+
+    margin-left: var(--space-2);
+
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+
+    border-radius: var(--radius-full);
+
+    vertical-align: -0.125em;
+
+    animation: color-studio-spin 600ms linear infinite;
+}
+
+
+@keyframes color-studio-spin {
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+/* =========================================================
+   19. Copy Feedback
+   ========================================================= */
+
+.color-card__action.is-copied {
+    background-color: var(--color-success-light);
+    color: var(--color-success);
+}
+
+
+/* =========================================================
+   20. Disabled States
+   ========================================================= */
+
+.color-card.is-disabled,
+.saved-palette-card.is-disabled {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   21. Utility Component Classes
+   ========================================================= */
+
+.text-muted-custom {
+    color: var(--app-text-muted) !important;
+}
+
+
+.text-secondary-custom {
+    color: var(--app-text-secondary) !important;
+}
+
+
+.surface-card {
+    background-color: var(--app-surface);
+
+    border: 1px solid var(--app-border);
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow-sm);
+}
