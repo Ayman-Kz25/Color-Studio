@@ -1,5 +1,5 @@
-import { PALETTE_SIZE, PALETTE_TYPES } from "../../core/constants.js";
 
+import { PALETTE_SIZE, PALETTE_TYPES } from "../../core/constants";
 import {
   generateRandomColor,
   generateRandomHslColor,
