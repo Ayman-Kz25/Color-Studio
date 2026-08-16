@@ -1,20 +1,15 @@
 import { initializeState } from "./core/state";
+import { initializeModuleUI } from "./ui/moduleUI";
+import { initializePaletteUI } from "./ui/paletteUI";
 
 function initializeApp(){
     try {
         
         initializeState()
-        /*
-         * Initialize shared UI functionality.
-         */
-        // initializeModuleUI();
+        
+        initializeModuleUI();
 
-
-        /*
-         * Initialize palette-related UI.
-         */
-        // initializePaletteUI();
-
+        initializePaletteUI();
 
         /*
          * Initialize contrast checker UI.
