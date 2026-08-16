@@ -1,33 +1,31 @@
+import { initializeState } from "./core/state";
+
 function initializeApp(){
     try {
         
-         /* Other modules can safely access the state after this.
-         */
-        initializeState();
-
-
+        initializeState()
         /*
          * Initialize shared UI functionality.
          */
-        initializeModuleUI();
+        // initializeModuleUI();
 
 
         /*
          * Initialize palette-related UI.
          */
-        initializePaletteUI();
+        // initializePaletteUI();
 
 
         /*
          * Initialize contrast checker UI.
          */
-        initializeContrastUI();
+        // initializeContrastUI();
 
 
         /*
          * Initialize saved palettes UI.
          */
-        initializeSavedPalettesUI();
+        // initializeSavedPalettesUI();
 
         console.info("Color Studio initialized successfully.");
     } catch (error) {
