@@ -4,20 +4,17 @@
    ========================================================= */
 
 import {
-    getPaletteState
-} from "../core/state.js";
-
-import {
-    getCurrentPalette,
-    setCurrentPalette
+  getCurrentPalette,
+  setCurrentPalette,
 } from "../modules/palette/manager.js";
 
 import {
-    savePalette,
-    getSavedPalettes,
-    deletePalette
+  savePalette,
+  getSavedPalettes,
+  deletePalette,
 } from "../modules/storage/storage.js";
 
+import { showSuccessToast, showErrorToast } from "./toastUI.js";
 
 /* =========================================================
    DOM Elements
@@ -25,558 +22,351 @@ import {
 
 let elements = {};
 
-
 /* =========================================================
    Initialization
    ========================================================= */
 
 export function initializeSavedUI() {
+  cacheElements();
 
-    cacheElements();
+  bindEvents();
 
-    bindEvents();
-
-    renderSavedPalettes();
-
+  renderSavedPalettes();
 }
-
 
 /* =========================================================
    Cache DOM Elements
    ========================================================= */
 
 function cacheElements() {
+  elements = {
+    savedContainer: document.querySelector("#savedPalettesContainer"),
 
-    elements = {
+    saveButton: document.querySelector("#savePaletteBtn"),
 
-        savedContainer:
-            document.querySelector(
-                "#savedPalettesContainer"
-            ),
-
-        saveButton:
-            document.querySelector(
-                "#savePaletteBtn"
-            ),
-
-        emptyState:
-            document.querySelector(
-                "#savedPalettesEmpty"
-            )
-
-    };
-
+    emptyState: document.querySelector("#savedPalettesEmpty"),
+  };
 }
-
 
 /* =========================================================
    Event Binding
    ========================================================= */
 
 function bindEvents() {
+  elements.saveButton?.addEventListener("click", handleSavePalette);
 
-    elements.saveButton?.addEventListener(
-        "click",
-        handleSavePalette
-    );
-
-
-    elements.savedContainer?.addEventListener(
-        "click",
-        handleSavedPaletteClick
-    );
-
+  elements.savedContainer?.addEventListener("click", handleSavedPaletteClick);
 }
-
 
 /* =========================================================
    Save Current Palette
    ========================================================= */
 
 function handleSavePalette() {
+  const palette = getCurrentPalette();
 
-    const palette =
-        getCurrentPalette();
+  if (
+    !palette ||
+    !Array.isArray(palette.colors) ||
+    palette.colors.length === 0
+  ) {
+    showErrorToast("There is no palette to save.");
 
+    return;
+  }
 
-    if (
-        !palette ||
-        !Array.isArray(palette.colors) ||
-        palette.colors.length === 0
-    ) {
-        return;
-    }
+  const savedPalette = savePalette({
+    colors: palette.colors,
+    locked: palette.locked,
+    baseColor: palette.baseColor,
+    type: palette.type,
+  });
 
+  if (!savedPalette) {
+    showErrorToast("Unable to save palette.");
 
-    const savedPalette =
-        savePalette({
-            colors: palette.colors,
-            locked: palette.locked,
-            baseColor: palette.baseColor,
-            type: palette.type
-        });
+    return;
+  }
 
+  renderSavedPalettes();
 
-    if (!savedPalette) {
-
-        showMessage(
-            "Unable to save palette"
-        );
-
-        return;
-
-    }
-
-
-    renderSavedPalettes();
-
-
-    showMessage(
-        "Palette saved"
-    );
-
+  showSuccessToast("Palette saved.");
 }
-
 
 /* =========================================================
    Saved Palette Click
    ========================================================= */
 
 function handleSavedPaletteClick(event) {
+  const card = event.target.closest("[data-saved-palette-id]");
 
-    const card =
-        event.target.closest(
-            "[data-saved-palette-id]"
-        );
+  if (!card) {
+    return;
+  }
 
+  const paletteId = card.dataset.savedPaletteId;
 
-    if (!card) {
-        return;
-    }
+  if (!paletteId) {
+    return;
+  }
 
+  const action = event.target.closest("[data-action]");
 
-    const paletteId =
-        card.dataset.savedPaletteId;
+  if (!action) {
+    return;
+  }
 
+  const actionType = action.dataset.action;
 
-    const action =
-        event.target.closest(
-            "[data-action]"
-        );
+  switch (actionType) {
+    case "load":
+      loadSavedPalette(paletteId);
+      break;
 
+    case "delete":
+      removeSavedPalette(paletteId);
+      break;
 
-    if (!action) {
-        return;
-    }
-
-
-    const actionType =
-        action.dataset.action;
-
-
-    switch (actionType) {
-
-        case "load":
-
-            loadSavedPalette(
-                paletteId
-            );
-
-            break;
-
-
-        case "delete":
-
-            removeSavedPalette(
-                paletteId
-            );
-
-            break;
-
-    }
-
+    default:
+      break;
+  }
 }
-
 
 /* =========================================================
    Load Saved Palette
    ========================================================= */
 
-function loadSavedPalette(
-    paletteId
-) {
+function loadSavedPalette(paletteId) {
+  const savedPalettes = getSavedPalettes();
 
-    const savedPalettes =
-        getSavedPalettes();
+  const savedPalette = savedPalettes.find(
+    (palette) => String(palette.id) === String(paletteId),
+  );
 
+  if (!savedPalette) {
+    showErrorToast("Saved palette not found.");
 
-    const savedPalette =
-        savedPalettes.find(
-            palette =>
-                String(palette.id) ===
-                String(paletteId)
-        );
+    return;
+  }
 
+  const loaded = setCurrentPalette(savedPalette.colors, savedPalette.locked);
 
-    if (!savedPalette) {
+  if (!loaded) {
+    showErrorToast("Unable to load palette.");
 
-        showMessage(
-            "Saved palette not found"
-        );
+    return;
+  }
 
-        return;
+  document.dispatchEvent(
+    new CustomEvent("colorstudio:palettechange", {
+      detail: {
+        palette: getCurrentPalette(),
+      },
+    }),
+  );
 
-    }
-
-
-    const loaded =
-        setCurrentPalette(
-            savedPalette.colors,
-            savedPalette.locked
-        );
-
-
-    if (!loaded) {
-
-        showMessage(
-            "Unable to load palette"
-        );
-
-        return;
-
-    }
-
-
-    document.dispatchEvent(
-        new CustomEvent(
-            "colorstudio:palettechange",
-            {
-                detail: {
-                    palette:
-                        getCurrentPalette()
-                }
-            }
-        )
-    );
-
-
-    showMessage(
-        "Palette loaded"
-    );
-
+  showSuccessToast("Palette loaded.");
 }
-
 
 /* =========================================================
    Delete Saved Palette
    ========================================================= */
 
-function removeSavedPalette(
-    paletteId
-) {
+function removeSavedPalette(paletteId) {
+  const deleted = deletePalette(paletteId);
 
-    const deleted =
-        deletePalette(
-            paletteId
-        );
+  if (!deleted) {
+    showErrorToast("Unable to delete palette.");
 
+    return;
+  }
 
-    if (!deleted) {
+  renderSavedPalettes();
 
-        showMessage(
-            "Unable to delete palette"
-        );
-
-        return;
-
-    }
-
-
-    renderSavedPalettes();
-
-
-    showMessage(
-        "Palette deleted"
-    );
-
+  showSuccessToast("Palette deleted.");
 }
-
 
 /* =========================================================
    Render Saved Palettes
    ========================================================= */
 
 export function renderSavedPalettes() {
+  if (!elements.savedContainer) {
+    return;
+  }
 
-    if (!elements.savedContainer) {
-        return;
-    }
+  const savedPalettes = getSavedPalettes();
 
+  elements.savedContainer.innerHTML = "";
 
-    const savedPalettes =
-        getSavedPalettes();
+  if (savedPalettes.length === 0) {
+    renderEmptyState();
 
+    return;
+  }
 
-    elements.savedContainer.innerHTML =
-        "";
+  hideEmptyState();
 
+  savedPalettes.forEach((palette) => {
+    const card = createSavedPaletteCard(palette);
 
-    if (
-        savedPalettes.length === 0
-    ) {
-
-        renderEmptyState();
-
-        return;
-
-    }
-
-
-    hideEmptyState();
-
-
-    savedPalettes.forEach(
-        palette => {
-
-            const card =
-                createSavedPaletteCard(
-                    palette
-                );
-
-
-            elements.savedContainer.appendChild(
-                card
-            );
-
-        }
-    );
-
+    elements.savedContainer.appendChild(card);
+  });
 }
-
 
 /* =========================================================
    Create Saved Palette Card
    ========================================================= */
 
-function createSavedPaletteCard(
-    palette
-) {
+function createSavedPaletteCard(palette) {
+  const card = document.createElement("article");
 
-    const card =
-        document.createElement(
-            "article"
-        );
+  card.className = "saved-palette-card";
 
+  card.dataset.savedPaletteId = String(palette.id);
 
-    card.className =
-        "saved-palette-card";
+  const colors = Array.isArray(palette.colors) ? palette.colors : [];
 
+  const swatches = colors
+    .map(
+      (color) => `
+          <span
+            class="saved-palette-card__swatch"
+            style="background-color: ${escapeHTML(color)};"
+            title="${escapeHTML(color)}"
+          ></span>
+        `,
+    )
+    .join("");
 
-    card.dataset.savedPaletteId =
-        String(palette.id);
+  const paletteName = palette.name || "Untitled Palette";
 
+  card.innerHTML = `
+    <div class="saved-palette-card__preview">
+      ${swatches}
+    </div>
 
-    const colors =
-        Array.isArray(palette.colors)
-            ? palette.colors
-            : [];
+    <div class="saved-palette-card__content">
 
+      <div class="saved-palette-card__header">
 
-    const swatches =
-        colors.map(
-            color => `
-                <span
-                    class="saved-palette-card__swatch"
-                    style="background-color: ${color};"
-                    title="${color}"
-                ></span>
-            `
-        ).join("");
+        <h3 class="saved-palette-card__name">
+          ${escapeHTML(paletteName)}
+        </h3>
 
+        <button
+          type="button"
+          class="saved-palette-card__delete"
+          data-action="delete"
+          aria-label="Delete saved palette"
+          title="Delete palette"
+        >
+          <i
+            class="fa-regular fa-trash-can"
+            aria-hidden="true"
+          ></i>
+        </button>
 
-    const paletteName =
-        palette.name ||
-        "Untitled Palette";
+      </div>
 
+      <div class="saved-palette-card__meta">
 
-    card.innerHTML = `
-        <div class="saved-palette-card__preview">
-            ${swatches}
-        </div>
+        <span>
+          ${colors.length} colors
+        </span>
 
-        <div class="saved-palette-card__content">
+        <span>
+          ${formatDate(palette.createdAt)}
+        </span>
 
-            <div class="saved-palette-card__header">
+      </div>
 
-                <h3 class="saved-palette-card__name">
-                    ${escapeHTML(paletteName)}
-                </h3>
+      <button
+        type="button"
+        class="saved-palette-card__load"
+        data-action="load"
+      >
+        <i
+          class="fa-solid fa-arrow-up-right-from-square"
+          aria-hidden="true"
+        ></i>
 
-                <button
-                    type="button"
-                    class="saved-palette-card__delete"
-                    data-action="delete"
-                    aria-label="Delete saved palette"
-                    title="Delete palette"
-                >
-                    <i class="fa-regular fa-trash-can"></i>
-                </button>
+        Load Palette
+      </button>
 
-            </div>
+    </div>
+  `;
 
-            <div class="saved-palette-card__meta">
-
-                <span>
-                    ${colors.length} colors
-                </span>
-
-                <span>
-                    ${formatDate(palette.createdAt)}
-                </span>
-
-            </div>
-
-            <button
-                type="button"
-                class="saved-palette-card__load"
-                data-action="load"
-            >
-                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                Load Palette
-            </button>
-
-        </div>
-    `;
-
-
-    return card;
-
+  return card;
 }
-
 
 /* =========================================================
    Empty State
    ========================================================= */
 
 function renderEmptyState() {
+  if (elements.emptyState) {
+    elements.emptyState.classList.remove("d-none");
 
-    if (elements.emptyState) {
+    return;
+  }
 
-        elements.emptyState.classList.remove(
-            "d-none"
-        );
+  elements.savedContainer.innerHTML = `
+    <div class="saved-palettes-empty">
 
-        return;
+      <i
+        class="fa-regular fa-folder-open"
+        aria-hidden="true"
+      ></i>
 
-    }
+      <h3>No saved palettes</h3>
 
+      <p>
+        Save a palette and it will appear here.
+      </p>
 
-    elements.savedContainer.innerHTML = `
-        <div class="saved-palettes-empty">
-
-            <i class="fa-regular fa-folder-open"></i>
-
-            <h3>No saved palettes</h3>
-
-            <p>
-                Save a palette and it will appear here.
-            </p>
-
-        </div>
-    `;
-
+    </div>
+  `;
 }
-
 
 /* =========================================================
    Hide Empty State
    ========================================================= */
 
 function hideEmptyState() {
-
-    elements.emptyState?.classList.add(
-        "d-none"
-    );
-
+  elements.emptyState?.classList.add("d-none");
 }
-
-
-/* =========================================================
-   Toast Message
-   ========================================================= */
-
-function showMessage(message) {
-
-    document.dispatchEvent(
-        new CustomEvent(
-            "colorstudio:toast",
-            {
-                detail: {
-                    message
-                }
-            }
-        )
-    );
-
-}
-
 
 /* =========================================================
    Format Date
    ========================================================= */
 
-function formatDate(
-    value
-) {
+function formatDate(value) {
+  if (!value) {
+    return "";
+  }
 
-    if (!value) {
-        return "";
-    }
+  const date = new Date(value);
 
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
 
-    const date =
-        new Date(value);
-
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-        return "";
-    }
-
-
-    return new Intl.DateTimeFormat(
-        undefined,
-        {
-            month: "short",
-            day: "numeric",
-            year: "numeric"
-        }
-    ).format(date);
-
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
 }
-
 
 /* =========================================================
    Escape HTML
    ========================================================= */
 
-function escapeHTML(
-    value
-) {
+function escapeHTML(value) {
+  const element = document.createElement("div");
 
-    const element =
-        document.createElement(
-            "div"
-        );
+  element.textContent = String(value);
 
-
-    element.textContent =
-        String(value);
-
-
-    return element.innerHTML;
-
+  return element.innerHTML;
 }

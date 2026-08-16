@@ -1,8 +1,31 @@
 import { setActiveModule, getUIState } from "../core/state.js";
 
-let elements = {};
+/* =========================================================
+   Constants
+   ========================================================= */
 
-/* Initialization */
+const MODULES = Object.freeze({
+  PALETTE: "palette",
+  CONTRAST: "contrast",
+  SAVED: "saved",
+});
+
+const SUPPORTED_MODULES = Object.freeze(Object.values(MODULES));
+
+/* =========================================================
+   DOM Elements
+   ========================================================= */
+
+let elements = {
+  paletteSection: null,
+  contrastSection: null,
+  savedPalettesButton: null,
+};
+
+/* =========================================================
+   Initialization
+   ========================================================= */
+
 export function initializeModuleUI() {
   cacheElements();
 
@@ -11,94 +34,169 @@ export function initializeModuleUI() {
   initializeActiveModule();
 }
 
-/* DOM Cache */
+/* =========================================================
+   DOM Cache
+   ========================================================= */
+
 function cacheElements() {
   elements = {
-    moduleButtons: document.querySelectorAll("[data-module]"),
+    paletteSection: document.getElementById("paletteGenerator"),
 
-    modules: document.querySelectorAll("[data-module-content]"),
+    contrastSection: document.getElementById("contrastChecker"),
+
+    savedPalettesButton: document.getElementById("savedPalettesButton"),
   };
 }
 
-/* Event Binding */
+/* =========================================================
+   Event Binding
+   ========================================================= */
+
 function bindEvents() {
-  elements.moduleButtons.forEach((button) => {
-    button.addEventListener("click", handleModuleClick);
-  });
+  elements.savedPalettesButton?.addEventListener(
+    "click",
+    handleSavedPalettesClick,
+  );
 }
 
-/* Module Click */
-function handleModuleClick(event) {
-  const button = event.currentTarget;
+/* =========================================================
+   Saved Palettes
+   ========================================================= */
 
-  const moduleName = button.dataset.module;
-
-  if (!moduleName) {
-    return;
-  }
-
-  switchModule(moduleName);
+function handleSavedPalettesClick() {
+  switchModule(MODULES.SAVED);
 }
 
-/* Switch Module */
-export function switchModule(moduleName) {
-  if (!moduleName) {
-    return;
+/* =========================================================
+   Initial Module
+   ========================================================= */
+
+function initializeActiveModule() {
+  const uiState = getUIState();
+
+  const activeModule = isSupportedModule(uiState.activeModule)
+    ? uiState.activeModule
+    : MODULES.PALETTE;
+
+  switchModule(activeModule, false);
+}
+
+/* =========================================================
+   Switch Module
+   ========================================================= */
+
+export function switchModule(moduleName, dispatchEvent = true) {
+  if (!isSupportedModule(moduleName)) {
+    return false;
   }
 
   setActiveModule(moduleName);
 
-  updateModuleButtons(moduleName);
+  updateMainSections(moduleName);
+  updateSavedPalettesButton(moduleName);
 
-  updateModuleContent(moduleName);
+  if (dispatchEvent) {
+    dispatchModuleChangeEvent(moduleName);
+  }
 
-  dispatchModuleChangeEvent(moduleName);
+  return true;
 }
 
-/* Module Buttons */
-function updateModuleButtons(activeModule) {
-  elements.moduleButtons.forEach((button) => {
-    const isActive = button.dataset.module === activeModule;
+/* =========================================================
+   Main Sections
+   ========================================================= */
 
-    button.classList.toggle("active", isActive);
+function updateMainSections(activeModule) {
+  /*
+   * Palette and Contrast are part of the main page layout.
+   * They remain visible regardless of the active logical module.
+   *
+   * Saved Palettes is displayed through Bootstrap offcanvas.
+   */
 
-    button.setAttribute("aria-selected", String(isActive));
+  showSection(elements.paletteSection);
+  showSection(elements.contrastSection);
 
-    if (isActive) {
-      button.setAttribute("tabindex", "0");
-    } else {
-      button.setAttribute("tabindex", "-1");
-    }
-  });
+  /*
+   * The active module is still reflected through aria state.
+   * This allows other UI code to react to the selected module
+   * without hiding the main sections.
+   */
+
+  if (elements.paletteSection) {
+    const isPaletteActive = activeModule === MODULES.PALETTE;
+
+    elements.paletteSection.classList.toggle(
+      "active",
+      isPaletteActive,
+    );
+
+    elements.paletteSection.setAttribute(
+      "aria-hidden",
+      String(!isPaletteActive),
+    );
+  }
+
+  if (elements.contrastSection) {
+    const isContrastActive = activeModule === MODULES.CONTRAST;
+
+    elements.contrastSection.classList.toggle(
+      "active",
+      isContrastActive,
+    );
+
+    elements.contrastSection.setAttribute(
+      "aria-hidden",
+      String(!isContrastActive),
+    );
+  }
 }
 
-/* Module Content */
-function updateModuleContent(activeModule) {
-  elements.modules.forEach((module) => {
-    const moduleName = module.dataset.moduleContent;
+/* =========================================================
+   Show Section
+   ========================================================= */
 
-    const isActive = moduleName === activeModule;
+function showSection(section) {
+  if (!section) {
+    return;
+  }
 
-    module.classList.toggle("active", isActive);
-
-    module.classList.toggle("d-none", !isActive);
-
-    module.setAttribute("aria-hidden", String(!isActive));
-  });
+  section.classList.remove("d-none");
 }
 
-/* Initial Module */
-function initializeActiveModule() {
-  const uiState = getUIState();
+/* =========================================================
+   Saved Palettes Button
+   ========================================================= */
 
-  const activeModule = uiState.activeModule || "palette";
+function updateSavedPalettesButton(activeModule) {
+  const button = elements.savedPalettesButton;
 
-  updateModuleButtons(activeModule);
+  if (!button) {
+    return;
+  }
 
-  updateModuleContent(activeModule);
+  const isActive = activeModule === MODULES.SAVED;
+
+  button.classList.toggle("active", isActive);
+
+  button.setAttribute("aria-current", isActive ? "page" : "false");
 }
 
-/* Custom Module Event */
+/* =========================================================
+   Module Validation
+   ========================================================= */
+
+function isSupportedModule(moduleName) {
+  return (
+    typeof moduleName === "string" &&
+    SUPPORTED_MODULES.includes(moduleName)
+  );
+}
+
+/* =========================================================
+   Custom Module Event
+   ========================================================= */
+
 function dispatchModuleChangeEvent(moduleName) {
   document.dispatchEvent(
     new CustomEvent("colorstudio:modulechange", {
@@ -109,13 +207,14 @@ function dispatchModuleChangeEvent(moduleName) {
   );
 }
 
-/* Public Helpers */
-export function getActiveModule() {
-  const uiState = getUIState();
+/* =========================================================
+   Public Helpers
+   ========================================================= */
 
-  return uiState.activeModule;
+export function getActiveModule() {
+  return getUIState().activeModule;
 }
 
 export function showModule(moduleName) {
-  switchModule(moduleName);
+  return switchModule(moduleName);
 }

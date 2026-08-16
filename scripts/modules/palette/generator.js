@@ -1,5 +1,5 @@
 
-import { PALETTE_SIZE, PALETTE_TYPES } from "../../core/constants";
+import { PALETTE_SIZE, PALETTE_TYPES } from "../../core/constants.js";
 import {
   generateRandomColor,
   generateRandomHslColor,
@@ -9,10 +9,21 @@ import {
   clamp,
 } from "./colorUtils.js";
 
-/* Generate Palette */
+/* =========================================================
+   Palette Generation
+   ========================================================= */
+
+/**
+ * Generate a palette based on the selected palette type.
+ *
+ * @param {string} baseColor
+ * @param {string} paletteType
+ * @param {number} size
+ * @returns {string[]}
+ */
 export function generatePalette(
   baseColor,
-  paletteType = PALETTE_SIZE.RANDOM,
+  paletteType = PALETTE_TYPES.RANDOM,
   size = PALETTE_SIZE,
 ) {
   const paletteSize = normalizePaletteSize(size);
@@ -37,130 +48,255 @@ export function generatePalette(
       return generateTetradicPalette(baseColor, paletteSize);
 
     case PALETTE_TYPES.RANDOM:
-
     default:
       return generateRandomPalette(paletteSize);
   }
 }
 
-/* Random Palette */
+/* =========================================================
+   Random Palette
+   ========================================================= */
+
+/**
+ * Generate completely random RGB colors.
+ *
+ * @param {number} size
+ * @returns {string[]}
+ */
 export function generateRandomPalette(size = PALETTE_SIZE) {
+  const paletteSize = normalizePaletteSize(size);
   const palette = [];
 
-  for (let index = 0; index < size; index++) {
+  for (let index = 0; index < paletteSize; index++) {
     palette.push(generateRandomColor());
   }
 
   return palette;
 }
 
-/* Random HSL Palette */
+/**
+ * Generate random HSL-based colors.
+ *
+ * @param {number} size
+ * @returns {string[]}
+ */
 export function generateRandomHslPalette(size = PALETTE_SIZE) {
+  const paletteSize = normalizePaletteSize(size);
   const palette = [];
 
-  for (let index = 0; index < size; index++) {
+  for (let index = 0; index < paletteSize; index++) {
     palette.push(generateRandomHslColor());
   }
 
   return palette;
 }
 
-/* Monochromatic */
-export function generateMonochromaticPalette(baseColor, size = PALETTE_SIZE) {
+/* =========================================================
+   Monochromatic Palette
+   ========================================================= */
+
+/**
+ * Generate colors using the base color's hue and saturation
+ * while varying lightness.
+ *
+ * @param {string} baseColor
+ * @param {number} size
+ * @returns {string[]}
+ */
+export function generateMonochromaticPalette(
+  baseColor,
+  size = PALETTE_SIZE,
+) {
+  const paletteSize = normalizePaletteSize(size);
   const hsl = hexToHsl(baseColor);
 
   if (!hsl) {
-    return generateRandomPalette(size);
+    return generateRandomPalette(paletteSize);
   }
 
   const palette = [];
-
-  const lightnessValues = createLightnessScale(size);
+  const lightnessValues = createLightnessScale(paletteSize);
 
   lightnessValues.forEach((lightness) => {
-    palette.push(createHslColor(hsl.h, hsl.s, lightness));
+    palette.push(
+      createHslColor(
+        hsl.h,
+        hsl.s,
+        lightness,
+      ),
+    );
   });
 
   return palette;
 }
 
-/* Analogous */
-export function generateAnalogousPalette(baseColor, size = PALETTE_SIZE) {
+/* =========================================================
+   Analogous Palette
+   ========================================================= */
+
+/**
+ * Generate an analogous palette around the base hue.
+ *
+ * @param {string} baseColor
+ * @param {number} size
+ * @returns {string[]}
+ */
+export function generateAnalogousPalette(
+  baseColor,
+  size = PALETTE_SIZE,
+) {
+  const paletteSize = normalizePaletteSize(size);
   const hsl = hexToHsl(baseColor);
 
   if (!hsl) {
-    return generateRandomPalette(size);
+    return generateRandomPalette(paletteSize);
   }
 
   const offsets = [-40, -20, 0, 20, 40];
 
-  return createHuePalette(hsl, offsets, size);
+  return createHuePalette(hsl, offsets, paletteSize);
 }
 
-/* Complementary */
-export function generateComplementaryPalette(baseColor, size = PALETTE_SIZE) {
+/* =========================================================
+   Complementary Palette
+   ========================================================= */
+
+/**
+ * Generate a complementary palette.
+ *
+ * @param {string} baseColor
+ * @param {number} size
+ * @returns {string[]}
+ */
+export function generateComplementaryPalette(
+  baseColor,
+  size = PALETTE_SIZE,
+) {
+  const paletteSize = normalizePaletteSize(size);
   const hsl = hexToHsl(baseColor);
 
   if (!hsl) {
-    return generateRandomPalette(size);
+    return generateRandomPalette(paletteSize);
   }
 
   const offsets = [0, 180, 180, 0, 180];
 
   const lightnessAdjustments = [0, 0, 15, -15, 30];
 
-  return createHueLightnessPalette(hsl, offsets, lightnessAdjustments, size);
+  return createHueLightnessPalette(
+    hsl,
+    offsets,
+    lightnessAdjustments,
+    paletteSize,
+  );
 }
 
-/* Triadic */
-export function generateTriadicPalette(baseColor, size = PALETTE_SIZE) {
+/* =========================================================
+   Triadic Palette
+   ========================================================= */
+
+/**
+ * Generate a triadic palette.
+ *
+ * @param {string} baseColor
+ * @param {number} size
+ * @returns {string[]}
+ */
+export function generateTriadicPalette(
+  baseColor,
+  size = PALETTE_SIZE,
+) {
+  const paletteSize = normalizePaletteSize(size);
   const hsl = hexToHsl(baseColor);
 
   if (!hsl) {
-    return generateRandomPalette(size);
+    return generateRandomPalette(paletteSize);
   }
 
   const offsets = [0, 120, 240, 120, 240];
 
   const lightnessAdjustments = [0, 0, 0, 15, -15];
 
-  return createHueLightnessPalette(hsl, offsets, lightnessAdjustments, size);
+  return createHueLightnessPalette(
+    hsl,
+    offsets,
+    lightnessAdjustments,
+    paletteSize,
+  );
 }
 
-/* Split Complementary */
+/* =========================================================
+   Split Complementary Palette
+   ========================================================= */
+
+/**
+ * Generate a split-complementary palette.
+ *
+ * @param {string} baseColor
+ * @param {number} size
+ * @returns {string[]}
+ */
 export function generateSplitComplementaryPalette(
   baseColor,
   size = PALETTE_SIZE,
 ) {
+  const paletteSize = normalizePaletteSize(size);
   const hsl = hexToHsl(baseColor);
 
   if (!hsl) {
-    return generateRandomPalette(size);
+    return generateRandomPalette(paletteSize);
   }
 
   const offsets = [0, 150, 210, 150, 210];
 
   const lightnessAdjustments = [0, 0, 0, 15, -15];
 
-  return createHueLightnessPalette(hsl, offsets, lightnessAdjustments, size);
+  return createHueLightnessPalette(
+    hsl,
+    offsets,
+    lightnessAdjustments,
+    paletteSize,
+  );
 }
 
-/* Tetradic */
-export function generateTetradicPalette(baseColor, size = PALETTE_SIZE) {
+/* =========================================================
+   Tetradic Palette
+   ========================================================= */
+
+/**
+ * Generate a tetradic palette.
+ *
+ * @param {string} baseColor
+ * @param {number} size
+ * @returns {string[]}
+ */
+export function generateTetradicPalette(
+  baseColor,
+  size = PALETTE_SIZE,
+) {
+  const paletteSize = normalizePaletteSize(size);
   const hsl = hexToHsl(baseColor);
 
   if (!hsl) {
-    return generateRandomPalette(size);
+    return generateRandomPalette(paletteSize);
   }
 
   const offsets = [0, 90, 180, 270, 90];
 
   const lightnessAdjustments = [0, 0, 0, 0, 15];
 
-  return createHueLightnessPalette(hsl, offsets, lightnessAdjustments, size);
+  return createHueLightnessPalette(
+    hsl,
+    offsets,
+    lightnessAdjustments,
+    paletteSize,
+  );
 }
 
-/* Hue Palette */
+/* =========================================================
+   Hue Palette
+   ========================================================= */
+
 function createHuePalette(hsl, offsets, size) {
   const palette = [];
 
@@ -171,11 +307,25 @@ function createHuePalette(hsl, offsets, size) {
 
     const lightnessVariation = getLightnessVariation(index);
 
+    const hue = adjustHue(hsl.h, offset);
+
+    const saturation = clamp(
+      hsl.s + saturationVariation,
+      15,
+      100,
+    );
+
+    const lightness = clamp(
+      hsl.l + lightnessVariation,
+      8,
+      92,
+    );
+
     palette.push(
       createHslColor(
-        adjustHue(hsl.h, offset),
-        clamp(hsl.s + saturationVariation, 15, 100),
-        clamp(hsl.l + lightnessVariation, 8, 92),
+        hue,
+        saturation,
+        lightness,
       ),
     );
   }
@@ -183,23 +333,48 @@ function createHuePalette(hsl, offsets, size) {
   return palette;
 }
 
-/* Hue + Lightness Palette */
-function createHueLightnessPalette(hsl, offsets, lightnessAdjustments, size) {
+/* =========================================================
+   Hue + Lightness Palette
+   ========================================================= */
+
+function createHueLightnessPalette(
+  hsl,
+  offsets,
+  lightnessAdjustments,
+  size,
+) {
   const palette = [];
 
   for (let index = 0; index < size; index++) {
     const offset = offsets[index % offsets.length];
 
     const lightnessAdjustment =
-      lightnessAdjustments[index % lightnessAdjustments.length];
+      lightnessAdjustments[
+        index % lightnessAdjustments.length
+      ];
 
-    const saturationVariation = getSaturationVariation(index);
+    const saturationVariation =
+      getSaturationVariation(index);
+
+    const hue = adjustHue(hsl.h, offset);
+
+    const saturation = clamp(
+      hsl.s + saturationVariation,
+      15,
+      100,
+    );
+
+    const lightness = clamp(
+      hsl.l + lightnessAdjustment,
+      8,
+      92,
+    );
 
     palette.push(
       createHslColor(
-        adjustHue(hsl.h, offset),
-        clamp(hsl.s + saturationVariation, 15, 100),
-        clamp(hsl.l + lightnessAdjustment, 8, 92),
+        hue,
+        saturation,
+        lightness,
       ),
     );
   }
@@ -207,13 +382,16 @@ function createHueLightnessPalette(hsl, offsets, lightnessAdjustments, size) {
   return palette;
 }
 
-/* Lightness Scale */
-function createLightnessScale(size) {
-  const values = [];
+/* =========================================================
+   Lightness Scale
+   ========================================================= */
 
-  if (size === 1) {
+function createLightnessScale(size) {
+  if (size <= 1) {
     return [50];
   }
+
+  const values = [];
 
   const minimum = 20;
   const maximum = 80;
@@ -221,27 +399,38 @@ function createLightnessScale(size) {
   const step = (maximum - minimum) / (size - 1);
 
   for (let index = 0; index < size; index++) {
-    values.push(Math.round(minimum + step * index));
+    values.push(
+      Math.round(minimum + step * index),
+    );
   }
 
   return values;
 }
 
-/* Saturation Variation */
+/* =========================================================
+   Saturation Variation
+   ========================================================= */
+
 function getSaturationVariation(index) {
   const variations = [0, 5, -5, 8, -8];
 
   return variations[index % variations.length];
 }
 
-/* Lightness Variation */
+/* =========================================================
+   Lightness Variation
+   ========================================================= */
+
 function getLightnessVariation(index) {
   const variations = [0, 8, -8, 12, -12];
 
   return variations[index % variations.length];
 }
 
-/* Palette Size */
+/* =========================================================
+   Palette Size
+   ========================================================= */
+
 function normalizePaletteSize(size) {
   const numericSize = Number(size);
 
@@ -249,27 +438,61 @@ function normalizePaletteSize(size) {
     return PALETTE_SIZE;
   }
 
-  return Math.max(1, Math.min(10, Math.floor(numericSize)));
+  return Math.max(
+    1,
+    Math.min(10, Math.floor(numericSize)),
+  );
 }
 
-/* Generate Color Variations */
-export function generateColorVariations(baseColor, count = PALETTE_SIZE) {
+/* =========================================================
+   Color Variations
+   ========================================================= */
+
+/**
+ * Generate controlled variations from a base color.
+ *
+ * @param {string} baseColor
+ * @param {number} count
+ * @returns {string[]}
+ */
+export function generateColorVariations(
+  baseColor,
+  count = PALETTE_SIZE,
+) {
+  const paletteSize = normalizePaletteSize(count);
   const hsl = hexToHsl(baseColor);
 
   if (!hsl) {
-    return generateRandomPalette(count);
+    return generateRandomPalette(paletteSize);
   }
 
   const palette = [];
 
-  for (let index = 0; index < count; index++) {
-    const hue = adjustHue(hsl.h, index * 12);
+  for (let index = 0; index < paletteSize; index++) {
+    const hue = adjustHue(
+      hsl.h,
+      index * 12,
+    );
 
-    const saturation = clamp(hsl.s + getSaturationVariation(index), 15, 100);
+    const saturation = clamp(
+      hsl.s + getSaturationVariation(index),
+      15,
+      100,
+    );
 
-    const lightness = clamp(hsl.l + getLightnessVariation(index), 8, 92);
+    const lightness = clamp(
+      hsl.l + getLightnessVariation(index),
+      8,
+      92,
+    );
 
-    palette.push(createHslColor(hue, saturation, lightness));
+    palette.push(
+      createHslColor(
+        hue,
+        saturation,
+        lightness,
+      ),
+    );
   }
 
   return palette;

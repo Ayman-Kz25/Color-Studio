@@ -1,12 +1,14 @@
-/* WCAG Contrast Ratios */
-const CONTRAST_RATIOS = Object.freeze({
-  AA_NORMAL: 4.5,
-  AA_LARGE: 3,
-  AAA_NORMAL: 7,
-  AAA_LARGE: 4.5,
-});
+/* =========================================================
+   Color Studio
+   Contrast Checker
+   ========================================================= */
 
-/* HEX Validation */
+import { CONTRAST_RATIOS } from "../core/constants.js";
+
+/* =========================================================
+   HEX Validation
+   ========================================================= */
+
 export function isValidHex(hex) {
   if (typeof hex !== "string") {
     return false;
@@ -15,7 +17,10 @@ export function isValidHex(hex) {
   return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hex.trim());
 }
 
-/* HEX Normalization */
+/* =========================================================
+   HEX Normalization
+   ========================================================= */
+
 export function normalizeHex(hex) {
   if (!isValidHex(hex)) {
     return null;
@@ -36,7 +41,10 @@ export function normalizeHex(hex) {
   return normalized;
 }
 
-/* HEX → RGB */
+/* =========================================================
+   HEX → RGB
+   ========================================================= */
+
 export function hexToRgb(hex) {
   const normalized = normalizeHex(hex);
 
@@ -53,7 +61,10 @@ export function hexToRgb(hex) {
   };
 }
 
-/* RGB → Relative Luminance */
+/* =========================================================
+   RGB → Relative Luminance
+   ========================================================= */
+
 export function getRelativeLuminance(rgb) {
   if (
     !rgb ||
@@ -74,10 +85,17 @@ export function getRelativeLuminance(rgb) {
     return Math.pow((channel + 0.055) / 1.055, 2.4);
   });
 
-  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+  return (
+    0.2126 * channels[0] +
+    0.7152 * channels[1] +
+    0.0722 * channels[2]
+  );
 }
 
-/* HEX → Relative Luminance */
+/* =========================================================
+   HEX → Relative Luminance
+   ========================================================= */
+
 export function getLuminance(hex) {
   const rgb = hexToRgb(hex);
 
@@ -88,35 +106,58 @@ export function getLuminance(hex) {
   return getRelativeLuminance(rgb);
 }
 
-/* Contrast Ratio */
+/* =========================================================
+   Contrast Ratio
+   ========================================================= */
+
 export function calculateContrastRatio(foreground, background) {
   const foregroundLuminance = getLuminance(foreground);
-
   const backgroundLuminance = getLuminance(background);
 
-  if (foregroundLuminance === null || backgroundLuminance === null) {
+  if (
+    foregroundLuminance === null ||
+    backgroundLuminance === null
+  ) {
     return null;
   }
 
-  const lighter = Math.max(foregroundLuminance, backgroundLuminance);
+  const lighter = Math.max(
+    foregroundLuminance,
+    backgroundLuminance,
+  );
 
-  const darker = Math.min(foregroundLuminance, backgroundLuminance);
+  const darker = Math.min(
+    foregroundLuminance,
+    backgroundLuminance,
+  );
 
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-/* Formatted Contrast Ratio */
+/* =========================================================
+   Formatted Contrast Ratio
+   ========================================================= */
+
 export function formatContrastRatio(ratio) {
-  if (typeof ratio !== "number" || !Number.isFinite(ratio)) {
+  if (
+    typeof ratio !== "number" ||
+    !Number.isFinite(ratio)
+  ) {
     return "N/A";
   }
 
   return `${ratio.toFixed(2)}:1`;
 }
 
-/* WCAG AA Check */
+/* =========================================================
+   WCAG AA
+   ========================================================= */
+
 export function passesAA(ratio, isLargeText = false) {
-  if (typeof ratio !== "number" || !Number.isFinite(ratio)) {
+  if (
+    typeof ratio !== "number" ||
+    !Number.isFinite(ratio)
+  ) {
     return false;
   }
 
@@ -127,9 +168,15 @@ export function passesAA(ratio, isLargeText = false) {
   return ratio >= requiredRatio;
 }
 
-/* WCAG AAA Check */
+/* =========================================================
+   WCAG AAA
+   ========================================================= */
+
 export function passesAAA(ratio, isLargeText = false) {
-  if (typeof ratio !== "number" || !Number.isFinite(ratio)) {
+  if (
+    typeof ratio !== "number" ||
+    !Number.isFinite(ratio)
+  ) {
     return false;
   }
 
@@ -140,9 +187,15 @@ export function passesAAA(ratio, isLargeText = false) {
   return ratio >= requiredRatio;
 }
 
-/* Contrast Level */
+/* =========================================================
+   Contrast Level
+   ========================================================= */
+
 export function getContrastLevel(ratio) {
-  if (typeof ratio !== "number" || !Number.isFinite(ratio)) {
+  if (
+    typeof ratio !== "number" ||
+    !Number.isFinite(ratio)
+  ) {
     return "fail";
   }
 
@@ -157,20 +210,26 @@ export function getContrastLevel(ratio) {
   return "fail";
 }
 
-/* Complete Contrast Result */
+/* =========================================================
+   Complete Contrast Result
+   ========================================================= */
+
 export function checkContrast(foreground, background) {
   const normalizedForeground = normalizeHex(foreground);
-
   const normalizedBackground = normalizeHex(background);
 
   if (!normalizedForeground || !normalizedBackground) {
     return {
       valid: false,
+
       foreground: normalizedForeground,
       background: normalizedBackground,
+
       ratio: null,
       formattedRatio: "N/A",
+
       level: "fail",
+
       normalText: {
         aa: false,
         aaa: false,
@@ -179,6 +238,10 @@ export function checkContrast(foreground, background) {
       largeText: {
         aa: false,
         aaa: false,
+      },
+
+      uiComponent: {
+        aa: false,
       },
     };
   }
@@ -190,10 +253,13 @@ export function checkContrast(foreground, background) {
 
   return {
     valid: ratio !== null,
+
     foreground: normalizedForeground,
     background: normalizedBackground,
+
     ratio,
     formattedRatio: formatContrastRatio(ratio),
+
     level: getContrastLevel(ratio),
 
     normalText: {
@@ -205,10 +271,17 @@ export function checkContrast(foreground, background) {
       aa: passesAA(ratio, true),
       aaa: passesAAA(ratio, true),
     },
+
+    uiComponent: {
+      aa: ratio !== null && ratio >= 3,
+    },
   };
 }
 
-/* Contrast Summary */
+/* =========================================================
+   Contrast Summary
+   ========================================================= */
+
 export function getContrastSummary(result) {
   if (!result || !result.valid) {
     return {
@@ -217,14 +290,14 @@ export function getContrastSummary(result) {
     };
   }
 
-  if (result.normalText.aaa) {
+  if (result.normalText?.aaa) {
     return {
       status: "aaa",
       label: "AAA",
     };
   }
 
-  if (result.normalText.aa) {
+  if (result.normalText?.aa) {
     return {
       status: "aa",
       label: "AA",
@@ -237,7 +310,10 @@ export function getContrastSummary(result) {
   };
 }
 
-/* Public Thresholds */
+/* =========================================================
+   Public Thresholds
+   ========================================================= */
+
 export function getContrastThresholds() {
   return {
     aaNormal: CONTRAST_RATIOS.AA_NORMAL,

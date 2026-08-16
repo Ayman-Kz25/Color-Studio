@@ -1,6 +1,18 @@
-const HEX_PATTERN = /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/;
+/* =========================================================
+   Color Studio
+   Color Utilities
+   ========================================================= */
 
-/* HEX Validation */
+/* =========================================================
+   Constants
+   ========================================================= */
+
+const HEX_PATTERN = /^#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/;
+
+/* =========================================================
+   HEX Validation
+   ========================================================= */
+
 export function isValidHex(hex) {
   if (typeof hex !== "string") {
     return false;
@@ -9,7 +21,10 @@ export function isValidHex(hex) {
   return HEX_PATTERN.test(hex.trim());
 }
 
-/* HEX Normalization */
+/* =========================================================
+   HEX Normalization
+   ========================================================= */
+
 export function normalizeHex(hex) {
   if (!isValidHex(hex)) {
     return null;
@@ -23,16 +38,17 @@ export function normalizeHex(hex) {
       normalized
         .slice(1)
         .split("")
-        .map((character) => {
-          return character + character;
-        })
+        .map((character) => character + character)
         .join("");
   }
 
   return normalized;
 }
 
-/* HEX → RGB */
+/* =========================================================
+   HEX → RGB
+   ========================================================= */
+
 export function hexToRgb(hex) {
   const normalized = normalizeHex(hex);
 
@@ -44,14 +60,15 @@ export function hexToRgb(hex) {
 
   return {
     r: parseInt(value.slice(0, 2), 16),
-
     g: parseInt(value.slice(2, 4), 16),
-
     b: parseInt(value.slice(4, 6), 16),
   };
 }
 
-/* RGB Validation */
+/* =========================================================
+   RGB Validation
+   ========================================================= */
+
 export function isValidRgb(rgb) {
   if (!rgb || typeof rgb !== "object") {
     return false;
@@ -70,7 +87,10 @@ export function isValidRgb(rgb) {
   );
 }
 
-/* RGB → HEX */
+/* =========================================================
+   RGB → HEX
+   ========================================================= */
+
 export function rgbToHex(r, g, b) {
   const rgb = {
     r: Number(r),
@@ -82,14 +102,19 @@ export function rgbToHex(r, g, b) {
     return null;
   }
 
-  const toHex = (value) => {
-    return Math.round(value).toString(16).padStart(2, "0").toUpperCase();
-  };
+  const toHex = (value) =>
+    Math.round(value)
+      .toString(16)
+      .padStart(2, "0")
+      .toUpperCase();
 
   return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
 }
 
-/* RGB → HSL */
+/* =========================================================
+   RGB → HSL
+   ========================================================= */
+
 export function rgbToHsl(r, g, b) {
   const rgb = {
     r: Number(r),
@@ -102,25 +127,25 @@ export function rgbToHsl(r, g, b) {
   }
 
   const red = rgb.r / 255;
-
   const green = rgb.g / 255;
-
   const blue = rgb.b / 255;
 
   const max = Math.max(red, green, blue);
-
   const min = Math.min(red, green, blue);
 
   const difference = max - min;
 
   let hue = 0;
-
   let saturation = 0;
 
   const lightness = (max + min) / 2;
 
   if (difference !== 0) {
-    saturation = difference / (1 - Math.abs(2 * lightness - 1));
+    const denominator = 1 - Math.abs(2 * lightness - 1);
+
+    if (denominator !== 0) {
+      saturation = difference / denominator;
+    }
 
     if (max === red) {
       hue = 60 * (((green - blue) / difference) % 6);
@@ -131,20 +156,19 @@ export function rgbToHsl(r, g, b) {
     }
   }
 
-  if (hue < 0) {
-    hue += 360;
-  }
+  hue = normalizeHue(hue);
 
   return {
     h: Math.round(hue),
-
     s: Math.round(saturation * 100),
-
     l: Math.round(lightness * 100),
   };
 }
 
-/* HEX → HSL */
+/* =========================================================
+   HEX → HSL
+   ========================================================= */
+
 export function hexToHsl(hex) {
   const rgb = hexToRgb(hex);
 
@@ -155,38 +179,52 @@ export function hexToHsl(hex) {
   return rgbToHsl(rgb.r, rgb.g, rgb.b);
 }
 
-/* HSL → RGB */
+/* =========================================================
+   HSL Validation
+   ========================================================= */
+
+function isValidHsl(h, s, l) {
+  return (
+    Number.isFinite(h) &&
+    Number.isFinite(s) &&
+    Number.isFinite(l) &&
+    s >= 0 &&
+    s <= 100 &&
+    l >= 0 &&
+    l <= 100
+  );
+}
+
+/* =========================================================
+   HSL → RGB
+   ========================================================= */
+
 export function hslToRgb(h, s, l) {
   let hue = Number(h);
+  const saturation = Number(s);
+  const lightness = Number(l);
 
-  let saturation = Number(s) / 100;
-
-  let lightness = Number(l) / 100;
-
-  if (
-    !Number.isFinite(hue) ||
-    !Number.isFinite(saturation) ||
-    !Number.isFinite(lightness)
-  ) {
+  if (!isValidHsl(hue, saturation, lightness)) {
     return null;
   }
 
-  hue = ((hue % 360) + 360) % 360;
+  hue = normalizeHue(hue);
 
-  saturation = Math.max(0, Math.min(1, saturation));
+  const normalizedSaturation = saturation / 100;
+  const normalizedLightness = lightness / 100;
 
-  lightness = Math.max(0, Math.min(1, lightness));
-
-  const chroma = (1 - Math.abs(2 * lightness - 1)) * saturation;
+  const chroma =
+    (1 - Math.abs(2 * normalizedLightness - 1)) *
+    normalizedSaturation;
 
   const hueSegment = hue / 60;
 
-  const intermediate = chroma * (1 - Math.abs((hueSegment % 2) - 1));
+  const intermediate =
+    chroma *
+    (1 - Math.abs((hueSegment % 2) - 1));
 
   let red = 0;
-
   let green = 0;
-
   let blue = 0;
 
   if (hueSegment < 1) {
@@ -209,18 +247,19 @@ export function hslToRgb(h, s, l) {
     blue = intermediate;
   }
 
-  const match = lightness - chroma / 2;
+  const match = normalizedLightness - chroma / 2;
 
   return {
     r: Math.round((red + match) * 255),
-
     g: Math.round((green + match) * 255),
-
     b: Math.round((blue + match) * 255),
   };
 }
 
-/* HSL → HEX */
+/* =========================================================
+   HSL → HEX
+   ========================================================= */
+
 export function hslToHex(h, s, l) {
   const rgb = hslToRgb(h, s, l);
 
@@ -231,12 +270,37 @@ export function hslToHex(h, s, l) {
   return rgbToHex(rgb.r, rgb.g, rgb.b);
 }
 
-/* Clamp Value */
+/* =========================================================
+   Clamp
+   ========================================================= */
+
 export function clamp(value, min, max) {
-  return Math.min(Math.max(Number(value), min), max);
+  const numericValue = Number(value);
+  const numericMin = Number(min);
+  const numericMax = Number(max);
+
+  if (
+    !Number.isFinite(numericValue) ||
+    !Number.isFinite(numericMin) ||
+    !Number.isFinite(numericMax)
+  ) {
+    return null;
+  }
+
+  if (numericMin > numericMax) {
+    return numericMin;
+  }
+
+  return Math.min(
+    Math.max(numericValue, numericMin),
+    numericMax,
+  );
 }
 
-/* Normalize Hue */
+/* =========================================================
+   Normalize Hue
+   ========================================================= */
+
 export function normalizeHue(hue) {
   const value = Number(hue);
 
@@ -247,58 +311,168 @@ export function normalizeHue(hue) {
   return ((value % 360) + 360) % 360;
 }
 
-/* Adjust Hue */
+/* =========================================================
+   Adjust Hue
+   ========================================================= */
+
 export function adjustHue(hue, amount) {
-  return normalizeHue(Number(hue) + Number(amount));
+  const numericHue = Number(hue);
+  const numericAmount = Number(amount);
+
+  if (
+    !Number.isFinite(numericHue) ||
+    !Number.isFinite(numericAmount)
+  ) {
+    return 0;
+  }
+
+  return normalizeHue(numericHue + numericAmount);
 }
 
-/* Adjust Lightness */
+/* =========================================================
+   Adjust Lightness
+   ========================================================= */
+
 export function adjustLightness(lightness, amount) {
-  return clamp(Number(lightness) + Number(amount), 0, 100);
-}
+  const numericLightness = Number(lightness);
+  const numericAmount = Number(amount);
 
-/* Create HSL Color */
-export function createHslColor(hue, saturation, lightness) {
-  return hslToHex(
-    normalizeHue(hue),
-    clamp(saturation, 0, 100),
-    clamp(lightness, 0, 100),
+  if (
+    !Number.isFinite(numericLightness) ||
+    !Number.isFinite(numericAmount)
+  ) {
+    return 0;
+  }
+
+  return clamp(
+    numericLightness + numericAmount,
+    0,
+    100,
   );
 }
 
-/* Random Number */
+/* =========================================================
+   Create HSL Color
+   ========================================================= */
+
+export function createHslColor(
+  hue,
+  saturation,
+  lightness,
+) {
+  const normalizedHue = normalizeHue(hue);
+  const normalizedSaturation = clamp(saturation, 0, 100);
+  const normalizedLightness = clamp(lightness, 0, 100);
+
+  if (
+    normalizedSaturation === null ||
+    normalizedLightness === null
+  ) {
+    return null;
+  }
+
+  return hslToHex(
+    normalizedHue,
+    normalizedSaturation,
+    normalizedLightness,
+  );
+}
+
+/* =========================================================
+   Random Number
+   ========================================================= */
+
 export function randomNumber(min, max) {
-  return Math.random() * (max - min) + min;
+  const numericMin = Number(min);
+  const numericMax = Number(max);
+
+  if (
+    !Number.isFinite(numericMin) ||
+    !Number.isFinite(numericMax)
+  ) {
+    return null;
+  }
+
+  if (numericMin > numericMax) {
+    return null;
+  }
+
+  return (
+    Math.random() * (numericMax - numericMin) +
+    numericMin
+  );
 }
 
-/* Random Integer */
+/* =========================================================
+   Random Integer
+   ========================================================= */
+
 export function randomInteger(min, max) {
-  return Math.floor(randomNumber(min, max + 1));
+  const numericMin = Number(min);
+  const numericMax = Number(max);
+
+  if (
+    !Number.isFinite(numericMin) ||
+    !Number.isFinite(numericMax) ||
+    numericMin > numericMax
+  ) {
+    return null;
+  }
+
+  return Math.floor(
+    Math.random() * (numericMax - numericMin + 1) +
+      numericMin,
+  );
 }
 
-/* Random Color */
+/* =========================================================
+   Random Color
+   ========================================================= */
+
 export function generateRandomColor() {
   const red = randomInteger(0, 255);
-
   const green = randomInteger(0, 255);
-
   const blue = randomInteger(0, 255);
+
+  if (
+    red === null ||
+    green === null ||
+    blue === null
+  ) {
+    return null;
+  }
 
   return rgbToHex(red, green, blue);
 }
 
-/* Generate Random HSL Color */
+/* =========================================================
+   Random HSL Color
+   ========================================================= */
+
 export function generateRandomHslColor() {
   const hue = randomInteger(0, 359);
-
   const saturation = randomInteger(45, 90);
-
   const lightness = randomInteger(35, 75);
 
-  return createHslColor(hue, saturation, lightness);
+  if (
+    hue === null ||
+    saturation === null ||
+    lightness === null
+  ) {
+    return null;
+  }
+
+  return createHslColor(
+    hue,
+    saturation,
+    lightness,
+  );
 }
 
-/* Get Color Brightness */
+/* =========================================================
+   Get Color Brightness
+   ========================================================= */
+
 export function getBrightness(hex) {
   const rgb = hexToRgb(hex);
 
@@ -306,10 +480,18 @@ export function getBrightness(hex) {
     return null;
   }
 
-  return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+  return (
+    (rgb.r * 299 +
+      rgb.g * 587 +
+      rgb.b * 114) /
+    1000
+  );
 }
 
-/* Get Best Text Color */
+/* =========================================================
+   Get Best Text Color
+   ========================================================= */
+
 export function getBestTextColor(background) {
   const brightness = getBrightness(background);
 
@@ -317,13 +499,20 @@ export function getBestTextColor(background) {
     return "#FFFFFF";
   }
 
-  return brightness > 155 ? "#111111" : "#FFFFFF";
+  return brightness > 155
+    ? "#111111"
+    : "#FFFFFF";
 }
 
-/* Color Difference */
-export function getColorDistance(firstColor, secondColor) {
-  const first = hexToRgb(firstColor);
+/* =========================================================
+   Color Distance
+   ========================================================= */
 
+export function getColorDistance(
+  firstColor,
+  secondColor,
+) {
+  const first = hexToRgb(firstColor);
   const second = hexToRgb(secondColor);
 
   if (!first || !second) {
@@ -331,9 +520,7 @@ export function getColorDistance(firstColor, secondColor) {
   }
 
   const redDifference = first.r - second.r;
-
   const greenDifference = first.g - second.g;
-
   const blueDifference = first.b - second.b;
 
   return Math.sqrt(

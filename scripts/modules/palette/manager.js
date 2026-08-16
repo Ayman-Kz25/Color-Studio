@@ -2,6 +2,7 @@ import {
   PALETTE_SIZE,
   DEFAULT_BASE_COLOR,
   DEFAULT_PALETTE_TYPE,
+  PALETTE_TYPES,
 } from "../../core/constants.js";
 
 import {
@@ -15,44 +16,79 @@ import {
 
 import { generatePalette } from "./generator.js";
 
-import { isValidHex, normalizeHex, generateRandomColor } from "./colorUtils.js";
+import {
+  isValidHex,
+  normalizeHex,
+  generateRandomColor,
+} from "./colorUtils.js";
 
-/* Initialize Palette */
+/* =========================================================
+   Initialize Palette
+   ========================================================= */
+
 export function initializePalette() {
   const paletteState = getPaletteState();
 
-  const baseColor = isValidHex(paletteState.baseColor)
-    ? normalizeHex(paletteState.baseColor)
-    : DEFAULT_BASE_COLOR;
+  const baseColor = normalizeBaseColor(
+    paletteState.baseColor,
+  );
 
-  const paletteType = paletteState.type || DEFAULT_PALETTE_TYPE;
+  const paletteType = normalizePaletteType(
+    paletteState.type,
+  );
 
-  setBaseColor(baseColor);
+  const paletteSize = normalizePaletteSize(
+    paletteState.size,
+  );
 
-  setPaletteType(paletteType);
+  const colors = generatePalette(
+    baseColor,
+    paletteType,
+    paletteSize,
+  );
 
-  const colors = generatePalette(baseColor, paletteType, PALETTE_SIZE);
+  setPaletteState({
+    baseColor,
+    type: paletteType,
+    size: colors.length,
+  });
 
   setPaletteColors(colors);
 
-  setLockedColors(createLockState(colors.length));
+  setLockedColors(
+    createLockState(colors.length),
+  );
 
   return getCurrentPalette();
 }
 
-/* Generate New Palette */
-export function generateNewPalette(baseColor, paletteType) {
+/* =========================================================
+   Generate New Palette
+   ========================================================= */
+
+export function generateNewPalette(
+  baseColor,
+  paletteType,
+  size,
+) {
   const currentState = getPaletteState();
 
-  const nextBaseColor = normalizeBaseColor(baseColor || currentState.baseColor);
+  const nextBaseColor = normalizeBaseColor(
+    baseColor ?? currentState.baseColor,
+  );
 
-  const nextPaletteType =
-    paletteType || currentState.type || DEFAULT_PALETTE_TYPE;
+  const nextPaletteType = normalizePaletteType(
+    paletteType ?? currentState.type,
+  );
+
+  const nextSize = normalizePaletteSize(
+    size ?? currentState.size ?? PALETTE_SIZE,
+  );
 
   const generatedColors = generatePalette(
     nextBaseColor,
     nextPaletteType,
-    PALETTE_SIZE,
+    nextSize,
   );
 
   const colors = applyLockedColors(
@@ -67,66 +103,137 @@ export function generateNewPalette(baseColor, paletteType) {
 
   setPaletteColors(colors);
 
+  setLockedColors(
+    createLockState(
+      colors.length,
+      currentState.locked,
+    ),
+  );
+
+  setPaletteState({
+    size: colors.length,
+  });
+
   return getCurrentPalette();
 }
 
-/* Randomize Unlocked Colors */
+/* =========================================================
+   Randomize Unlocked Colors
+   ========================================================= */
+
 export function randomizeUnlockedColors() {
   const currentState = getPaletteState();
 
-  const colors = currentState.colors.map((color, index) => {
-    if (currentState.locked[index]) {
-      return color;
-    }
+  if (!Array.isArray(currentState.colors)) {
+    return getCurrentPalette();
+  }
 
-    return generateRandomColor();
-  });
+  const colors = currentState.colors.map(
+    (color, index) => {
+      if (currentState.locked[index]) {
+        return color;
+      }
+
+      return generateRandomColor();
+    },
+  );
 
   setPaletteColors(colors);
+
+  setPaletteState({
+    size: colors.length,
+  });
 
   return getCurrentPalette();
 }
 
-/* Regenerate While Preserving Locks */
+/* =========================================================
+   Regenerate Palette
+   ========================================================= */
+
 export function regeneratePalette() {
   const currentState = getPaletteState();
 
-  return generateNewPalette(currentState.baseColor, currentState.type);
+  return generateNewPalette(
+    currentState.baseColor,
+    currentState.type,
+    currentState.size,
+  );
 }
 
-/* Set Base Color */
+/* =========================================================
+   Set Base Color
+   ========================================================= */
+
 export function updateBaseColor(baseColor) {
   if (!isValidHex(baseColor)) {
     return false;
   }
 
-  const normalizedColor = normalizeHex(baseColor);
+  const normalizedColor = normalizeHex(
+    baseColor,
+  );
+
+  if (!normalizedColor) {
+    return false;
+  }
 
   setBaseColor(normalizedColor);
 
   return true;
 }
 
-/* Set Palette Type */
+/* =========================================================
+   Set Palette Type
+   ========================================================= */
+
 export function updatePaletteType(paletteType) {
-  if (typeof paletteType !== "string" || !paletteType.trim()) {
+  const normalizedType =
+    normalizePaletteType(paletteType);
+
+  if (!normalizedType) {
     return false;
   }
 
-  setPaletteType(paletteType);
+  setPaletteType(normalizedType);
 
   return true;
 }
 
-/* Lock Color */
-export function lockColor(index) {
-  const currentState = getPaletteState();
+/* =========================================================
+   Set Palette Size
+   ========================================================= */
 
-  if (!isValidIndex(index)) {
+export function updatePaletteSize(size) {
+  const normalizedSize =
+    normalizePaletteSize(size);
+
+  if (!Number.isInteger(normalizedSize)) {
     return false;
   }
 
-  const locked = [...currentState.locked];
+  setPaletteState({
+    size: normalizedSize,
+  });
+
+  return true;
+}
+
+/* =========================================================
+   Lock Color
+   ========================================================= */
+
+export function lockColor(index) {
+  const currentState = getPaletteState();
+
+  if (!isValidIndex(index, currentState.colors)) {
+    return false;
+  }
+
+  const locked = createLockState(
+    currentState.colors.length,
+    currentState.locked,
+  );
 
   locked[index] = true;
 
@@ -135,15 +242,21 @@ export function lockColor(index) {
   return true;
 }
 
-/* Unlock Color */
+/* =========================================================
+   Unlock Color
+   ========================================================= */
+
 export function unlockColor(index) {
   const currentState = getPaletteState();
 
-  if (!isValidIndex(index)) {
+  if (!isValidIndex(index, currentState.colors)) {
     return false;
   }
 
-  const locked = [...currentState.locked];
+  const locked = createLockState(
+    currentState.colors.length,
+    currentState.locked,
+  );
 
   locked[index] = false;
 
@@ -152,15 +265,21 @@ export function unlockColor(index) {
   return true;
 }
 
-/* Toggle Color Lock */
+/* =========================================================
+   Toggle Color Lock
+   ========================================================= */
+
 export function toggleColorLock(index) {
   const currentState = getPaletteState();
 
-  if (!isValidIndex(index)) {
+  if (!isValidIndex(index, currentState.colors)) {
     return false;
   }
 
-  const locked = [...currentState.locked];
+  const locked = createLockState(
+    currentState.colors.length,
+    currentState.locked,
+  );
 
   locked[index] = !locked[index];
 
@@ -169,52 +288,76 @@ export function toggleColorLock(index) {
   return locked[index];
 }
 
-/* Get Current Palette */
+/* =========================================================
+   Get Current Palette
+   ========================================================= */
+
 export function getCurrentPalette() {
   const currentState = getPaletteState();
 
   return {
     colors: [...currentState.colors],
 
-    locked: [...currentState.locked],
+    locked: createLockState(
+      currentState.colors.length,
+      currentState.locked,
+    ),
 
     baseColor: currentState.baseColor,
 
     type: currentState.type,
 
-    size: currentState.size,
+    size: currentState.colors.length,
   };
 }
 
-/* Get Colors */
+/* =========================================================
+   Get Colors
+   ========================================================= */
+
 export function getPaletteColors() {
   const currentState = getPaletteState();
 
   return [...currentState.colors];
 }
 
-/* Get Locked Colors */
+/* =========================================================
+   Get Locked Color Indexes
+   ========================================================= */
+
 export function getLockedColorIndexes() {
   const currentState = getPaletteState();
 
   return currentState.locked
-    .map((isLocked, index) => (isLocked ? index : null))
+    .map((isLocked, index) =>
+      isLocked ? index : null,
+    )
     .filter((index) => index !== null);
 }
 
-/* Set Palette */
-export function setCurrentPalette(colors, locked = []) {
+/* =========================================================
+   Set Current Palette
+   ========================================================= */
+
+export function setCurrentPalette(
+  colors,
+  locked = [],
+) {
   if (!Array.isArray(colors)) {
     return false;
   }
 
-  const normalizedColors = normalizePaletteColors(colors);
+  const normalizedColors =
+    normalizePaletteColors(colors);
 
   if (normalizedColors.length === 0) {
     return false;
   }
 
-  const normalizedLocks = createLockState(normalizedColors.length, locked);
+  const normalizedLocks = createLockState(
+    normalizedColors.length,
+    locked,
+  );
 
   setPaletteColors(normalizedColors);
 
@@ -227,50 +370,67 @@ export function setCurrentPalette(colors, locked = []) {
   return true;
 }
 
-/* Replace Color */
+/* =========================================================
+   Replace Color
+   ========================================================= */
+
 export function replaceColor(index, color) {
-  if (!isValidIndex(index) || !isValidHex(color)) {
+  const currentState = getPaletteState();
+
+  if (
+    !isValidIndex(index, currentState.colors) ||
+    !isValidHex(color)
+  ) {
     return false;
   }
 
-  const currentState = getPaletteState();
+  const normalizedColor = normalizeHex(color);
+
+  if (!normalizedColor) {
+    return false;
+  }
 
   const colors = [...currentState.colors];
 
-  colors[index] = normalizeHex(color);
+  colors[index] = normalizedColor;
 
   setPaletteColors(colors);
 
   return true;
 }
 
-/* Reset Locks */
+/* =========================================================
+   Reset Locks
+   ========================================================= */
+
 export function resetLocks() {
   const currentState = getPaletteState();
 
-  setLockedColors(createLockState(currentState.colors.length));
+  setLockedColors(
+    createLockState(
+      currentState.colors.length,
+    ),
+  );
 }
 
-/* Reset Palette */
+/* =========================================================
+   Reset Palette
+   ========================================================= */
+
 export function resetPalette() {
-  setBaseColor(DEFAULT_BASE_COLOR);
-
-  setPaletteType(DEFAULT_PALETTE_TYPE);
-
-  const colors = generatePalette(
+  return generateNewPalette(
     DEFAULT_BASE_COLOR,
     DEFAULT_PALETTE_TYPE,
     PALETTE_SIZE,
   );
-
-  setPaletteColors(colors);
-
-  setLockedColors(createLockState(colors.length));
-
-  return getCurrentPalette();
 }
 
-/* Helpers */
+/* =========================================================
+   Helpers
+   ========================================================= */
+
+/* Normalize Base Color */
+
 function normalizeBaseColor(color) {
   if (isValidHex(color)) {
     return normalizeHex(color);
@@ -279,35 +439,103 @@ function normalizeBaseColor(color) {
   return DEFAULT_BASE_COLOR;
 }
 
+/* Normalize Palette Type */
+
+function normalizePaletteType(type) {
+  if (
+    typeof type !== "string" ||
+    !type.trim()
+  ) {
+    return DEFAULT_PALETTE_TYPE;
+  }
+
+  const normalizedType = type.trim();
+
+  const validTypes = Object.values(
+    PALETTE_TYPES,
+  );
+
+  return validTypes.includes(normalizedType)
+    ? normalizedType
+    : DEFAULT_PALETTE_TYPE;
+}
+
+/* Normalize Palette Size */
+
+function normalizePaletteSize(size) {
+  const numericSize = Number(size);
+
+  if (!Number.isFinite(numericSize)) {
+    return PALETTE_SIZE;
+  }
+
+  return Math.max(
+    1,
+    Math.min(10, Math.floor(numericSize)),
+  );
+}
+
+/* Normalize Palette Colors */
+
 function normalizePaletteColors(colors) {
   return colors
-    .slice(0, PALETTE_SIZE)
+    .slice(0, 10)
     .map((color) => {
-      if (isValidHex(color)) {
-        return normalizeHex(color);
+      if (!isValidHex(color)) {
+        return null;
       }
 
-      return null;
+      return normalizeHex(color);
     })
     .filter(Boolean);
 }
 
-function createLockState(size, existingLocks = []) {
-  return Array.from({ length: size }, (_, index) =>
-    Boolean(existingLocks[index]),
+/* Create Lock State */
+
+function createLockState(
+  size,
+  existingLocks = [],
+) {
+  return Array.from(
+    { length: size },
+    (_, index) =>
+      Boolean(existingLocks[index]),
   );
 }
 
-function applyLockedColors(generatedColors, currentColors, locked) {
-  return generatedColors.map((generatedColor, index) => {
-    if (locked[index] && isValidHex(currentColors[index])) {
-      return currentColors[index];
-    }
+/* Apply Existing Locks */
 
-    return generatedColor;
-  });
+function applyLockedColors(
+  generatedColors,
+  currentColors,
+  locked,
+) {
+  return generatedColors.map(
+    (generatedColor, index) => {
+      const isLocked = Boolean(locked[index]);
+
+      const existingColor =
+        currentColors[index];
+
+      if (
+        isLocked &&
+        isValidHex(existingColor)
+      ) {
+        return normalizeHex(existingColor);
+      }
+
+      return generatedColor;
+    },
+  );
 }
 
-function isValidIndex(index) {
-  return Number.isInteger(index) && index >= 0 && index < PALETTE_SIZE;
+/* Validate Color Index */
+
+function isValidIndex(index, colors) {
+  return (
+    Number.isInteger(index) &&
+    Array.isArray(colors) &&
+    index >= 0 &&
+    index < colors.length
+  );
 }
