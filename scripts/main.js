@@ -2,6 +2,7 @@ import { initializeState } from "./core/state.js";
 import { initializeContrastUI } from "./ui/contrastUI.js";
 import { initializeModuleUI } from "./ui/moduleUI.js";
 import { initializePaletteUI } from "./ui/paletteUI.js";
+import { initializeSavedUI } from "./ui/savedPaletteUI.js";
 
 function initializeApp() {
   try {
@@ -13,10 +14,7 @@ function initializeApp() {
 
     initializeContrastUI();
 
-    /*
-     * Initialize saved palettes UI.
-     */
-    // initializeSavedPalettesUI();
+    initializeSavedUI();
 
     console.info("Color Studio initialized successfully.");
   } catch (error) {
