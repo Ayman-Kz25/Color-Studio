@@ -1,37 +1,36 @@
-import { initializeState } from "./core/state.js";
-
 import { initializeToastUI } from "./ui/toastUI.js";
 import { initializeModuleUI } from "./ui/moduleUI.js";
 import { initializePaletteUI } from "./ui/paletteUI.js";
 import { initializeContrastUI } from "./ui/contrastUI.js";
 import { initializeSavedUI } from "./ui/savedPaletteUI.js";
+import { initializeState } from "./core/state.js";
 
 /* =========================================================
    Application Initialization
    ========================================================= */
 
 function initializeApp() {
-  try {
-    initializeState();
+  console.info("Color Studio: starting initialization");
 
-    /*
-     * Toast must be initialized before the
-     * other UI modules.
-     */
-    initializeToastUI();
+  initializeState()
+  console.info("✓ State initialized");
 
-    initializeModuleUI();
+  initializeToastUI();
+  console.info("✓ Toast UI initialized");
 
-    initializePaletteUI();
+  initializeModuleUI();
+  console.info("✓ Module UI initialized");
 
-    initializeContrastUI();
+  initializePaletteUI();
+  console.info("✓ Palette UI initialized");
 
-    initializeSavedUI();
+  initializeContrastUI();
+  console.info("✓ Contrast UI initialized");
 
-    console.info("Color Studio initialized successfully.");
-  } catch (error) {
-    console.error("Color Studio failed to initialize:", error);
-  }
+  initializeSavedUI();
+  console.info("✓ Saved palettes UI initialized");
+
+  console.info("Color Studio initialized successfully.");
 }
 
 /* =========================================================

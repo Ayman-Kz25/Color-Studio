@@ -15,6 +15,10 @@
     }
 
 
+    /* -----------------------------------------------------
+       Palette
+       ----------------------------------------------------- */
+
     .current-palette {
         grid-template-columns:
             repeat(5, minmax(0, 1fr));
@@ -30,6 +34,10 @@
         font-size: 0.8125rem;
     }
 
+
+    /* -----------------------------------------------------
+       Contrast Results
+       ----------------------------------------------------- */
 
     .contrast-results {
         grid-template-columns:
@@ -88,10 +96,9 @@
     }
 
 
-    /*
-     * Five columns become a wrapped grid.
-     * This gives each color enough space on tablets.
-     */
+    /* -----------------------------------------------------
+       Current Palette
+       ----------------------------------------------------- */
 
     .current-palette {
         grid-template-columns:
@@ -104,8 +111,9 @@
     .color-card {
         min-height: 320px;
 
-        border-right: 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+        border-right: 1px solid rgba(255, 255, 255, 0.3);
+
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     }
 
 
@@ -208,7 +216,7 @@
 
 
     /* -----------------------------------------------------
-       Palette
+       Current Palette
        ----------------------------------------------------- */
 
     .current-palette {
@@ -221,11 +229,13 @@
 
     .color-card {
         min-height: 300px;
+
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     }
 
 
     .color-card:nth-child(3n) {
-        border-right: 1px solid rgba(255, 255, 255, 0.18);
+        border-right: 1px solid rgba(255, 255, 255, 0.3);
     }
 
 
@@ -308,7 +318,8 @@
        ----------------------------------------------------- */
 
     .offcanvas {
-        --bs-offcanvas-width: min(420px, 92vw);
+        --bs-offcanvas-width:
+            min(420px, 92vw);
     }
 
 
@@ -403,6 +414,7 @@
     .palette-generator,
     .contrast-checker {
         padding-top: var(--section-padding-y);
+
         padding-bottom: var(--section-padding-y);
     }
 
@@ -414,12 +426,14 @@
 
     .section-title {
         font-size: 1.75rem;
-        letter-spacing: -0.03em;
+
+        letter-spacing: -0.035em;
     }
 
 
     .section-description {
         font-size: 0.875rem;
+
         line-height: 1.6;
     }
 
@@ -454,6 +468,10 @@
 
     .palette-generator__controls {
         margin-bottom: var(--space-5);
+
+        padding: var(--space-4);
+
+        border-radius: var(--radius-lg);
     }
 
 
@@ -462,8 +480,9 @@
        ----------------------------------------------------- */
 
     .current-palette {
-        grid-template-columns:
-            1fr;
+        grid-template-columns: 1fr;
+
+        min-height: auto;
 
         border-radius: var(--radius-lg);
     }
@@ -472,19 +491,14 @@
     .color-card {
         min-height: 280px;
 
-        border-right: 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+        border-right: 0 !important;
+
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     }
 
 
     .color-card:last-child {
         border-bottom: 0;
-    }
-
-
-    .color-card:nth-child(2n),
-    .color-card:nth-child(3n) {
-        border-right: 0;
     }
 
 
@@ -612,6 +626,7 @@
 
     .modal-dialog {
         margin-right: var(--space-3);
+
         margin-left: var(--space-3);
     }
 
@@ -622,6 +637,7 @@
 
     #appToast {
         width: calc(100vw - 2rem);
+
         min-width: 0;
     }
 
@@ -634,10 +650,18 @@
 
 @media (max-width: 374.98px) {
 
+    /* -----------------------------------------------------
+       Header
+       ----------------------------------------------------- */
+
     .app-brand__name {
         display: none;
     }
 
+
+    /* -----------------------------------------------------
+       Palette
+       ----------------------------------------------------- */
 
     .current-palette {
         border-radius: var(--radius-md);
@@ -648,6 +672,10 @@
         min-height: 200px;
     }
 
+
+    /* -----------------------------------------------------
+       Typography
+       ----------------------------------------------------- */
 
     .section-title {
         font-size: 1.625rem;

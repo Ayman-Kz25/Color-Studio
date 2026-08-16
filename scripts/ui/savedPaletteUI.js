@@ -12,7 +12,7 @@ import {
   savePalette,
   getSavedPalettes,
   deletePalette,
-} from "../modules/storage/storage.js";
+} from "../core/storage.js";
 
 import { showSuccessToast, showErrorToast } from "./toastUI.js";
 

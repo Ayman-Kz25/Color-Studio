@@ -1,8 +1,4 @@
-import { STORAGE_KEYS, MAX_SAVED_PALETTES } from "./constants.js";
-
-/* =========================================================
-   Storage Availability
-   ========================================================= */
+import { MAX_SAVED_PALETTES, STORAGE_KEYS } from "./constants.js";
 
 let storageAvailable = null;
 

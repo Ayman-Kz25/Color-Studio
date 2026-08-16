@@ -1,8 +1,4 @@
-import { setActiveModule, getUIState } from "../core/state.js";
-
-/* =========================================================
-   Constants
-   ========================================================= */
+import { getUIState, setActiveModule } from "../core/state.js";
 
 const MODULES = Object.freeze({
   PALETTE: "palette",

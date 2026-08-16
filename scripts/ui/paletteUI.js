@@ -1,9 +1,4 @@
 import {
-  MESSAGES,
-  PALETTE_TYPES,
-} from "../core/constants.js";
-
-import {
   getPaletteState,
   setSelectedColorIndex,
 } from "../core/state.js";
@@ -30,6 +25,8 @@ import {
   showSuccessToast,
   showErrorToast,
 } from "./toastUI.js";
+
+import { MESSAGES, PALETTE_TYPES } from "../core/constants.js";
 
 
 /* =========================================================

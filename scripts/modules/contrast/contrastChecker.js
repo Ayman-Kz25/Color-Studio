@@ -3,7 +3,8 @@
    Contrast Checker
    ========================================================= */
 
-import { CONTRAST_RATIOS } from "../core/constants.js";
+import { CONTRAST_RATIOS } from "../../core/constants.js";
+
 
 /* =========================================================
    HEX Validation

@@ -1,8 +1,3 @@
-/* =========================================================
-   Color Studio
-   Application State
-   ========================================================= */
-
 import {
   DEFAULT_BASE_COLOR,
   DEFAULT_PALETTE_TYPE,
@@ -11,7 +6,6 @@ import {
   MIN_PALETTE_SIZE,
   MAX_PALETTE_SIZE,
 } from "./constants.js";
-
 
 /* =========================================================
    Initial State
@@ -47,13 +41,11 @@ const initialState = {
   },
 };
 
-
 /* =========================================================
    App State
    ========================================================= */
 
 let state = createInitialState();
-
 
 /* =========================================================
    State Creation
@@ -62,7 +54,6 @@ let state = createInitialState();
 function createInitialState() {
   return structuredClone(initialState);
 }
-
 
 /* =========================================================
    State Initialization
@@ -74,7 +65,6 @@ export function initializeState() {
   return getState();
 }
 
-
 /* =========================================================
    Get Complete State
    ========================================================= */
@@ -82,7 +72,6 @@ export function initializeState() {
 export function getState() {
   return state;
 }
-
 
 /* =========================================================
    Palette State
@@ -92,13 +81,8 @@ export function getPaletteState() {
   return state.palette;
 }
 
-
 export function setPaletteState(updates) {
-  if (
-    !updates ||
-    typeof updates !== "object" ||
-    Array.isArray(updates)
-  ) {
+  if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
     return;
   }
 
@@ -107,7 +91,6 @@ export function setPaletteState(updates) {
     ...updates,
   };
 }
-
 
 /* =========================================================
    Palette Colors
@@ -125,9 +108,8 @@ export function setPaletteColors(colors) {
    * current number of palette colors.
    */
 
-  state.palette.locked = colors.map(
-    (_, index) =>
-      Boolean(state.palette.locked[index]),
+  state.palette.locked = colors.map((_, index) =>
+    Boolean(state.palette.locked[index]),
   );
 
   state.palette.size = colors.length;
@@ -137,17 +119,12 @@ export function setPaletteColors(colors) {
    * exists in the new palette.
    */
 
-  const selectedIndex =
-    state.ui.selectedColorIndex;
+  const selectedIndex = state.ui.selectedColorIndex;
 
-  if (
-    selectedIndex !== null &&
-    selectedIndex >= colors.length
-  ) {
+  if (selectedIndex !== null && selectedIndex >= colors.length) {
     state.ui.selectedColorIndex = null;
   }
 }
-
 
 /* =========================================================
    Locked Colors
@@ -158,91 +135,62 @@ export function setLockedColors(locked) {
     return;
   }
 
-  const colorCount =
-    state.palette.colors.length;
+  const colorCount = state.palette.colors.length;
 
-  state.palette.locked =
-    Array.from(
-      { length: colorCount },
-      (_, index) =>
-        Boolean(locked[index]),
-    );
+  state.palette.locked = Array.from({ length: colorCount }, (_, index) =>
+    Boolean(locked[index]),
+  );
 }
-
 
 /* =========================================================
    Base Color
    ========================================================= */
 
 export function setBaseColor(baseColor) {
-  if (
-    typeof baseColor !== "string" ||
-    !baseColor.trim()
-  ) {
+  if (typeof baseColor !== "string" || !baseColor.trim()) {
     return;
   }
 
-  state.palette.baseColor =
-    baseColor.trim();
+  state.palette.baseColor = baseColor.trim();
 }
-
 
 /* =========================================================
    Palette Type
    ========================================================= */
 
 export function setPaletteType(type) {
-  if (
-    typeof type !== "string" ||
-    !type.trim()
-  ) {
+  if (typeof type !== "string" || !type.trim()) {
     return;
   }
 
-  state.palette.type =
-    type.trim();
+  state.palette.type = type.trim();
 }
-
 
 /* =========================================================
    Palette Size
    ========================================================= */
 
 export function setPaletteSize(size) {
-  const normalizedSize =
-    Number(size);
+  const normalizedSize = Number(size);
 
-  if (
-    !Number.isInteger(
-      normalizedSize,
-    )
-  ) {
+  if (!Number.isInteger(normalizedSize)) {
     return;
   }
 
-  if (
-    normalizedSize < MIN_PALETTE_SIZE ||
-    normalizedSize > MAX_PALETTE_SIZE
-  ) {
+  if (normalizedSize < MIN_PALETTE_SIZE || normalizedSize > MAX_PALETTE_SIZE) {
     return;
   }
 
-  state.palette.size =
-    normalizedSize;
+  state.palette.size = normalizedSize;
 
   /*
    * Keep locked colors aligned with
    * the requested palette size.
    */
 
-  state.palette.locked =
-    Array.from(
-      { length: normalizedSize },
-      (_, index) =>
-        Boolean(
-          state.palette.locked[index],
-        ),
-    );
+  state.palette.locked = Array.from({ length: normalizedSize }, (_, index) =>
+    Boolean(state.palette.locked[index]),
+  );
 
   /*
    * A selected color outside the new
@@ -251,13 +199,11 @@ export function setPaletteSize(size) {
 
   if (
     state.ui.selectedColorIndex !== null &&
-    state.ui.selectedColorIndex >=
-      normalizedSize
+    state.ui.selectedColorIndex >= normalizedSize
   ) {
     state.ui.selectedColorIndex = null;
   }
 }
-
 
 /* =========================================================
    Saved Palettes State
@@ -267,55 +213,31 @@ export function getSavedPalettes() {
   return state.savedPalettes;
 }
 
-
-export function setSavedPalettes(
-  palettes,
-) {
+export function setSavedPalettes(palettes) {
   if (!Array.isArray(palettes)) {
     return;
   }
 
-  state.savedPalettes = [
-    ...palettes,
-  ];
+  state.savedPalettes = [...palettes];
 }
 
-
-export function addSavedPalette(
-  palette,
-) {
-  if (
-    !palette ||
-    typeof palette !== "object"
-  ) {
+export function addSavedPalette(palette) {
+  if (!palette || typeof palette !== "object") {
     return;
   }
 
-  state.savedPalettes = [
-    ...state.savedPalettes,
-    palette,
-  ];
+  state.savedPalettes = [...state.savedPalettes, palette];
 }
 
-
-export function removeSavedPalette(
-  paletteId,
-) {
-  if (
-    paletteId === null ||
-    paletteId === undefined
-  ) {
+export function removeSavedPalette(paletteId) {
+  if (paletteId === null || paletteId === undefined) {
     return;
   }
 
-  state.savedPalettes =
-    state.savedPalettes.filter(
-      (palette) =>
-        String(palette.id) !==
-        String(paletteId),
-    );
+  state.savedPalettes = state.savedPalettes.filter(
+    (palette) => String(palette.id) !== String(paletteId),
+  );
 }
-
 
 /* =========================================================
    Contrast State
@@ -325,15 +247,8 @@ export function getContrastState() {
   return state.contrast;
 }
 
-
-export function setContrastState(
-  updates,
-) {
-  if (
-    !updates ||
-    typeof updates !== "object" ||
-    Array.isArray(updates)
-  ) {
+export function setContrastState(updates) {
+  if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
     return;
   }
 
@@ -343,28 +258,15 @@ export function setContrastState(
   };
 }
 
-
-export function setContrastColors(
-  foreground,
-  background,
-) {
-  if (
-    typeof foreground === "string" &&
-    foreground.trim()
-  ) {
-    state.contrast.foreground =
-      foreground.trim();
+export function setContrastColors(foreground, background) {
+  if (typeof foreground === "string" && foreground.trim()) {
+    state.contrast.foreground = foreground.trim();
   }
 
-  if (
-    typeof background === "string" &&
-    background.trim()
-  ) {
-    state.contrast.background =
-      background.trim();
+  if (typeof background === "string" && background.trim()) {
+    state.contrast.background = background.trim();
   }
 }
-
 
 /* =========================================================
    Color State
@@ -374,19 +276,13 @@ export function getColorFormat() {
   return state.color.format;
 }
 
-
 export function setColorFormat(format) {
-  if (
-    typeof format !== "string" ||
-    !format.trim()
-  ) {
+  if (typeof format !== "string" || !format.trim()) {
     return;
   }
 
-  state.color.format =
-    format.trim();
+  state.color.format = format.trim();
 }
-
 
 /* =========================================================
    UI State
@@ -396,13 +292,8 @@ export function getUIState() {
   return state.ui;
 }
 
-
 export function setUIState(updates) {
-  if (
-    !updates ||
-    typeof updates !== "object" ||
-    Array.isArray(updates)
-  ) {
+  if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
     return;
   }
 
@@ -412,60 +303,41 @@ export function setUIState(updates) {
   };
 }
 
-
 /* =========================================================
    Active Module
    ========================================================= */
 
-export function setActiveModule(
-  moduleName,
-) {
-  if (
-    typeof moduleName !== "string" ||
-    !moduleName.trim()
-  ) {
+export function setActiveModule(moduleName) {
+  if (typeof moduleName !== "string" || !moduleName.trim()) {
     return;
   }
 
-  state.ui.activeModule =
-    moduleName.trim();
+  state.ui.activeModule = moduleName.trim();
 }
-
 
 /* =========================================================
    Generating State
    ========================================================= */
 
-export function setGenerating(
-  isGenerating,
-) {
-  state.ui.isGenerating =
-    Boolean(isGenerating);
+export function setGenerating(isGenerating) {
+  state.ui.isGenerating = Boolean(isGenerating);
 }
-
 
 /* =========================================================
    Saving State
    ========================================================= */
 
-export function setSaving(
-  isSaving,
-) {
-  state.ui.isSaving =
-    Boolean(isSaving);
+export function setSaving(isSaving) {
+  state.ui.isSaving = Boolean(isSaving);
 }
-
 
 /* =========================================================
    Selected Color
    ========================================================= */
 
-export function setSelectedColorIndex(
-  index,
-) {
+export function setSelectedColorIndex(index) {
   if (index === null) {
-    state.ui.selectedColorIndex =
-      null;
+    state.ui.selectedColorIndex = null;
 
     return;
   }
@@ -478,10 +350,8 @@ export function setSelectedColorIndex(
     return;
   }
 
-  state.ui.selectedColorIndex =
-    index;
+  state.ui.selectedColorIndex = index;
 }
-
 
 /* =========================================================
    State Reset
