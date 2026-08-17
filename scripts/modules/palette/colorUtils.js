@@ -46,7 +46,7 @@ export function normalizeHex(hex) {
 }
 
 /* =========================================================
-   HEX → RGB
+   HEX -> RGB
    ========================================================= */
 
 export function hexToRgb(hex) {
@@ -88,7 +88,7 @@ export function isValidRgb(rgb) {
 }
 
 /* =========================================================
-   RGB → HEX
+   RGB -> HEX
    ========================================================= */
 
 export function rgbToHex(r, g, b) {
@@ -103,16 +103,13 @@ export function rgbToHex(r, g, b) {
   }
 
   const toHex = (value) =>
-    Math.round(value)
-      .toString(16)
-      .padStart(2, "0")
-      .toUpperCase();
+    Math.round(value).toString(16).padStart(2, "0").toUpperCase();
 
   return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
 }
 
 /* =========================================================
-   RGB → HSL
+   RGB -> HSL
    ========================================================= */
 
 export function rgbToHsl(r, g, b) {
@@ -166,7 +163,7 @@ export function rgbToHsl(r, g, b) {
 }
 
 /* =========================================================
-   HEX → HSL
+   HEX -> HSL
    ========================================================= */
 
 export function hexToHsl(hex) {
@@ -196,7 +193,7 @@ function isValidHsl(h, s, l) {
 }
 
 /* =========================================================
-   HSL → RGB
+   HSL -> RGB
    ========================================================= */
 
 export function hslToRgb(h, s, l) {
@@ -211,17 +208,15 @@ export function hslToRgb(h, s, l) {
   hue = normalizeHue(hue);
 
   const normalizedSaturation = saturation / 100;
+
   const normalizedLightness = lightness / 100;
 
   const chroma =
-    (1 - Math.abs(2 * normalizedLightness - 1)) *
-    normalizedSaturation;
+    (1 - Math.abs(2 * normalizedLightness - 1)) * normalizedSaturation;
 
   const hueSegment = hue / 60;
 
-  const intermediate =
-    chroma *
-    (1 - Math.abs((hueSegment % 2) - 1));
+  const intermediate = chroma * (1 - Math.abs((hueSegment % 2) - 1));
 
   let red = 0;
   let green = 0;
@@ -257,7 +252,7 @@ export function hslToRgb(h, s, l) {
 }
 
 /* =========================================================
-   HSL → HEX
+   HSL -> HEX
    ========================================================= */
 
 export function hslToHex(h, s, l) {
@@ -291,10 +286,7 @@ export function clamp(value, min, max) {
     return numericMin;
   }
 
-  return Math.min(
-    Math.max(numericValue, numericMin),
-    numericMax,
-  );
+  return Math.min(Math.max(numericValue, numericMin), numericMax);
 }
 
 /* =========================================================
@@ -319,10 +311,7 @@ export function adjustHue(hue, amount) {
   const numericHue = Number(hue);
   const numericAmount = Number(amount);
 
-  if (
-    !Number.isFinite(numericHue) ||
-    !Number.isFinite(numericAmount)
-  ) {
+  if (!Number.isFinite(numericHue) || !Number.isFinite(numericAmount)) {
     return 0;
   }
 
@@ -337,45 +326,29 @@ export function adjustLightness(lightness, amount) {
   const numericLightness = Number(lightness);
   const numericAmount = Number(amount);
 
-  if (
-    !Number.isFinite(numericLightness) ||
-    !Number.isFinite(numericAmount)
-  ) {
+  if (!Number.isFinite(numericLightness) || !Number.isFinite(numericAmount)) {
     return 0;
   }
 
-  return clamp(
-    numericLightness + numericAmount,
-    0,
-    100,
-  );
+  return clamp(numericLightness + numericAmount, 0, 100);
 }
 
 /* =========================================================
    Create HSL Color
    ========================================================= */
 
-export function createHslColor(
-  hue,
-  saturation,
-  lightness,
-) {
+export function createHslColor(hue, saturation, lightness) {
   const normalizedHue = normalizeHue(hue);
+
   const normalizedSaturation = clamp(saturation, 0, 100);
+
   const normalizedLightness = clamp(lightness, 0, 100);
 
-  if (
-    normalizedSaturation === null ||
-    normalizedLightness === null
-  ) {
+  if (normalizedSaturation === null || normalizedLightness === null) {
     return null;
   }
 
-  return hslToHex(
-    normalizedHue,
-    normalizedSaturation,
-    normalizedLightness,
-  );
+  return hslToHex(normalizedHue, normalizedSaturation, normalizedLightness);
 }
 
 /* =========================================================
@@ -388,19 +361,13 @@ export function randomNumber(min, max) {
 
   if (
     !Number.isFinite(numericMin) ||
-    !Number.isFinite(numericMax)
+    !Number.isFinite(numericMax) ||
+    numericMin > numericMax
   ) {
     return null;
   }
 
-  if (numericMin > numericMax) {
-    return null;
-  }
-
-  return (
-    Math.random() * (numericMax - numericMin) +
-    numericMin
-  );
+  return Math.random() * (numericMax - numericMin) + numericMin;
 }
 
 /* =========================================================
@@ -419,10 +386,7 @@ export function randomInteger(min, max) {
     return null;
   }
 
-  return Math.floor(
-    Math.random() * (numericMax - numericMin + 1) +
-      numericMin,
-  );
+  return Math.floor(Math.random() * (numericMax - numericMin + 1) + numericMin);
 }
 
 /* =========================================================
@@ -434,11 +398,7 @@ export function generateRandomColor() {
   const green = randomInteger(0, 255);
   const blue = randomInteger(0, 255);
 
-  if (
-    red === null ||
-    green === null ||
-    blue === null
-  ) {
+  if (red === null || green === null || blue === null) {
     return null;
   }
 
@@ -454,19 +414,11 @@ export function generateRandomHslColor() {
   const saturation = randomInteger(45, 90);
   const lightness = randomInteger(35, 75);
 
-  if (
-    hue === null ||
-    saturation === null ||
-    lightness === null
-  ) {
+  if (hue === null || saturation === null || lightness === null) {
     return null;
   }
 
-  return createHslColor(
-    hue,
-    saturation,
-    lightness,
-  );
+  return createHslColor(hue, saturation, lightness);
 }
 
 /* =========================================================
@@ -480,12 +432,7 @@ export function getBrightness(hex) {
     return null;
   }
 
-  return (
-    (rgb.r * 299 +
-      rgb.g * 587 +
-      rgb.b * 114) /
-    1000
-  );
+  return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
 }
 
 /* =========================================================
@@ -499,20 +446,71 @@ export function getBestTextColor(background) {
     return "#FFFFFF";
   }
 
-  return brightness > 155
-    ? "#111111"
-    : "#FFFFFF";
+  return brightness > 155 ? "#111111" : "#FFFFFF";
+}
+
+/* =========================================================
+   Convert sRGB Channel
+   WCAG relative luminance helper
+   ========================================================= */
+
+function normalizeRgbChannel(value) {
+  const channel = Number(value) / 255;
+
+  if (channel <= 0.03928) {
+    return channel / 12.92;
+  }
+
+  return Math.pow((channel + 0.055) / 1.055, 2.4);
+}
+
+/* =========================================================
+   Relative Luminance
+   ========================================================= */
+
+export function getRelativeLuminance(hex) {
+  const rgb = hexToRgb(hex);
+
+  if (!rgb) {
+    return null;
+  }
+
+  const red = normalizeRgbChannel(rgb.r);
+
+  const green = normalizeRgbChannel(rgb.g);
+
+  const blue = normalizeRgbChannel(rgb.b);
+
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+}
+
+/* =========================================================
+   WCAG Contrast Ratio
+   ========================================================= */
+
+export function getContrastRatio(foreground, background) {
+  const foregroundLuminance = getRelativeLuminance(foreground);
+
+  const backgroundLuminance = getRelativeLuminance(background);
+
+  if (foregroundLuminance === null || backgroundLuminance === null) {
+    return null;
+  }
+
+  const lighter = Math.max(foregroundLuminance, backgroundLuminance);
+
+  const darker = Math.min(foregroundLuminance, backgroundLuminance);
+
+  return (lighter + 0.05) / (darker + 0.05);
 }
 
 /* =========================================================
    Color Distance
    ========================================================= */
 
-export function getColorDistance(
-  firstColor,
-  secondColor,
-) {
+export function getColorDistance(firstColor, secondColor) {
   const first = hexToRgb(firstColor);
+
   const second = hexToRgb(secondColor);
 
   if (!first || !second) {
@@ -520,7 +518,9 @@ export function getColorDistance(
   }
 
   const redDifference = first.r - second.r;
+
   const greenDifference = first.g - second.g;
+
   const blueDifference = first.b - second.b;
 
   return Math.sqrt(

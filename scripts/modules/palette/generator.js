@@ -1,5 +1,10 @@
+import {
+  PALETTE_SIZE,
+  MIN_PALETTE_SIZE,
+  MAX_PALETTE_SIZE,
+  PALETTE_TYPES,
+} from "../../core/constants.js";
 
-import { PALETTE_SIZE, PALETTE_TYPES } from "../../core/constants.js";
 import {
   generateRandomColor,
   generateRandomHslColor,
@@ -7,6 +12,7 @@ import {
   createHslColor,
   adjustHue,
   clamp,
+  normalizeHex,
 } from "./colorUtils.js";
 
 /* =========================================================
@@ -27,25 +33,44 @@ export function generatePalette(
   size = PALETTE_SIZE,
 ) {
   const paletteSize = normalizePaletteSize(size);
+  const normalizedBaseColor = normalizeHex(baseColor);
 
   switch (paletteType) {
     case PALETTE_TYPES.MONOCHROMATIC:
-      return generateMonochromaticPalette(baseColor, paletteSize);
+      return generateMonochromaticPalette(
+        normalizedBaseColor,
+        paletteSize,
+      );
 
     case PALETTE_TYPES.ANALOGOUS:
-      return generateAnalogousPalette(baseColor, paletteSize);
+      return generateAnalogousPalette(
+        normalizedBaseColor,
+        paletteSize,
+      );
 
     case PALETTE_TYPES.COMPLEMENTARY:
-      return generateComplementaryPalette(baseColor, paletteSize);
+      return generateComplementaryPalette(
+        normalizedBaseColor,
+        paletteSize,
+      );
 
     case PALETTE_TYPES.TRIADIC:
-      return generateTriadicPalette(baseColor, paletteSize);
+      return generateTriadicPalette(
+        normalizedBaseColor,
+        paletteSize,
+      );
 
     case PALETTE_TYPES.SPLIT_COMPLEMENTARY:
-      return generateSplitComplementaryPalette(baseColor, paletteSize);
+      return generateSplitComplementaryPalette(
+        normalizedBaseColor,
+        paletteSize,
+      );
 
     case PALETTE_TYPES.TETRADIC:
-      return generateTetradicPalette(baseColor, paletteSize);
+      return generateTetradicPalette(
+        normalizedBaseColor,
+        paletteSize,
+      );
 
     case PALETTE_TYPES.RANDOM:
     default:
@@ -58,20 +83,18 @@ export function generatePalette(
    ========================================================= */
 
 /**
- * Generate completely random RGB colors.
+ * Generate completely random colors.
  *
  * @param {number} size
  * @returns {string[]}
  */
 export function generateRandomPalette(size = PALETTE_SIZE) {
   const paletteSize = normalizePaletteSize(size);
-  const palette = [];
 
-  for (let index = 0; index < paletteSize; index++) {
-    palette.push(generateRandomColor());
-  }
-
-  return palette;
+  return Array.from(
+    { length: paletteSize },
+    () => generateRandomColor(),
+  );
 }
 
 /**
@@ -82,13 +105,11 @@ export function generateRandomPalette(size = PALETTE_SIZE) {
  */
 export function generateRandomHslPalette(size = PALETTE_SIZE) {
   const paletteSize = normalizePaletteSize(size);
-  const palette = [];
 
-  for (let index = 0; index < paletteSize; index++) {
-    palette.push(generateRandomHslColor());
-  }
-
-  return palette;
+  return Array.from(
+    { length: paletteSize },
+    () => generateRandomHslColor(),
+  );
 }
 
 /* =========================================================
@@ -96,8 +117,8 @@ export function generateRandomHslPalette(size = PALETTE_SIZE) {
    ========================================================= */
 
 /**
- * Generate colors using the base color's hue and saturation
- * while varying lightness.
+ * Generate colors from the same hue while
+ * varying lightness.
  *
  * @param {string} baseColor
  * @param {number} size
@@ -114,20 +135,16 @@ export function generateMonochromaticPalette(
     return generateRandomPalette(paletteSize);
   }
 
-  const palette = [];
-  const lightnessValues = createLightnessScale(paletteSize);
+  const lightnessValues =
+    createLightnessScale(paletteSize);
 
-  lightnessValues.forEach((lightness) => {
-    palette.push(
-      createHslColor(
-        hsl.h,
-        hsl.s,
-        lightness,
-      ),
-    );
-  });
-
-  return palette;
+  return lightnessValues.map((lightness) =>
+    createHslColor(
+      hsl.h,
+      hsl.s,
+      lightness,
+    ),
+  );
 }
 
 /* =========================================================
@@ -135,7 +152,7 @@ export function generateMonochromaticPalette(
    ========================================================= */
 
 /**
- * Generate an analogous palette around the base hue.
+ * Generate colors around the base hue.
  *
  * @param {string} baseColor
  * @param {number} size
@@ -154,7 +171,11 @@ export function generateAnalogousPalette(
 
   const offsets = [-40, -20, 0, 20, 40];
 
-  return createHuePalette(hsl, offsets, paletteSize);
+  return createHuePalette(
+    hsl,
+    offsets,
+    paletteSize,
+  );
 }
 
 /* =========================================================
@@ -181,7 +202,13 @@ export function generateComplementaryPalette(
 
   const offsets = [0, 180, 180, 0, 180];
 
-  const lightnessAdjustments = [0, 0, 15, -15, 30];
+  const lightnessAdjustments = [
+    0,
+    0,
+    15,
+    -15,
+    30,
+  ];
 
   return createHueLightnessPalette(
     hsl,
@@ -215,7 +242,13 @@ export function generateTriadicPalette(
 
   const offsets = [0, 120, 240, 120, 240];
 
-  const lightnessAdjustments = [0, 0, 0, 15, -15];
+  const lightnessAdjustments = [
+    0,
+    0,
+    0,
+    15,
+    -15,
+  ];
 
   return createHueLightnessPalette(
     hsl,
@@ -249,7 +282,13 @@ export function generateSplitComplementaryPalette(
 
   const offsets = [0, 150, 210, 150, 210];
 
-  const lightnessAdjustments = [0, 0, 0, 15, -15];
+  const lightnessAdjustments = [
+    0,
+    0,
+    0,
+    15,
+    -15,
+  ];
 
   return createHueLightnessPalette(
     hsl,
@@ -265,6 +304,9 @@ export function generateSplitComplementaryPalette(
 
 /**
  * Generate a tetradic palette.
+ *
+ * This export is retained for compatibility even though
+ * the current HTML does not expose a tetradic option.
  *
  * @param {string} baseColor
  * @param {number} size
@@ -283,7 +325,13 @@ export function generateTetradicPalette(
 
   const offsets = [0, 90, 180, 270, 90];
 
-  const lightnessAdjustments = [0, 0, 0, 0, 15];
+  const lightnessAdjustments = [
+    0,
+    0,
+    0,
+    0,
+    15,
+  ];
 
   return createHueLightnessPalette(
     hsl,
@@ -297,40 +345,49 @@ export function generateTetradicPalette(
    Hue Palette
    ========================================================= */
 
-function createHuePalette(hsl, offsets, size) {
+function createHuePalette(
+  hsl,
+  offsets,
+  size,
+) {
   const palette = [];
 
   for (let index = 0; index < size; index++) {
-    const offset = offsets[index % offsets.length];
+    const offset =
+      offsets[index % offsets.length];
 
-    const saturationVariation = getSaturationVariation(index);
-
-    const lightnessVariation = getLightnessVariation(index);
-
-    const hue = adjustHue(hsl.h, offset);
+    const hue = adjustHue(
+      hsl.h,
+      offset,
+    );
 
     const saturation = clamp(
-      hsl.s + saturationVariation,
+      hsl.s + getSaturationVariation(index),
       15,
       100,
     );
 
     const lightness = clamp(
-      hsl.l + lightnessVariation,
+      hsl.l + getLightnessVariation(index),
       8,
       92,
     );
 
-    palette.push(
-      createHslColor(
-        hue,
-        saturation,
-        lightness,
-      ),
+    const color = createHslColor(
+      hue,
+      saturation,
+      lightness,
     );
+
+    if (color) {
+      palette.push(color);
+    }
   }
 
-  return palette;
+  return ensurePaletteSize(
+    palette,
+    size,
+  );
 }
 
 /* =========================================================
@@ -346,20 +403,21 @@ function createHueLightnessPalette(
   const palette = [];
 
   for (let index = 0; index < size; index++) {
-    const offset = offsets[index % offsets.length];
+    const offset =
+      offsets[index % offsets.length];
 
     const lightnessAdjustment =
       lightnessAdjustments[
         index % lightnessAdjustments.length
       ];
 
-    const saturationVariation =
-      getSaturationVariation(index);
-
-    const hue = adjustHue(hsl.h, offset);
+    const hue = adjustHue(
+      hsl.h,
+      offset,
+    );
 
     const saturation = clamp(
-      hsl.s + saturationVariation,
+      hsl.s + getSaturationVariation(index),
       15,
       100,
     );
@@ -370,16 +428,21 @@ function createHueLightnessPalette(
       92,
     );
 
-    palette.push(
-      createHslColor(
-        hue,
-        saturation,
-        lightness,
-      ),
+    const color = createHslColor(
+      hue,
+      saturation,
+      lightness,
     );
+
+    if (color) {
+      palette.push(color);
+    }
   }
 
-  return palette;
+  return ensurePaletteSize(
+    palette,
+    size,
+  );
 }
 
 /* =========================================================
@@ -387,24 +450,26 @@ function createHueLightnessPalette(
    ========================================================= */
 
 function createLightnessScale(size) {
-  if (size <= 1) {
+  const paletteSize = normalizePaletteSize(size);
+
+  if (paletteSize === 1) {
     return [50];
   }
-
-  const values = [];
 
   const minimum = 20;
   const maximum = 80;
 
-  const step = (maximum - minimum) / (size - 1);
+  const step =
+    (maximum - minimum) /
+    (paletteSize - 1);
 
-  for (let index = 0; index < size; index++) {
-    values.push(
-      Math.round(minimum + step * index),
-    );
-  }
-
-  return values;
+  return Array.from(
+    { length: paletteSize },
+    (_, index) =>
+      Math.round(
+        minimum + step * index,
+      ),
+  );
 }
 
 /* =========================================================
@@ -412,9 +477,17 @@ function createLightnessScale(size) {
    ========================================================= */
 
 function getSaturationVariation(index) {
-  const variations = [0, 5, -5, 8, -8];
+  const variations = [
+    0,
+    5,
+    -5,
+    8,
+    -8,
+  ];
 
-  return variations[index % variations.length];
+  return variations[
+    index % variations.length
+  ];
 }
 
 /* =========================================================
@@ -422,9 +495,17 @@ function getSaturationVariation(index) {
    ========================================================= */
 
 function getLightnessVariation(index) {
-  const variations = [0, 8, -8, 12, -12];
+  const variations = [
+    0,
+    8,
+    -8,
+    12,
+    -12,
+  ];
 
-  return variations[index % variations.length];
+  return variations[
+    index % variations.length
+  ];
 }
 
 /* =========================================================
@@ -439,8 +520,39 @@ function normalizePaletteSize(size) {
   }
 
   return Math.max(
-    1,
-    Math.min(10, Math.floor(numericSize)),
+    MIN_PALETTE_SIZE,
+    Math.min(
+      MAX_PALETTE_SIZE,
+      Math.floor(numericSize),
+    ),
+  );
+}
+
+/* =========================================================
+   Ensure Palette Size
+   ========================================================= */
+
+function ensurePaletteSize(
+  palette,
+  size,
+) {
+  const normalizedSize =
+    normalizePaletteSize(size);
+
+  const result = [...palette];
+
+  while (result.length < normalizedSize) {
+    const fallback =
+      generateRandomHslColor();
+
+    if (fallback) {
+      result.push(fallback);
+    }
+  }
+
+  return result.slice(
+    0,
+    normalizedSize,
   );
 }
 
@@ -449,7 +561,7 @@ function normalizePaletteSize(size) {
    ========================================================= */
 
 /**
- * Generate controlled variations from a base color.
+ * Generate controlled color variations.
  *
  * @param {string} baseColor
  * @param {number} count
@@ -459,41 +571,56 @@ export function generateColorVariations(
   baseColor,
   count = PALETTE_SIZE,
 ) {
-  const paletteSize = normalizePaletteSize(count);
+  const paletteSize =
+    normalizePaletteSize(count);
+
   const hsl = hexToHsl(baseColor);
 
   if (!hsl) {
-    return generateRandomPalette(paletteSize);
+    return generateRandomPalette(
+      paletteSize,
+    );
   }
 
   const palette = [];
 
-  for (let index = 0; index < paletteSize; index++) {
+  for (
+    let index = 0;
+    index < paletteSize;
+    index++
+  ) {
     const hue = adjustHue(
       hsl.h,
       index * 12,
     );
 
     const saturation = clamp(
-      hsl.s + getSaturationVariation(index),
+      hsl.s +
+        getSaturationVariation(index),
       15,
       100,
     );
 
     const lightness = clamp(
-      hsl.l + getLightnessVariation(index),
+      hsl.l +
+        getLightnessVariation(index),
       8,
       92,
     );
 
-    palette.push(
-      createHslColor(
-        hue,
-        saturation,
-        lightness,
-      ),
+    const color = createHslColor(
+      hue,
+      saturation,
+      lightness,
     );
+
+    if (color) {
+      palette.push(color);
+    }
   }
 
-  return palette;
+  return ensurePaletteSize(
+    palette,
+    paletteSize,
+  );
 }
