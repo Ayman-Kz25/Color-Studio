@@ -215,7 +215,6 @@ export function getContrastLevel(ratio) {
 /* =========================================================
    Complete Contrast Result
    ========================================================= */
-
 export function checkContrast(foreground, background) {
   const normalizedForeground = normalizeHex(foreground);
   const normalizedBackground = normalizeHex(background);

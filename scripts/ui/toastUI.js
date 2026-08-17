@@ -3,11 +3,16 @@
    Toast UI
    ========================================================= */
 
-/* =========================================================
-   DOM Elements
-   ========================================================= */
+import {
+  toastContainer,
+  appToast,
+  toastMessage,
+  toastIcon,
+} from "./dom.js";
 
-let elements = {};
+/* =========================================================
+   State
+   ========================================================= */
 
 let hideTimer = null;
 
@@ -16,27 +21,7 @@ let hideTimer = null;
    ========================================================= */
 
 export function initializeToastUI() {
-  cacheElements();
-
   bindEvents();
-}
-
-/* =========================================================
-   Cache DOM Elements
-   ========================================================= */
-
-function cacheElements() {
-  elements = {
-    container: document.querySelector("#toastContainer"),
-
-    toast: document.querySelector("#appToast"),
-
-    message: document.querySelector("#toastMessage"),
-
-    icon: document.querySelector("#toastIcon"),
-
-    closeButton: document.querySelector("#toastCloseBtn"),
-  };
 }
 
 /* =========================================================
@@ -44,9 +29,10 @@ function cacheElements() {
    ========================================================= */
 
 function bindEvents() {
-  document.addEventListener("colorstudio:toast", handleToastEvent);
-
-  elements.closeButton?.addEventListener("click", hideToast);
+  document.addEventListener(
+    "colorstudio:toast",
+    handleToastEvent,
+  );
 }
 
 /* =========================================================
@@ -67,30 +53,15 @@ function handleToastEvent(event) {
    Show Toast
    ========================================================= */
 
-export function showToast(message, duration = 2500) {
-  if (!elements.toast) {
-    return;
-  }
-
-  clearTimeout(hideTimer);
-
-  if (elements.message) {
-    elements.message.textContent = message;
-  }
-
-  setToastIcon("success");
-
-  elements.toast.classList.remove("is-hiding");
-
-  elements.toast.classList.add("is-visible");
-
-  elements.toast.setAttribute("aria-hidden", "false");
-
-  if (elements.container) {
-    elements.container.classList.add("is-active");
-  }
-
-  hideTimer = window.setTimeout(hideToast, duration);
+export function showToast(
+  message,
+  duration = 2500,
+) {
+  showTypedToast(
+    message,
+    "success",
+    duration,
+  );
 }
 
 /* =========================================================
@@ -98,22 +69,33 @@ export function showToast(message, duration = 2500) {
    ========================================================= */
 
 export function hideToast() {
-  if (!elements.toast) {
+  if (!appToast) {
     return;
   }
 
-  elements.toast.classList.remove("is-visible");
+  clearTimeout(hideTimer);
 
-  elements.toast.classList.add("is-hiding");
+  appToast.classList.remove(
+    "is-visible",
+  );
 
-  elements.toast.setAttribute("aria-hidden", "true");
+  appToast.classList.add(
+    "is-hiding",
+  );
 
-  if (elements.container) {
-    elements.container.classList.remove("is-active");
-  }
+  appToast.setAttribute(
+    "aria-hidden",
+    "true",
+  );
+
+  toastContainer?.classList.remove(
+    "is-active",
+  );
 
   window.setTimeout(() => {
-    elements.toast?.classList.remove("is-hiding");
+    appToast?.classList.remove(
+      "is-hiding",
+    );
   }, 200);
 }
 
@@ -122,33 +104,38 @@ export function hideToast() {
    ========================================================= */
 
 function setToastIcon(type) {
-  if (!elements.icon) {
+  if (!toastIcon) {
     return;
   }
 
-  elements.icon.className = "";
+  const icon = toastIcon.querySelector("i");
+
+  if (!icon) {
+    return;
+  }
+
+  icon.className = "";
 
   switch (type) {
     case "error":
-      elements.icon.className = "fa-solid fa-circle-xmark";
-
+      icon.className =
+        "fa-solid fa-circle-xmark";
       break;
 
     case "warning":
-      elements.icon.className = "fa-solid fa-triangle-exclamation";
-
+      icon.className =
+        "fa-solid fa-triangle-exclamation";
       break;
 
     case "info":
-      elements.icon.className = "fa-solid fa-circle-info";
-
+      icon.className =
+        "fa-solid fa-circle-info";
       break;
 
     case "success":
-
     default:
-      elements.icon.className = "fa-solid fa-circle-check";
-
+      icon.className =
+        "fa-solid fa-circle-check";
       break;
   }
 }
@@ -157,57 +144,101 @@ function setToastIcon(type) {
    Public Toast Types
    ========================================================= */
 
-export function showSuccessToast(message, duration = 2500) {
-  showTypedToast(message, "success", duration);
+export function showSuccessToast(
+  message,
+  duration = 2500,
+) {
+  showTypedToast(
+    message,
+    "success",
+    duration,
+  );
 }
 
-export function showErrorToast(message, duration = 3000) {
-  showTypedToast(message, "error", duration);
+export function showErrorToast(
+  message,
+  duration = 3000,
+) {
+  showTypedToast(
+    message,
+    "error",
+    duration,
+  );
 }
 
-export function showWarningToast(message, duration = 3000) {
-  showTypedToast(message, "warning", duration);
+export function showWarningToast(
+  message,
+  duration = 3000,
+) {
+  showTypedToast(
+    message,
+    "warning",
+    duration,
+  );
 }
 
-export function showInfoToast(message, duration = 2500) {
-  showTypedToast(message, "info", duration);
+export function showInfoToast(
+  message,
+  duration = 2500,
+) {
+  showTypedToast(
+    message,
+    "info",
+    duration,
+  );
 }
 
 /* =========================================================
    Typed Toast
    ========================================================= */
 
-function showTypedToast(message, type, duration) {
-  if (!elements.toast) {
+function showTypedToast(
+  message,
+  type,
+  duration,
+) {
+  if (!appToast) {
     return;
   }
 
   clearTimeout(hideTimer);
 
-  if (elements.message) {
-    elements.message.textContent = message;
+  if (toastMessage) {
+    toastMessage.textContent = message;
   }
 
   setToastIcon(type);
 
-  elements.toast.classList.remove(
+  appToast.classList.remove(
     "toast-success",
     "toast-error",
     "toast-warning",
     "toast-info",
   );
 
-  elements.toast.classList.add(`toast-${type}`);
+  appToast.classList.add(
+    `toast-${type}`,
+  );
 
-  elements.toast.classList.remove("is-hiding");
+  appToast.classList.remove(
+    "is-hiding",
+  );
 
-  elements.toast.classList.add("is-visible");
+  appToast.classList.add(
+    "is-visible",
+  );
 
-  elements.toast.setAttribute("aria-hidden", "false");
+  appToast.setAttribute(
+    "aria-hidden",
+    "false",
+  );
 
-  if (elements.container) {
-    elements.container.classList.add("is-active");
-  }
+  toastContainer?.classList.add(
+    "is-active",
+  );
 
-  hideTimer = window.setTimeout(hideToast, duration);
+  hideTimer = window.setTimeout(
+    hideToast,
+    duration,
+  );
 }

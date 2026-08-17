@@ -14,38 +14,26 @@ import {
   deletePalette,
 } from "../core/storage.js";
 
-import { showSuccessToast, showErrorToast } from "./toastUI.js";
+import {
+  showSuccessToast,
+  showErrorToast,
+} from "./toastUI.js";
 
-/* =========================================================
-   DOM Elements
-   ========================================================= */
-
-let elements = {};
+import {
+  savedPalettesList,
+  saveCurrentPaletteButton,
+  savedPalettesEmptyState,
+  savedPalettesCount,
+} from "./dom.js";
 
 /* =========================================================
    Initialization
    ========================================================= */
 
 export function initializeSavedUI() {
-  cacheElements();
-
   bindEvents();
 
   renderSavedPalettes();
-}
-
-/* =========================================================
-   Cache DOM Elements
-   ========================================================= */
-
-function cacheElements() {
-  elements = {
-    savedContainer: document.querySelector("#savedPalettesContainer"),
-
-    saveButton: document.querySelector("#savePaletteBtn"),
-
-    emptyState: document.querySelector("#savedPalettesEmpty"),
-  };
 }
 
 /* =========================================================
@@ -53,9 +41,15 @@ function cacheElements() {
    ========================================================= */
 
 function bindEvents() {
-  elements.saveButton?.addEventListener("click", handleSavePalette);
+  saveCurrentPaletteButton?.addEventListener(
+    "click",
+    handleSavePalette,
+  );
 
-  elements.savedContainer?.addEventListener("click", handleSavedPaletteClick);
+  savedPalettesList?.addEventListener(
+    "click",
+    handleSavedPaletteClick,
+  );
 }
 
 /* =========================================================
@@ -70,7 +64,9 @@ function handleSavePalette() {
     !Array.isArray(palette.colors) ||
     palette.colors.length === 0
   ) {
-    showErrorToast("There is no palette to save.");
+    showErrorToast(
+      "There is no palette to save.",
+    );
 
     return;
   }
@@ -83,14 +79,18 @@ function handleSavePalette() {
   });
 
   if (!savedPalette) {
-    showErrorToast("Unable to save palette.");
+    showErrorToast(
+      "Unable to save palette.",
+    );
 
     return;
   }
 
   renderSavedPalettes();
 
-  showSuccessToast("Palette saved.");
+  showSuccessToast(
+    "Palette saved.",
+  );
 }
 
 /* =========================================================
@@ -98,25 +98,30 @@ function handleSavePalette() {
    ========================================================= */
 
 function handleSavedPaletteClick(event) {
-  const card = event.target.closest("[data-saved-palette-id]");
+  const card = event.target.closest(
+    "[data-saved-palette-id]",
+  );
 
   if (!card) {
     return;
   }
 
-  const paletteId = card.dataset.savedPaletteId;
+  const paletteId =
+    card.dataset.savedPaletteId;
 
   if (!paletteId) {
     return;
   }
 
-  const action = event.target.closest("[data-action]");
+  const action =
+    event.target.closest("[data-action]");
 
   if (!action) {
     return;
   }
 
-  const actionType = action.dataset.action;
+  const actionType =
+    action.dataset.action;
 
   switch (actionType) {
     case "load":
@@ -137,35 +142,51 @@ function handleSavedPaletteClick(event) {
    ========================================================= */
 
 function loadSavedPalette(paletteId) {
-  const savedPalettes = getSavedPalettes();
+  const savedPalettes =
+    getSavedPalettes();
 
-  const savedPalette = savedPalettes.find(
-    (palette) => String(palette.id) === String(paletteId),
-  );
+  const savedPalette =
+    savedPalettes.find(
+      (palette) =>
+        String(palette.id) ===
+        String(paletteId),
+    );
 
   if (!savedPalette) {
-    showErrorToast("Saved palette not found.");
+    showErrorToast(
+      "Saved palette not found.",
+    );
 
     return;
   }
 
-  const loaded = setCurrentPalette(savedPalette.colors, savedPalette.locked);
+  const loaded = setCurrentPalette(
+    savedPalette.colors,
+    savedPalette.locked,
+  );
 
   if (!loaded) {
-    showErrorToast("Unable to load palette.");
+    showErrorToast(
+      "Unable to load palette.",
+    );
 
     return;
   }
 
   document.dispatchEvent(
-    new CustomEvent("colorstudio:palettechange", {
-      detail: {
-        palette: getCurrentPalette(),
+    new CustomEvent(
+      "colorstudio:palettechange",
+      {
+        detail: {
+          palette: getCurrentPalette(),
+        },
       },
-    }),
+    ),
   );
 
-  showSuccessToast("Palette loaded.");
+  showSuccessToast(
+    "Palette loaded.",
+  );
 }
 
 /* =========================================================
@@ -173,17 +194,22 @@ function loadSavedPalette(paletteId) {
    ========================================================= */
 
 function removeSavedPalette(paletteId) {
-  const deleted = deletePalette(paletteId);
+  const deleted =
+    deletePalette(paletteId);
 
   if (!deleted) {
-    showErrorToast("Unable to delete palette.");
+    showErrorToast(
+      "Unable to delete palette.",
+    );
 
     return;
   }
 
   renderSavedPalettes();
 
-  showSuccessToast("Palette deleted.");
+  showSuccessToast(
+    "Palette deleted.",
+  );
 }
 
 /* =========================================================
@@ -191,13 +217,18 @@ function removeSavedPalette(paletteId) {
    ========================================================= */
 
 export function renderSavedPalettes() {
-  if (!elements.savedContainer) {
+  if (!savedPalettesList) {
     return;
   }
 
-  const savedPalettes = getSavedPalettes();
+  const savedPalettes =
+    getSavedPalettes();
 
-  elements.savedContainer.innerHTML = "";
+  savedPalettesList.innerHTML = "";
+
+  updateSavedPalettesCount(
+    savedPalettes.length,
+  );
 
   if (savedPalettes.length === 0) {
     renderEmptyState();
@@ -207,11 +238,31 @@ export function renderSavedPalettes() {
 
   hideEmptyState();
 
-  savedPalettes.forEach((palette) => {
-    const card = createSavedPaletteCard(palette);
+  savedPalettes.forEach(
+    (palette) => {
+      const card =
+        createSavedPaletteCard(
+          palette,
+        );
 
-    elements.savedContainer.appendChild(card);
-  });
+      savedPalettesList.appendChild(
+        card,
+      );
+    },
+  );
+}
+
+/* =========================================================
+   Saved Palettes Count
+   ========================================================= */
+
+function updateSavedPalettesCount(count) {
+  if (!savedPalettesCount) {
+    return;
+  }
+
+  savedPalettesCount.textContent =
+    String(count);
 }
 
 /* =========================================================
@@ -219,27 +270,35 @@ export function renderSavedPalettes() {
    ========================================================= */
 
 function createSavedPaletteCard(palette) {
-  const card = document.createElement("article");
+  const card =
+    document.createElement("article");
 
-  card.className = "saved-palette-card";
+  card.className =
+    "saved-palette-card";
 
-  card.dataset.savedPaletteId = String(palette.id);
+  card.dataset.savedPaletteId =
+    String(palette.id);
 
-  const colors = Array.isArray(palette.colors) ? palette.colors : [];
+  const colors =
+    Array.isArray(palette.colors)
+      ? palette.colors
+      : [];
 
   const swatches = colors
     .map(
       (color) => `
-          <span
-            class="saved-palette-card__swatch"
-            style="background-color: ${escapeHTML(color)};"
-            title="${escapeHTML(color)}"
-          ></span>
-        `,
+        <span
+          class="saved-palette-card__swatch"
+          style="background-color: ${escapeHTML(color)};"
+          title="${escapeHTML(color)}"
+        ></span>
+      `,
     )
     .join("");
 
-  const paletteName = palette.name || "Untitled Palette";
+  const paletteName =
+    palette.name ||
+    "Untitled Palette";
 
   card.innerHTML = `
     <div class="saved-palette-card__preview">
@@ -276,7 +335,9 @@ function createSavedPaletteCard(palette) {
         </span>
 
         <span>
-          ${formatDate(palette.createdAt)}
+          ${formatDate(
+            palette.createdAt,
+          )}
         </span>
 
       </div>
@@ -305,28 +366,9 @@ function createSavedPaletteCard(palette) {
    ========================================================= */
 
 function renderEmptyState() {
-  if (elements.emptyState) {
-    elements.emptyState.classList.remove("d-none");
-
-    return;
-  }
-
-  elements.savedContainer.innerHTML = `
-    <div class="saved-palettes-empty">
-
-      <i
-        class="fa-regular fa-folder-open"
-        aria-hidden="true"
-      ></i>
-
-      <h3>No saved palettes</h3>
-
-      <p>
-        Save a palette and it will appear here.
-      </p>
-
-    </div>
-  `;
+  savedPalettesEmptyState?.classList.remove(
+    "d-none",
+  );
 }
 
 /* =========================================================
@@ -334,7 +376,9 @@ function renderEmptyState() {
    ========================================================= */
 
 function hideEmptyState() {
-  elements.emptyState?.classList.add("d-none");
+  savedPalettesEmptyState?.classList.add(
+    "d-none",
+  );
 }
 
 /* =========================================================
@@ -346,17 +390,25 @@ function formatDate(value) {
     return "";
   }
 
-  const date = new Date(value);
+  const date =
+    new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
+  if (
+    Number.isNaN(
+      date.getTime(),
+    )
+  ) {
     return "";
   }
 
-  return new Intl.DateTimeFormat(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(date);
+  return new Intl.DateTimeFormat(
+    undefined,
+    {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    },
+  ).format(date);
 }
 
 /* =========================================================
@@ -364,9 +416,11 @@ function formatDate(value) {
    ========================================================= */
 
 function escapeHTML(value) {
-  const element = document.createElement("div");
+  const element =
+    document.createElement("div");
 
-  element.textContent = String(value);
+  element.textContent =
+    String(value);
 
   return element.innerHTML;
 }

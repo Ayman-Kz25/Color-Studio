@@ -1,4 +1,15 @@
-import { getUIState, setActiveModule } from "../core/state.js";
+// scripts/ui/moduleUI.js
+
+import {
+  paletteGenerator,
+  contrastChecker,
+  savedPalettesButton,
+} from "./dom.js";
+
+import {
+  getUIState,
+  setActiveModule,
+} from "../core/state.js";
 
 const MODULES = Object.freeze({
   PALETTE: "palette",
@@ -6,42 +17,18 @@ const MODULES = Object.freeze({
   SAVED: "saved",
 });
 
-const SUPPORTED_MODULES = Object.freeze(Object.values(MODULES));
-
-/* =========================================================
-   DOM Elements
-   ========================================================= */
-
-let elements = {
-  paletteSection: null,
-  contrastSection: null,
-  savedPalettesButton: null,
-};
+const SUPPORTED_MODULES = Object.freeze(
+  Object.values(MODULES),
+);
 
 /* =========================================================
    Initialization
    ========================================================= */
 
 export function initializeModuleUI() {
-  cacheElements();
-
   bindEvents();
 
   initializeActiveModule();
-}
-
-/* =========================================================
-   DOM Cache
-   ========================================================= */
-
-function cacheElements() {
-  elements = {
-    paletteSection: document.getElementById("paletteGenerator"),
-
-    contrastSection: document.getElementById("contrastChecker"),
-
-    savedPalettesButton: document.getElementById("savedPalettesButton"),
-  };
 }
 
 /* =========================================================
@@ -49,7 +36,7 @@ function cacheElements() {
    ========================================================= */
 
 function bindEvents() {
-  elements.savedPalettesButton?.addEventListener(
+  savedPalettesButton?.addEventListener(
     "click",
     handleSavedPalettesClick,
   );
@@ -70,9 +57,10 @@ function handleSavedPalettesClick() {
 function initializeActiveModule() {
   const uiState = getUIState();
 
-  const activeModule = isSupportedModule(uiState.activeModule)
-    ? uiState.activeModule
-    : MODULES.PALETTE;
+  const activeModule =
+    isSupportedModule(uiState.activeModule)
+      ? uiState.activeModule
+      : MODULES.PALETTE;
 
   switchModule(activeModule, false);
 }
@@ -81,7 +69,10 @@ function initializeActiveModule() {
    Switch Module
    ========================================================= */
 
-export function switchModule(moduleName, dispatchEvent = true) {
+export function switchModule(
+  moduleName,
+  dispatchEvent = true,
+) {
   if (!isSupportedModule(moduleName)) {
     return false;
   }
@@ -104,44 +95,38 @@ export function switchModule(moduleName, dispatchEvent = true) {
 
 function updateMainSections(activeModule) {
   /*
-   * Palette and Contrast are part of the main page layout.
-   * They remain visible regardless of the active logical module.
-   *
-   * Saved Palettes is displayed through Bootstrap offcanvas.
+   * Palette and Contrast remain visible because they are
+   * both part of the main page layout.
    */
 
-  showSection(elements.paletteSection);
-  showSection(elements.contrastSection);
+  showSection(paletteGenerator);
+  showSection(contrastChecker);
 
-  /*
-   * The active module is still reflected through aria state.
-   * This allows other UI code to react to the selected module
-   * without hiding the main sections.
-   */
+  if (paletteGenerator) {
+    const isPaletteActive =
+      activeModule === MODULES.PALETTE;
 
-  if (elements.paletteSection) {
-    const isPaletteActive = activeModule === MODULES.PALETTE;
-
-    elements.paletteSection.classList.toggle(
+    paletteGenerator.classList.toggle(
       "active",
       isPaletteActive,
     );
 
-    elements.paletteSection.setAttribute(
+    paletteGenerator.setAttribute(
       "aria-hidden",
       String(!isPaletteActive),
     );
   }
 
-  if (elements.contrastSection) {
-    const isContrastActive = activeModule === MODULES.CONTRAST;
+  if (contrastChecker) {
+    const isContrastActive =
+      activeModule === MODULES.CONTRAST;
 
-    elements.contrastSection.classList.toggle(
+    contrastChecker.classList.toggle(
       "active",
       isContrastActive,
     );
 
-    elements.contrastSection.setAttribute(
+    contrastChecker.setAttribute(
       "aria-hidden",
       String(!isContrastActive),
     );
@@ -164,18 +149,31 @@ function showSection(section) {
    Saved Palettes Button
    ========================================================= */
 
-function updateSavedPalettesButton(activeModule) {
-  const button = elements.savedPalettesButton;
-
-  if (!button) {
+function updateSavedPalettesButton(
+  activeModule,
+) {
+  if (!savedPalettesButton) {
     return;
   }
 
-  const isActive = activeModule === MODULES.SAVED;
+  const isActive =
+    activeModule === MODULES.SAVED;
 
-  button.classList.toggle("active", isActive);
+  savedPalettesButton.classList.toggle(
+    "active",
+    isActive,
+  );
 
-  button.setAttribute("aria-current", isActive ? "page" : "false");
+  if (isActive) {
+    savedPalettesButton.setAttribute(
+      "aria-current",
+      "page",
+    );
+  } else {
+    savedPalettesButton.removeAttribute(
+      "aria-current",
+    );
+  }
 }
 
 /* =========================================================
@@ -193,13 +191,18 @@ function isSupportedModule(moduleName) {
    Custom Module Event
    ========================================================= */
 
-function dispatchModuleChangeEvent(moduleName) {
+function dispatchModuleChangeEvent(
+  moduleName,
+) {
   document.dispatchEvent(
-    new CustomEvent("colorstudio:modulechange", {
-      detail: {
-        module: moduleName,
+    new CustomEvent(
+      "colorstudio:modulechange",
+      {
+        detail: {
+          module: moduleName,
+        },
       },
-    }),
+    ),
   );
 }
 

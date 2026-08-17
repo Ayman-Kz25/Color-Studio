@@ -1,4 +1,7 @@
-import { DEFAULT_BASE_COLOR, CONTRAST_LEVELS } from "../core/constants.js";
+import {
+  DEFAULT_BASE_COLOR,
+  CONTRAST_LEVELS,
+} from "../core/constants.js";
 
 import {
   getContrastState,
@@ -6,7 +9,7 @@ import {
   setContrastState,
 } from "../core/state.js";
 
-import { checkContrast } from "../modules/contrast/contrastChecker.js";
+
 
 import {
   isValidHex,
@@ -18,19 +21,15 @@ import {
   showErrorToast,
 } from "./toastUI.js";
 
-/* =========================================================
-   DOM Elements
-   ========================================================= */
+import { dom } from "./dom.js";
 
-let elements = {};
+import { checkContrast } from "../modules/contrast/contrastChecker.js";
 
 /* =========================================================
    Initialization
    ========================================================= */
 
 export function initializeContrastUI() {
-  cacheElements();
-
   bindEvents();
 
   initializeColors();
@@ -39,65 +38,31 @@ export function initializeContrastUI() {
 }
 
 /* =========================================================
-   DOM Cache
-   ========================================================= */
-
-function cacheElements() {
-  elements = {
-    foregroundInput: document.querySelector("#foregroundColorInput"),
-
-    foregroundPicker: document.querySelector("#foregroundColorPicker"),
-
-    backgroundInput: document.querySelector("#backgroundColorInput"),
-
-    backgroundPicker: document.querySelector("#backgroundColorPicker"),
-
-    swapButton: document.querySelector("#swapColorsBtn"),
-
-    ratio: document.querySelector("#contrastRatio"),
-
-    level: document.querySelector("#contrastLevel"),
-
-    preview: document.querySelector("#contrastPreview"),
-
-    previewText: document.querySelector("#contrastPreviewText"),
-
-    normalAA: document.querySelector("#normalTextAA"),
-
-    normalAAA: document.querySelector("#normalTextAAA"),
-
-    largeAA: document.querySelector("#largeTextAA"),
-
-    largeAAA: document.querySelector("#largeTextAAA"),
-  };
-}
-
-/* =========================================================
    Event Binding
    ========================================================= */
 
 function bindEvents() {
-  elements.foregroundInput?.addEventListener(
+  dom.foregroundHexInput?.addEventListener(
     "input",
     handleForegroundInput,
   );
 
-  elements.foregroundPicker?.addEventListener(
+  dom.foregroundColorPicker?.addEventListener(
     "input",
     handleForegroundPicker,
   );
 
-  elements.backgroundInput?.addEventListener(
+  dom.backgroundHexInput?.addEventListener(
     "input",
     handleBackgroundInput,
   );
 
-  elements.backgroundPicker?.addEventListener(
+  dom.backgroundColorPicker?.addEventListener(
     "input",
     handleBackgroundPicker,
   );
 
-  elements.swapButton?.addEventListener(
+  dom.swapContrastColorsButton?.addEventListener(
     "click",
     handleSwapColors,
   );
@@ -185,14 +150,14 @@ function handleBackgroundPicker(event) {
    ========================================================= */
 
 function handleColorInput(type, value) {
-  const color = typeof value === "string"
-    ? value.trim()
-    : "";
+  const color =
+    typeof value === "string"
+      ? value.trim()
+      : "";
 
   /*
-   * Text inputs are allowed to be temporarily invalid
-   * while the user is typing. Do not overwrite the input
-   * until a complete valid HEX value is available.
+   * Allow text inputs to remain temporarily invalid
+   * while the user is typing.
    */
   if (!isValidHex(color)) {
     return;
@@ -279,8 +244,12 @@ function handleSwapColors() {
    Update Contrast Colors
    ========================================================= */
 
-function updateContrastColors(type, color) {
-  const currentState = getContrastState();
+function updateContrastColors(
+  type,
+  color,
+) {
+  const currentState =
+    getContrastState();
 
   if (type === "foreground") {
     setContrastColors(
@@ -304,8 +273,11 @@ function updateContrastColors(type, color) {
    ========================================================= */
 
 export function updateContrast() {
-  const foreground = getForegroundColor();
-  const background = getBackgroundColor();
+  const foreground =
+    getForegroundColor();
+
+  const background =
+    getBackgroundColor();
 
   const result = checkContrast(
     foreground,
@@ -314,16 +286,19 @@ export function updateContrast() {
 
   setContrastState({
     foreground:
-      result.foreground || foreground,
+      result?.foreground ||
+      foreground,
 
     background:
-      result.background || background,
+      result?.background ||
+      background,
 
     ratio:
-      result.ratio ?? 0,
+      result?.ratio ?? 0,
 
     level:
-      result.level || CONTRAST_LEVELS.FAIL,
+      result?.level ||
+      CONTRAST_LEVELS.FAIL,
   });
 
   renderContrastResult(result);
@@ -340,28 +315,20 @@ function renderContrastResult(result) {
     return;
   }
 
-  renderRatio(result.formattedRatio);
-
-  renderLevel(result);
-
-  renderWCAGResult(
-    elements.normalAA,
-    result.normalText.aa,
+  renderRatio(
+    result.formattedRatio,
   );
 
-  renderWCAGResult(
-    elements.normalAAA,
-    result.normalText.aaa,
+  renderNormalTextResult(
+    result.normalText,
   );
 
-  renderWCAGResult(
-    elements.largeAA,
-    result.largeText.aa,
+  renderLargeTextResult(
+    result.largeText,
   );
 
-  renderWCAGResult(
-    elements.largeAAA,
-    result.largeText.aaa,
+  renderUIComponentResult(
+    result.uiComponents,
   );
 
   renderPreview(
@@ -375,90 +342,155 @@ function renderContrastResult(result) {
    ========================================================= */
 
 function renderRatio(ratio) {
-  if (!elements.ratio) {
+  if (!dom.contrastRatio) {
     return;
   }
 
-  elements.ratio.textContent = ratio || "N/A";
+  dom.contrastRatio.textContent =
+    ratio || "N/A";
 }
 
 /* =========================================================
-   Render Level
+   Render Normal Text Result
    ========================================================= */
 
-function renderLevel(result) {
-  if (!elements.level) {
+function renderNormalTextResult(result) {
+  if (!dom.normalTextResult) {
     return;
   }
 
-  const level =
-    result.level || CONTRAST_LEVELS.FAIL;
+  const aaPassed =
+    Boolean(result?.aa);
 
-  let label = "Fail";
+  const aaaPassed =
+    Boolean(result?.aaa);
 
-  if (level === CONTRAST_LEVELS.AAA) {
-    label = "AAA";
-  } else if (level === CONTRAST_LEVELS.AA) {
-    label = "AA";
-  }
+  const passed =
+    aaPassed || aaaPassed;
 
-  elements.level.textContent = label;
-
-  elements.level.classList.remove(
+  dom.normalTextResult.classList.toggle(
     "is-pass",
-    "is-fail",
-    "is-aaa",
+    passed,
   );
 
-  if (level === CONTRAST_LEVELS.AAA) {
-    elements.level.classList.add("is-aaa");
-  } else if (level === CONTRAST_LEVELS.AA) {
-    elements.level.classList.add("is-pass");
-  } else {
-    elements.level.classList.add("is-fail");
-  }
-}
-
-/* =========================================================
-   Render WCAG Result
-   ========================================================= */
-
-function renderWCAGResult(element, passed) {
-  if (!element) {
-    return;
-  }
-
-  element.classList.toggle(
-    "is-pass",
-    Boolean(passed),
-  );
-
-  element.classList.toggle(
+  dom.normalTextResult.classList.toggle(
     "is-fail",
     !passed,
   );
 
-  const icon = element.querySelector("i");
-
-  if (icon) {
-    icon.classList.toggle(
-      "fa-check",
-      Boolean(passed),
-    );
-
-    icon.classList.toggle(
-      "fa-xmark",
-      !passed,
-    );
+  if (dom.normalTextStatus) {
+    dom.normalTextStatus.textContent =
+      aaaPassed
+        ? "AAA Pass"
+        : aaPassed
+          ? "AA Pass"
+          : "Fail";
   }
 
-  const status = element.querySelector(
-    "[data-status]",
+  if (dom.normalTextLevel) {
+    dom.normalTextLevel.textContent =
+      aaaPassed
+        ? "WCAG AAA"
+        : aaPassed
+          ? "WCAG AA"
+          : "WCAG AA / AAA";
+  }
+}
+
+/* =========================================================
+   Render Large Text Result
+   ========================================================= */
+
+function renderLargeTextResult(result) {
+  if (!dom.largeTextResult) {
+    return;
+  }
+
+  const aaPassed =
+    Boolean(result?.aa);
+
+  const aaaPassed =
+    Boolean(result?.aaa);
+
+  const passed =
+    aaPassed || aaaPassed;
+
+  dom.largeTextResult.classList.toggle(
+    "is-pass",
+    passed,
   );
 
-  if (status) {
-    status.textContent =
+  dom.largeTextResult.classList.toggle(
+    "is-fail",
+    !passed,
+  );
+
+  if (dom.largeTextStatus) {
+    dom.largeTextStatus.textContent =
+      aaaPassed
+        ? "AAA Pass"
+        : aaPassed
+          ? "AA Pass"
+          : "Fail";
+  }
+
+  if (dom.largeTextLevel) {
+    dom.largeTextLevel.textContent =
+      aaaPassed
+        ? "WCAG AAA"
+        : aaPassed
+          ? "WCAG AA"
+          : "WCAG AA / AAA";
+  }
+}
+
+/* =========================================================
+   Render UI Component Result
+   ========================================================= */
+
+function renderUIComponentResult(result) {
+  if (!dom.uiComponentResult) {
+    return;
+  }
+
+  /*
+   * The contrast checker may expose this as:
+   *
+   * result.uiComponents.aa
+   *
+   * or:
+   *
+   * result.uiComponent
+   *
+   * Support both shapes so the UI does not break.
+   */
+  const passed =
+    typeof result === "boolean"
+      ? result
+      : Boolean(
+          result?.aa ??
+          result?.pass ??
+          result?.passed,
+        );
+
+  dom.uiComponentResult.classList.toggle(
+    "is-pass",
+    passed,
+  );
+
+  dom.uiComponentResult.classList.toggle(
+    "is-fail",
+    !passed,
+  );
+
+  if (dom.uiComponentStatus) {
+    dom.uiComponentStatus.textContent =
       passed ? "Pass" : "Fail";
+  }
+
+  if (dom.uiComponentLevel) {
+    dom.uiComponentLevel.textContent =
+      "WCAG 1.4.11";
   }
 }
 
@@ -470,18 +502,28 @@ function renderPreview(
   foreground,
   background,
 ) {
-  if (!elements.preview) {
+  if (!dom.contrastPreview) {
     return;
   }
 
-  elements.preview.style.backgroundColor =
+  dom.contrastPreview.style.backgroundColor =
     background;
 
-  elements.preview.style.color =
+  dom.contrastPreview.style.color =
     foreground;
 
-  if (elements.previewText) {
-    elements.previewText.style.color =
+  if (dom.contrastPreviewLabel) {
+    dom.contrastPreviewLabel.style.color =
+      foreground;
+  }
+
+  if (dom.contrastPreviewHeading) {
+    dom.contrastPreviewHeading.style.color =
+      foreground;
+  }
+
+  if (dom.contrastPreviewText) {
+    dom.contrastPreviewText.style.color =
       foreground;
   }
 }
@@ -493,49 +535,83 @@ function renderPreview(
 function renderInvalidResult() {
   renderRatio("N/A");
 
-  if (elements.level) {
-    elements.level.textContent = "Invalid";
+  renderResultCardInvalid(
+    dom.normalTextResult,
+    dom.normalTextStatus,
+    dom.normalTextLevel,
+    "Fail",
+    "WCAG AA / AAA",
+  );
 
-    elements.level.classList.remove(
-      "is-pass",
-      "is-aaa",
-    );
+  renderResultCardInvalid(
+    dom.largeTextResult,
+    dom.largeTextStatus,
+    dom.largeTextLevel,
+    "Fail",
+    "WCAG AA / AAA",
+  );
 
-    elements.level.classList.add(
-      "is-fail",
-    );
-  }
+  renderResultCardInvalid(
+    dom.uiComponentResult,
+    dom.uiComponentStatus,
+    dom.uiComponentLevel,
+    "Fail",
+    "WCAG 1.4.11",
+  );
 
-  [
-    elements.normalAA,
-    elements.normalAAA,
-    elements.largeAA,
-    elements.largeAAA,
-  ].forEach((element) => {
-    renderWCAGResult(
-      element,
-      false,
-    );
-  });
-
-  /*
-   * Do not leave a previous valid contrast preview
-   * visible when the current colors are invalid.
-   */
-  if (elements.preview) {
-    elements.preview.style.removeProperty(
+  if (dom.contrastPreview) {
+    dom.contrastPreview.style.removeProperty(
       "background-color",
     );
 
-    elements.preview.style.removeProperty(
+    dom.contrastPreview.style.removeProperty(
       "color",
     );
   }
 
-  if (elements.previewText) {
-    elements.previewText.style.removeProperty(
+  if (dom.contrastPreviewLabel) {
+    dom.contrastPreviewLabel.style.removeProperty(
       "color",
     );
+  }
+
+  if (dom.contrastPreviewHeading) {
+    dom.contrastPreviewHeading.style.removeProperty(
+      "color",
+    );
+  }
+
+  if (dom.contrastPreviewText) {
+    dom.contrastPreviewText.style.removeProperty(
+      "color",
+    );
+  }
+}
+
+/* =========================================================
+   Render Invalid Result Card
+   ========================================================= */
+
+function renderResultCardInvalid(
+  card,
+  status,
+  description,
+  statusText,
+  descriptionText,
+) {
+  if (card) {
+    card.classList.remove("is-pass");
+
+    card.classList.add("is-fail");
+  }
+
+  if (status) {
+    status.textContent = statusText;
+  }
+
+  if (description) {
+    description.textContent =
+      descriptionText;
   }
 }
 
@@ -543,21 +619,25 @@ function renderInvalidResult() {
    Sync Color Controls
    ========================================================= */
 
-function syncColorControls(type, color) {
-  const normalized = normalizeHex(color);
+function syncColorControls(
+  type,
+  color,
+) {
+  const normalized =
+    normalizeHex(color);
 
   if (!normalized) {
     return;
   }
 
   if (type === "foreground") {
-    if (elements.foregroundInput) {
-      elements.foregroundInput.value =
+    if (dom.foregroundHexInput) {
+      dom.foregroundHexInput.value =
         normalized;
     }
 
-    if (elements.foregroundPicker) {
-      elements.foregroundPicker.value =
+    if (dom.foregroundColorPicker) {
+      dom.foregroundColorPicker.value =
         normalized;
     }
 
@@ -565,13 +645,13 @@ function syncColorControls(type, color) {
   }
 
   if (type === "background") {
-    if (elements.backgroundInput) {
-      elements.backgroundInput.value =
+    if (dom.backgroundHexInput) {
+      dom.backgroundHexInput.value =
         normalized;
     }
 
-    if (elements.backgroundPicker) {
-      elements.backgroundPicker.value =
+    if (dom.backgroundColorPicker) {
+      dom.backgroundColorPicker.value =
         normalized;
     }
   }
@@ -586,13 +666,17 @@ function getForegroundColor() {
     getContrastState();
 
   const inputValue =
-    elements.foregroundInput?.value?.trim();
+    dom.foregroundHexInput?.value?.trim();
 
   if (isValidHex(inputValue)) {
     return normalizeHex(inputValue);
   }
 
-  if (isValidHex(contrastState?.foreground)) {
+  if (
+    isValidHex(
+      contrastState?.foreground,
+    )
+  ) {
     return normalizeHex(
       contrastState.foreground,
     );
@@ -610,13 +694,17 @@ function getBackgroundColor() {
     getContrastState();
 
   const inputValue =
-    elements.backgroundInput?.value?.trim();
+    dom.backgroundHexInput?.value?.trim();
 
   if (isValidHex(inputValue)) {
     return normalizeHex(inputValue);
   }
 
-  if (isValidHex(contrastState?.background)) {
+  if (
+    isValidHex(
+      contrastState?.background,
+    )
+  ) {
     return normalizeHex(
       contrastState.background,
     );
@@ -633,11 +721,15 @@ function normalizeOrFallback(
   color,
   fallback,
 ) {
-  const normalized = normalizeHex(color);
+  const normalized =
+    normalizeHex(color);
 
   if (normalized) {
     return normalized;
   }
 
-  return normalizeHex(fallback) || fallback;
+  return (
+    normalizeHex(fallback) ||
+    fallback
+  );
 }
