@@ -568,28 +568,39 @@ async function handleCopyColor(index) {
    ========================================================= */
 
 function handleToggleLock(index) {
-  const isLocked =
-    toggleColorLock(index);
+  const result = toggleColorLock(index);
 
   /*
-   * toggleColorLock() should return false only
-   * when the operation could not be performed.
+   * toggleColorLock() returns false both when:
+   * 1. the color was successfully unlocked
+   * 2. the index was invalid
    *
-   * A successful unlock is also represented by
-   * false, so determine the actual state from
-   * the current palette afterward.
+   * Therefore, validate the index before displaying
+   * the notification.
    */
-  const palette =
-    getCurrentPalette();
+  const palette = getCurrentPalette();
 
-  const actualLockState =
-    Boolean(
-      palette?.locked?.[index],
-    );
+  if (
+    !palette ||
+    !Array.isArray(palette.colors) ||
+    !Number.isInteger(index) ||
+    index < 0 ||
+    index >= palette.colors.length
+  ) {
+    return;
+  }
+
+  const isLocked = result === true;
 
   updateLockButton(
     index,
-    actualLockState,
+    isLocked,
+  );
+
+  showSuccessToast(
+    isLocked
+      ? `${palette.colors[index]} locked.`
+      : `${palette.colors[index]} unlocked.`,
   );
 }
 

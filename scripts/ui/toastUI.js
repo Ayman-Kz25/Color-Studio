@@ -10,16 +10,12 @@ import {
   toastIcon,
 } from "./dom.js";
 
-
 /* =========================================================
    Constants
    ========================================================= */
 
 const DEFAULT_DURATION = 2500;
 const ERROR_DURATION = 3000;
-const WARNING_DURATION = 3000;
-
-const HIDE_ANIMATION_DURATION = 200;
 
 const TOAST_TYPES = Object.freeze({
   SUCCESS: "success",
@@ -28,29 +24,13 @@ const TOAST_TYPES = Object.freeze({
   INFO: "info",
 });
 
-const TOAST_ICONS = Object.freeze({
-  success:
-    "fa-solid fa-circle-check",
-
-  error:
-    "fa-solid fa-circle-xmark",
-
-  warning:
-    "fa-solid fa-triangle-exclamation",
-
-  info:
-    "fa-solid fa-circle-info",
-});
-
-
 /* =========================================================
    State
    ========================================================= */
 
 let hideTimer = null;
-let animationTimer = null;
+let removeHidingTimer = null;
 let eventsBound = false;
-
 
 /* =========================================================
    Initialization
@@ -64,8 +44,14 @@ export function initializeToastUI() {
   bindEvents();
 
   eventsBound = true;
-}
 
+  if (appToast) {
+    appToast.setAttribute(
+      "aria-hidden",
+      "true",
+    );
+  }
+}
 
 /* =========================================================
    Event Binding
@@ -78,25 +64,34 @@ function bindEvents() {
   );
 }
 
-
 /* =========================================================
    Toast Event
    ========================================================= */
 
 function handleToastEvent(event) {
+  const detail = event?.detail;
+
+  if (!detail) {
+    return;
+  }
+
   const message =
-    event?.detail?.message;
-
-  const type =
-    event?.detail?.type ||
-    TOAST_TYPES.SUCCESS;
-
-  const duration =
-    event?.detail?.duration;
+    typeof detail.message === "string"
+      ? detail.message.trim()
+      : "";
 
   if (!message) {
     return;
   }
+
+  const type =
+    normalizeToastType(detail.type);
+
+  const duration =
+    normalizeDuration(
+      detail.duration,
+      getDefaultDuration(type),
+    );
 
   showTypedToast(
     message,
@@ -105,22 +100,25 @@ function handleToastEvent(event) {
   );
 }
 
-
 /* =========================================================
    Show Toast
    ========================================================= */
 
-/*
- * Kept for backwards compatibility.
- *
- * Existing code can continue using:
- *
- * showToast("Palette generated");
- *
- * It behaves as a success toast.
- */
-
 export function showToast(
+  message,
+  duration = DEFAULT_DURATION,
+) {
+  showSuccessToast(
+    message,
+    duration,
+  );
+}
+
+/* =========================================================
+   Success Toast
+   ========================================================= */
+
+export function showSuccessToast(
   message,
   duration = DEFAULT_DURATION,
 ) {
@@ -131,6 +129,50 @@ export function showToast(
   );
 }
 
+/* =========================================================
+   Error Toast
+   ========================================================= */
+
+export function showErrorToast(
+  message,
+  duration = ERROR_DURATION,
+) {
+  showTypedToast(
+    message,
+    TOAST_TYPES.ERROR,
+    duration,
+  );
+}
+
+/* =========================================================
+   Warning Toast
+   ========================================================= */
+
+export function showWarningToast(
+  message,
+  duration = ERROR_DURATION,
+) {
+  showTypedToast(
+    message,
+    TOAST_TYPES.WARNING,
+    duration,
+  );
+}
+
+/* =========================================================
+   Info Toast
+   ========================================================= */
+
+export function showInfoToast(
+  message,
+  duration = DEFAULT_DURATION,
+) {
+  showTypedToast(
+    message,
+    TOAST_TYPES.INFO,
+    duration,
+  );
+}
 
 /* =========================================================
    Hide Toast
@@ -141,7 +183,8 @@ export function hideToast() {
     return;
   }
 
-  clearToastTimers();
+  clearTimeout(hideTimer);
+  clearTimeout(removeHidingTimer);
 
   appToast.classList.remove(
     "is-visible",
@@ -160,24 +203,128 @@ export function hideToast() {
     "is-active",
   );
 
-  animationTimer =
+  removeHidingTimer =
     window.setTimeout(() => {
-      /*
-       * Don't assume the DOM node still exists
-       * or is still in the same state.
-       */
-      if (!appToast) {
-        return;
-      }
-
-      appToast.classList.remove(
+      appToast?.classList.remove(
         "is-hiding",
       );
-
-      animationTimer = null;
-    }, HIDE_ANIMATION_DURATION);
+    }, 200);
 }
 
+/* =========================================================
+   Typed Toast
+   ========================================================= */
+
+function showTypedToast(
+  message,
+  type,
+  duration,
+) {
+  if (!appToast) {
+    console.warn(
+      "[ColorStudio] Toast element not found.",
+    );
+
+    return;
+  }
+
+  const normalizedMessage =
+    normalizeMessage(message);
+
+  if (!normalizedMessage) {
+    return;
+  }
+
+  const normalizedType =
+    normalizeToastType(type);
+
+  const normalizedDuration =
+    normalizeDuration(
+      duration,
+      getDefaultDuration(
+        normalizedType,
+      ),
+    );
+
+  clearTimeout(hideTimer);
+  clearTimeout(removeHidingTimer);
+
+  setToastMessage(
+    normalizedMessage,
+  );
+
+  setToastIcon(
+    normalizedType,
+  );
+
+  setToastType(
+    normalizedType,
+  );
+
+  appToast.classList.remove(
+    "is-hiding",
+  );
+
+  /*
+   * Force the browser to recognize the
+   * visibility transition when a toast
+   * is shown immediately after another one.
+   */
+  void appToast.offsetWidth;
+
+  appToast.classList.add(
+    "is-visible",
+  );
+
+  appToast.setAttribute(
+    "aria-hidden",
+    "false",
+  );
+
+  toastContainer?.classList.add(
+    "is-active",
+  );
+
+  if (normalizedDuration > 0) {
+    hideTimer = window.setTimeout(
+      hideToast,
+      normalizedDuration,
+    );
+  }
+}
+
+/* =========================================================
+   Set Toast Message
+   ========================================================= */
+
+function setToastMessage(message) {
+  if (!toastMessage) {
+    return;
+  }
+
+  /*
+   * textContent prevents HTML injection.
+   */
+  toastMessage.textContent =
+    message;
+}
+
+/* =========================================================
+   Set Toast Type
+   ========================================================= */
+
+function setToastType(type) {
+  appToast?.classList.remove(
+    "toast-success",
+    "toast-error",
+    "toast-warning",
+    "toast-info",
+  );
+
+  appToast?.classList.add(
+    `toast-${type}`,
+  );
+}
 
 /* =========================================================
    Set Toast Icon
@@ -195,211 +342,55 @@ function setToastIcon(type) {
     return;
   }
 
-  const iconClass =
-    TOAST_ICONS[type] ||
-    TOAST_ICONS.success;
+  icon.className = "";
 
-  icon.className =
-    iconClass;
+  switch (type) {
+    case TOAST_TYPES.ERROR:
+      icon.className =
+        "fa-solid fa-circle-xmark";
+      break;
+
+    case TOAST_TYPES.WARNING:
+      icon.className =
+        "fa-solid fa-triangle-exclamation";
+      break;
+
+    case TOAST_TYPES.INFO:
+      icon.className =
+        "fa-solid fa-circle-info";
+      break;
+
+    case TOAST_TYPES.SUCCESS:
+    default:
+      icon.className =
+        "fa-solid fa-circle-check";
+      break;
+  }
 }
 
-
 /* =========================================================
-   Public Toast Types
+   Normalize Toast Type
    ========================================================= */
 
-export function showSuccessToast(
-  message,
-  duration = DEFAULT_DURATION,
-) {
-  showTypedToast(
-    message,
-    TOAST_TYPES.SUCCESS,
-    duration,
-  );
+function normalizeToastType(type) {
+  if (
+    typeof type !== "string"
+  ) {
+    return TOAST_TYPES.SUCCESS;
+  }
+
+  const normalized =
+    type.trim().toLowerCase();
+
+  return Object.values(
+    TOAST_TYPES,
+  ).includes(normalized)
+    ? normalized
+    : TOAST_TYPES.SUCCESS;
 }
-
-
-export function showErrorToast(
-  message,
-  duration = ERROR_DURATION,
-) {
-  showTypedToast(
-    message,
-    TOAST_TYPES.ERROR,
-    duration,
-  );
-}
-
-
-export function showWarningToast(
-  message,
-  duration = WARNING_DURATION,
-) {
-  showTypedToast(
-    message,
-    TOAST_TYPES.WARNING,
-    duration,
-  );
-}
-
-
-export function showInfoToast(
-  message,
-  duration = DEFAULT_DURATION,
-) {
-  showTypedToast(
-    message,
-    TOAST_TYPES.INFO,
-    duration,
-  );
-}
-
 
 /* =========================================================
-   Typed Toast
-   ========================================================= */
-
-function showTypedToast(
-  message,
-  type = TOAST_TYPES.SUCCESS,
-  duration = DEFAULT_DURATION,
-) {
-  if (!appToast) {
-    return;
-  }
-
-  const normalizedMessage =
-    normalizeMessage(message);
-
-  if (!normalizedMessage) {
-    return;
-  }
-
-  const normalizedType =
-    normalizeToastType(type);
-
-  const normalizedDuration =
-    normalizeDuration(duration);
-
-  clearToastTimers();
-
-  /*
-   * Cancel an unfinished hide animation before
-   * showing the toast again.
-   */
-  appToast.classList.remove(
-    "is-hiding",
-  );
-
-  /*
-   * textContent is intentionally used instead
-   * of innerHTML.
-   */
-  if (toastMessage) {
-    toastMessage.textContent =
-      normalizedMessage;
-  }
-
-  setToastIcon(
-    normalizedType,
-  );
-
-  updateToastType(
-    normalizedType,
-  );
-
-  updateToastAccessibility(
-    normalizedType,
-  );
-
-  appToast.classList.add(
-    "is-visible",
-  );
-
-  appToast.setAttribute(
-    "aria-hidden",
-    "false",
-  );
-
-  toastContainer?.classList.add(
-    "is-active",
-  );
-
-  hideTimer =
-    window.setTimeout(
-      hideToast,
-      normalizedDuration,
-    );
-}
-
-
-/* =========================================================
-   Toast Type
-   ========================================================= */
-
-function updateToastType(type) {
-  if (!appToast) {
-    return;
-  }
-
-  appToast.classList.remove(
-    "toast-success",
-    "toast-error",
-    "toast-warning",
-    "toast-info",
-  );
-
-  appToast.classList.add(
-    `toast-${type}`,
-  );
-}
-
-
-/* =========================================================
-   Accessibility
-   ========================================================= */
-
-function updateToastAccessibility(type) {
-  if (!appToast) {
-    return;
-  }
-
-  /*
-   * Errors and warnings should interrupt the user.
-   * Success/info messages can use status semantics.
-   */
-  const role =
-    type === TOAST_TYPES.ERROR ||
-    type === TOAST_TYPES.WARNING
-      ? "alert"
-      : "status";
-
-  appToast.setAttribute(
-    "role",
-    role,
-  );
-
-  /*
-   * aria-live is useful when the toast is already
-   * present in the DOM.
-   */
-  appToast.setAttribute(
-    "aria-live",
-    role === "alert"
-      ? "assertive"
-      : "polite",
-  );
-
-  appToast.setAttribute(
-    "aria-atomic",
-    "true",
-  );
-}
-
-
-/* =========================================================
-   Validation
+   Normalize Message
    ========================================================= */
 
 function normalizeMessage(message) {
@@ -412,61 +403,34 @@ function normalizeMessage(message) {
   return message.trim();
 }
 
+/* =========================================================
+   Normalize Duration
+   ========================================================= */
 
-function normalizeToastType(type) {
-  if (
-    typeof type !== "string"
-  ) {
-    return TOAST_TYPES.SUCCESS;
-  }
-
-  return Object.values(
-    TOAST_TYPES,
-  ).includes(type)
-    ? type
-    : TOAST_TYPES.SUCCESS;
-}
-
-
-function normalizeDuration(duration) {
+function normalizeDuration(
+  duration,
+  fallback,
+) {
   const value =
     Number(duration);
 
   if (
     !Number.isFinite(value) ||
-    value <= 0
+    value < 0
   ) {
-    return DEFAULT_DURATION;
+    return fallback;
   }
 
-  /*
-   * Prevent absurdly long timers.
-   */
-  return Math.min(
-    value,
-    30000,
-  );
+  return value;
 }
 
-
 /* =========================================================
-   Timer Management
+   Default Duration
    ========================================================= */
 
-function clearToastTimers() {
-  if (hideTimer !== null) {
-    window.clearTimeout(
-      hideTimer,
-    );
-
-    hideTimer = null;
-  }
-
-  if (animationTimer !== null) {
-    window.clearTimeout(
-      animationTimer,
-    );
-
-    animationTimer = null;
-  }
+function getDefaultDuration(type) {
+  return type === TOAST_TYPES.ERROR ||
+    type === TOAST_TYPES.WARNING
+    ? ERROR_DURATION
+    : DEFAULT_DURATION;
 }
