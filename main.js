@@ -62,6 +62,7 @@ import {
 } from "./scripts/ui/toastUI.js";
 
 import { elements } from "./scripts/ui/dom.js";
+import { initializeContrastUI } from "./scripts/ui/contrastUI.js";
 
 /* =========================================================
    Runtime State

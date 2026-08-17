@@ -1,5 +1,114 @@
 // scripts/ui/dom.js
 
+export const dom = {
+  /* =========================================================
+     Contrast Controls
+     ========================================================= */
+
+  foregroundHexInput:
+    document.getElementById(
+      "foregroundHexInput",
+    ),
+
+  foregroundColorPicker:
+    document.getElementById(
+      "foregroundColorPicker",
+    ),
+
+  backgroundHexInput:
+    document.getElementById(
+      "backgroundHexInput",
+    ),
+
+  backgroundColorPicker:
+    document.getElementById(
+      "backgroundColorPicker",
+    ),
+
+  swapContrastColorsButton:
+    document.getElementById(
+      "swapContrastColorsButton",
+    ),
+
+  /* =========================================================
+     Contrast Preview
+     ========================================================= */
+
+  contrastPreview:
+    document.getElementById(
+      "contrastPreview",
+    ),
+
+  contrastPreviewLabel:
+    document.getElementById(
+      "contrastPreviewLabel",
+    ),
+
+  contrastPreviewHeading:
+    document.getElementById(
+      "contrastPreviewHeading",
+    ),
+
+  contrastPreviewText:
+    document.getElementById(
+      "contrastPreviewText",
+    ),
+
+  /* =========================================================
+     Contrast Results
+     ========================================================= */
+
+  contrastRatio:
+    document.getElementById(
+      "contrastRatio",
+    ),
+
+  normalTextResult:
+    document.getElementById(
+      "normalTextResult",
+    ),
+
+  normalTextStatus:
+    document.getElementById(
+      "normalTextStatus",
+    ),
+
+  normalTextLevel:
+    document.getElementById(
+      "normalTextLevel",
+    ),
+
+  largeTextResult:
+    document.getElementById(
+      "largeTextResult",
+    ),
+
+  largeTextStatus:
+    document.getElementById(
+      "largeTextStatus",
+    ),
+
+  largeTextLevel:
+    document.getElementById(
+      "largeTextLevel",
+    ),
+
+  uiComponentResult:
+    document.getElementById(
+      "uiComponentResult",
+    ),
+
+  uiComponentStatus:
+    document.getElementById(
+      "uiComponentStatus",
+    ),
+
+  uiComponentLevel:
+    document.getElementById(
+      "uiComponentLevel",
+    ),
+};
+
 /* =========================================================
    Shared DOM Elements
    ========================================================= */
