@@ -85,6 +85,15 @@ export const CONTRAST_LEVELS = Object.freeze({
 });
 
 /* =========================================================
+ *  Default Contrast Colors
+ *  ========================================================= */
+
+export const DEFAULT_CONTRAST_COLORS = Object.freeze({
+    FOREGROUND: "#000000",
+    BACKGROUND: "#FFFFFF",
+});
+
+/* =========================================================
    UI
    ========================================================= */
 

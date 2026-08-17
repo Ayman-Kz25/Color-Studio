@@ -323,3 +323,11 @@ export function getContrastThresholds() {
     aaaLarge: CONTRAST_RATIOS.AAA_LARGE,
   };
 }
+
+/* =========================================================
+   Contrast Results
+   ========================================================= */
+
+export function getContrastResults(foreground, background) {
+  return checkContrast(foreground, background);
+}

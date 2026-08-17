@@ -1,6 +1,7 @@
 import {
   DEFAULT_BASE_COLOR,
   CONTRAST_LEVELS,
+  DEFAULT_CONTRAST_COLORS,
 } from "../core/constants.js";
 
 import {
@@ -8,8 +9,6 @@ import {
   setContrastColors,
   setContrastState,
 } from "../core/state.js";
-
-
 
 import {
   isValidHex,
@@ -25,17 +24,23 @@ import { dom } from "./dom.js";
 
 import { checkContrast } from "../modules/contrast/contrastChecker.js";
 
+
 /* =========================================================
    Initialization
    ========================================================= */
 
+let eventsBound = false;
+
 export function initializeContrastUI() {
-  bindEvents();
+  if (!eventsBound) {
+    bindEvents();
+    eventsBound = true;
+  }
 
   initializeColors();
-
   updateContrast();
 }
+
 
 /* =========================================================
    Event Binding
@@ -68,6 +73,7 @@ function bindEvents() {
   );
 }
 
+
 /* =========================================================
    Initialize Colors
    ========================================================= */
@@ -77,12 +83,13 @@ function initializeColors() {
 
   const foreground = normalizeOrFallback(
     contrastState?.foreground,
-    "#FFFFFF",
+    DEFAULT_CONTRAST_COLORS.FOREGROUND,
   );
 
   const background = normalizeOrFallback(
     contrastState?.background,
-    DEFAULT_BASE_COLOR,
+    DEFAULT_CONTRAST_COLORS.BACKGROUND ||
+      DEFAULT_BASE_COLOR,
   );
 
   setContrastColors(
@@ -101,16 +108,18 @@ function initializeColors() {
   );
 }
 
+
 /* =========================================================
-   Foreground Text Input
+   Foreground Input
    ========================================================= */
 
 function handleForegroundInput(event) {
   handleColorInput(
     "foreground",
-    event.target.value,
+    event?.target?.value,
   );
 }
+
 
 /* =========================================================
    Foreground Picker
@@ -119,20 +128,22 @@ function handleForegroundInput(event) {
 function handleForegroundPicker(event) {
   handleColorInput(
     "foreground",
-    event.target.value,
+    event?.target?.value,
   );
 }
 
+
 /* =========================================================
-   Background Text Input
+   Background Input
    ========================================================= */
 
 function handleBackgroundInput(event) {
   handleColorInput(
     "background",
-    event.target.value,
+    event?.target?.value,
   );
 }
+
 
 /* =========================================================
    Background Picker
@@ -141,9 +152,10 @@ function handleBackgroundInput(event) {
 function handleBackgroundPicker(event) {
   handleColorInput(
     "background",
-    event.target.value,
+    event?.target?.value,
   );
 }
+
 
 /* =========================================================
    Handle Color Input
@@ -182,6 +194,7 @@ function handleColorInput(type, value) {
   updateContrast();
 }
 
+
 /* =========================================================
    Swap Colors
    ========================================================= */
@@ -189,17 +202,6 @@ function handleColorInput(type, value) {
 function handleSwapColors() {
   const foreground = getForegroundColor();
   const background = getBackgroundColor();
-
-  if (
-    !isValidHex(foreground) ||
-    !isValidHex(background)
-  ) {
-    showErrorToast(
-      "Please enter valid HEX colors first.",
-    );
-
-    return;
-  }
 
   const normalizedForeground =
     normalizeHex(foreground);
@@ -240,6 +242,7 @@ function handleSwapColors() {
   );
 }
 
+
 /* =========================================================
    Update Contrast Colors
    ========================================================= */
@@ -250,6 +253,10 @@ function updateContrastColors(
 ) {
   const currentState =
     getContrastState();
+
+  if (!currentState) {
+    return;
+  }
 
   if (type === "foreground") {
     setContrastColors(
@@ -268,6 +275,7 @@ function updateContrastColors(
   }
 }
 
+
 /* =========================================================
    Update Contrast
    ========================================================= */
@@ -284,25 +292,47 @@ export function updateContrast() {
     background,
   );
 
+  if (!result || !result.valid) {
+    setContrastState({
+      foreground:
+        result?.foreground ||
+        foreground,
+
+      background:
+        result?.background ||
+        background,
+
+      ratio:
+        result?.ratio ?? 0,
+
+      level:
+        result?.level ||
+        CONTRAST_LEVELS.FAIL,
+    });
+
+    renderInvalidResult();
+
+    return;
+  }
+
   setContrastState({
     foreground:
-      result?.foreground ||
-      foreground,
+      result.foreground,
 
     background:
-      result?.background ||
-      background,
+      result.background,
 
     ratio:
-      result?.ratio ?? 0,
+      result.ratio,
 
     level:
-      result?.level ||
+      result.level ||
       CONTRAST_LEVELS.FAIL,
   });
 
   renderContrastResult(result);
 }
+
 
 /* =========================================================
    Render Contrast Result
@@ -311,7 +341,6 @@ export function updateContrast() {
 function renderContrastResult(result) {
   if (!result || !result.valid) {
     renderInvalidResult();
-
     return;
   }
 
@@ -327,8 +356,13 @@ function renderContrastResult(result) {
     result.largeText,
   );
 
+  /*
+   * contrastChecker.js uses "uiComponent"
+   * (singular). Keep the UI consistent with
+   * that public result shape.
+   */
   renderUIComponentResult(
-    result.uiComponents,
+    result.uiComponent,
   );
 
   renderPreview(
@@ -336,6 +370,7 @@ function renderContrastResult(result) {
     result.background,
   );
 }
+
 
 /* =========================================================
    Render Ratio
@@ -349,6 +384,7 @@ function renderRatio(ratio) {
   dom.contrastRatio.textContent =
     ratio || "N/A";
 }
+
 
 /* =========================================================
    Render Normal Text Result
@@ -397,6 +433,7 @@ function renderNormalTextResult(result) {
   }
 }
 
+
 /* =========================================================
    Render Large Text Result
    ========================================================= */
@@ -444,6 +481,7 @@ function renderLargeTextResult(result) {
   }
 }
 
+
 /* =========================================================
    Render UI Component Result
    ========================================================= */
@@ -453,17 +491,6 @@ function renderUIComponentResult(result) {
     return;
   }
 
-  /*
-   * The contrast checker may expose this as:
-   *
-   * result.uiComponents.aa
-   *
-   * or:
-   *
-   * result.uiComponent
-   *
-   * Support both shapes so the UI does not break.
-   */
   const passed =
     typeof result === "boolean"
       ? result
@@ -485,7 +512,9 @@ function renderUIComponentResult(result) {
 
   if (dom.uiComponentStatus) {
     dom.uiComponentStatus.textContent =
-      passed ? "Pass" : "Fail";
+      passed
+        ? "Pass"
+        : "Fail";
   }
 
   if (dom.uiComponentLevel) {
@@ -493,6 +522,7 @@ function renderUIComponentResult(result) {
       "WCAG 1.4.11";
   }
 }
+
 
 /* =========================================================
    Render Preview
@@ -528,6 +558,7 @@ function renderPreview(
   }
 }
 
+
 /* =========================================================
    Render Invalid Result
    ========================================================= */
@@ -559,6 +590,15 @@ function renderInvalidResult() {
     "WCAG 1.4.11",
   );
 
+  clearPreview();
+}
+
+
+/* =========================================================
+   Clear Preview
+   ========================================================= */
+
+function clearPreview() {
   if (dom.contrastPreview) {
     dom.contrastPreview.style.removeProperty(
       "background-color",
@@ -588,6 +628,7 @@ function renderInvalidResult() {
   }
 }
 
+
 /* =========================================================
    Render Invalid Result Card
    ========================================================= */
@@ -601,7 +642,6 @@ function renderResultCardInvalid(
 ) {
   if (card) {
     card.classList.remove("is-pass");
-
     card.classList.add("is-fail");
   }
 
@@ -614,6 +654,7 @@ function renderResultCardInvalid(
       descriptionText;
   }
 }
+
 
 /* =========================================================
    Sync Color Controls
@@ -657,6 +698,7 @@ function syncColorControls(
   }
 }
 
+
 /* =========================================================
    Get Foreground Color
    ========================================================= */
@@ -682,8 +724,14 @@ function getForegroundColor() {
     );
   }
 
-  return "#FFFFFF";
+  return (
+    normalizeHex(
+      DEFAULT_CONTRAST_COLORS?.FOREGROUND,
+    ) ||
+    "#FFFFFF"
+  );
 }
+
 
 /* =========================================================
    Get Background Color
@@ -710,8 +758,15 @@ function getBackgroundColor() {
     );
   }
 
-  return DEFAULT_BASE_COLOR;
+  return (
+    normalizeHex(
+      DEFAULT_CONTRAST_COLORS?.BACKGROUND,
+    ) ||
+    normalizeHex(DEFAULT_BASE_COLOR) ||
+    DEFAULT_BASE_COLOR
+  );
 }
+
 
 /* =========================================================
    Normalize Or Fallback

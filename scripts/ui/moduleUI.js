@@ -11,6 +11,11 @@ import {
   setActiveModule,
 } from "../core/state.js";
 
+
+/* =========================================================
+   Module Constants
+   ========================================================= */
+
 const MODULES = Object.freeze({
   PALETTE: "palette",
   CONTRAST: "contrast",
@@ -21,15 +26,22 @@ const SUPPORTED_MODULES = Object.freeze(
   Object.values(MODULES),
 );
 
+
 /* =========================================================
    Initialization
    ========================================================= */
 
+let eventsBound = false;
+
 export function initializeModuleUI() {
-  bindEvents();
+  if (!eventsBound) {
+    bindEvents();
+    eventsBound = true;
+  }
 
   initializeActiveModule();
 }
+
 
 /* =========================================================
    Event Binding
@@ -42,13 +54,21 @@ function bindEvents() {
   );
 }
 
+
 /* =========================================================
    Saved Palettes
    ========================================================= */
 
-function handleSavedPalettesClick() {
+function handleSavedPalettesClick(event) {
+  /*
+   * Prevent default navigation when the control
+   * is implemented as an <a> element.
+   */
+  event?.preventDefault();
+
   switchModule(MODULES.SAVED);
 }
+
 
 /* =========================================================
    Initial Module
@@ -57,13 +77,28 @@ function handleSavedPalettesClick() {
 function initializeActiveModule() {
   const uiState = getUIState();
 
+  const requestedModule =
+    uiState?.activeModule;
+
   const activeModule =
-    isSupportedModule(uiState.activeModule)
-      ? uiState.activeModule
+    isSupportedModule(requestedModule)
+      ? requestedModule
       : MODULES.PALETTE;
 
-  switchModule(activeModule, false);
+  /*
+   * Keep state synchronized when the stored
+   * module is invalid.
+   */
+  if (requestedModule !== activeModule) {
+    setActiveModule(activeModule);
+  }
+
+  switchModule(
+    activeModule,
+    false,
+  );
 }
+
 
 /* =========================================================
    Switch Module
@@ -77,73 +112,89 @@ export function switchModule(
     return false;
   }
 
+  const previousModule =
+    getUIState()?.activeModule;
+
+  /*
+   * Keep application state as the source
+   * of truth.
+   */
   setActiveModule(moduleName);
 
   updateMainSections(moduleName);
   updateSavedPalettesButton(moduleName);
 
-  if (dispatchEvent) {
+  /*
+   * Avoid unnecessary module-change events
+   * when the module hasn't actually changed.
+   */
+  if (
+    dispatchEvent &&
+    previousModule !== moduleName
+  ) {
     dispatchModuleChangeEvent(moduleName);
   }
 
   return true;
 }
 
+
 /* =========================================================
    Main Sections
    ========================================================= */
 
 function updateMainSections(activeModule) {
-  /*
-   * Palette and Contrast remain visible because they are
-   * both part of the main page layout.
-   */
+  updateSection(
+    paletteGenerator,
+    activeModule === MODULES.PALETTE,
+  );
 
-  showSection(paletteGenerator);
-  showSection(contrastChecker);
-
-  if (paletteGenerator) {
-    const isPaletteActive =
-      activeModule === MODULES.PALETTE;
-
-    paletteGenerator.classList.toggle(
-      "active",
-      isPaletteActive,
-    );
-
-    paletteGenerator.setAttribute(
-      "aria-hidden",
-      String(!isPaletteActive),
-    );
-  }
-
-  if (contrastChecker) {
-    const isContrastActive =
-      activeModule === MODULES.CONTRAST;
-
-    contrastChecker.classList.toggle(
-      "active",
-      isContrastActive,
-    );
-
-    contrastChecker.setAttribute(
-      "aria-hidden",
-      String(!isContrastActive),
-    );
-  }
+  updateSection(
+    contrastChecker,
+    activeModule === MODULES.CONTRAST,
+  );
 }
 
+
 /* =========================================================
-   Show Section
+   Update Section
    ========================================================= */
 
-function showSection(section) {
+function updateSection(
+  section,
+  isActive,
+) {
   if (!section) {
     return;
   }
 
-  section.classList.remove("d-none");
+  /*
+   * The active class controls visual state.
+   */
+  section.classList.toggle(
+    "active",
+    isActive,
+  );
+
+  /*
+   * Keep Bootstrap-style d-none synchronized
+   * with the actual module state.
+   */
+  section.classList.toggle(
+    "d-none",
+    !isActive,
+  );
+
+  /*
+   * aria-hidden communicates the same state
+   * to assistive technologies.
+   */
+  section.setAttribute(
+    "aria-hidden",
+    String(!isActive),
+  );
 }
+
 
 /* =========================================================
    Saved Palettes Button
@@ -176,6 +227,7 @@ function updateSavedPalettesButton(
   }
 }
 
+
 /* =========================================================
    Module Validation
    ========================================================= */
@@ -186,6 +238,7 @@ function isSupportedModule(moduleName) {
     SUPPORTED_MODULES.includes(moduleName)
   );
 }
+
 
 /* =========================================================
    Custom Module Event
@@ -206,14 +259,25 @@ function dispatchModuleChangeEvent(
   );
 }
 
+
 /* =========================================================
    Public Helpers
    ========================================================= */
 
 export function getActiveModule() {
-  return getUIState().activeModule;
+  return (
+    getUIState()?.activeModule ||
+    MODULES.PALETTE
+  );
 }
 
 export function showModule(moduleName) {
   return switchModule(moduleName);
 }
+
+
+/* =========================================================
+   Public Module Constants
+   ========================================================= */
+
+export { MODULES };

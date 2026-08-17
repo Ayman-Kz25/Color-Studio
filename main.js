@@ -53,7 +53,7 @@ import {
   getBestTextColor,
 } from "./scripts/modules/palette/colorUtils.js";
 
-import { getContrastResults } from "./scripts/modules/contrast/contrast.js";
+import { getContrastResults } from "./scripts/modules/contrast/contrastChecker.js";
 
 import {
   initializeToastUI,
