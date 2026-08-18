@@ -61,7 +61,7 @@ import {
   showErrorToast,
 } from "./scripts/ui/toastUI.js";
 
-import { elements } from "./scripts/ui/dom.js";
+import { dom } from "./scripts/ui/dom.js";
 import { initializeContrastUI } from "./scripts/ui/contrastUI.js";
 
 /* =========================================================
@@ -113,11 +113,11 @@ function initializeApp() {
    ========================================================= */
 
 function initializeYear() {
-  if (!elements.currentYear) {
+  if (!dom.currentYear) {
     return;
   }
 
-  elements.currentYear.textContent =
+  dom.currentYear.textContent =
     String(new Date().getFullYear());
 }
 
@@ -130,10 +130,10 @@ function initializeBootstrap() {
     return;
   }
 
-  if (elements.savePaletteModal) {
+  if (dom.savePaletteModal) {
     saveModal =
       window.bootstrap.Modal.getOrCreateInstance(
-        elements.savePaletteModal,
+        dom.savePaletteModal,
       );
   }
 }
@@ -147,7 +147,7 @@ function bindEvents() {
      Brand
      ------------------------------------------------------- */
 
-  elements.brandLink?.addEventListener(
+  dom.brandLink?.addEventListener(
     "click",
     handleBrandClick,
   );
@@ -156,22 +156,22 @@ function bindEvents() {
      Palette Generation
      ------------------------------------------------------- */
 
-  elements.generatePaletteButton?.addEventListener(
+  dom.generatePaletteButton?.addEventListener(
     "click",
     handleGenerate,
   );
 
-  elements.randomizePaletteButton?.addEventListener(
+  dom.randomizePaletteButton?.addEventListener(
     "click",
     handleRandomize,
   );
 
-  elements.paletteTypeSelect?.addEventListener(
+  dom.paletteTypeSelect?.addEventListener(
     "change",
     handlePaletteTypeChange,
   );
 
-  elements.colorCountSelect?.addEventListener(
+  dom.colorCountSelect?.addEventListener(
     "change",
     handlePaletteSizeChange,
   );
@@ -180,17 +180,17 @@ function bindEvents() {
      Base Color
      ------------------------------------------------------- */
 
-  elements.baseColorInput?.addEventListener(
+  dom.baseColorInput?.addEventListener(
     "change",
     handleBaseColorChange,
   );
 
-  elements.baseColorInput?.addEventListener(
+  dom.baseColorInput?.addEventListener(
     "keydown",
     handleBaseColorKeydown,
   );
 
-  elements.baseColorPicker?.addEventListener(
+  dom.baseColorPicker?.addEventListener(
     "input",
     handleBaseColorPickerChange,
   );
@@ -199,12 +199,12 @@ function bindEvents() {
      Palette
      ------------------------------------------------------- */
 
-  elements.currentPalette?.addEventListener(
+  dom.currentPalette?.addEventListener(
     "click",
     handlePaletteAction,
   );
 
-  elements.clearPaletteButton?.addEventListener(
+  dom.clearPaletteButton?.addEventListener(
     "click",
     handleReset,
   );
@@ -213,22 +213,22 @@ function bindEvents() {
      Save Palette
      ------------------------------------------------------- */
 
-  elements.saveCurrentPaletteButton?.addEventListener(
+  dom.saveCurrentPaletteButton?.addEventListener(
     "click",
     openSaveModal,
   );
 
-  elements.confirmSavePaletteButton?.addEventListener(
+  dom.confirmSavePaletteButton?.addEventListener(
     "click",
     handleConfirmSave,
   );
 
-  elements.paletteNameInput?.addEventListener(
+  dom.paletteNameInput?.addEventListener(
     "keydown",
     handlePaletteNameKeydown,
   );
 
-  elements.paletteNameInput?.addEventListener(
+  dom.paletteNameInput?.addEventListener(
     "input",
     clearPaletteNameError,
   );
@@ -237,7 +237,7 @@ function bindEvents() {
      Saved Palettes
      ------------------------------------------------------- */
 
-  elements.savedPalettesList?.addEventListener(
+  dom.savedPalettesList?.addEventListener(
     "click",
     handleSavedPaletteAction,
   );
@@ -247,18 +247,18 @@ function bindEvents() {
      ------------------------------------------------------- */
 
   bindContrastInput(
-    elements.foregroundHexInput,
-    elements.foregroundColorPicker,
+    dom.foregroundHexInput,
+    dom.foregroundColorPicker,
     "foreground",
   );
 
   bindContrastInput(
-    elements.backgroundHexInput,
-    elements.backgroundColorPicker,
+    dom.backgroundHexInput,
+    dom.backgroundColorPicker,
     "background",
   );
 
-  elements.swapContrastColorsButton?.addEventListener(
+  dom.swapContrastColorsButton?.addEventListener(
     "click",
     swapContrastColors,
   );
@@ -328,23 +328,23 @@ function syncPaletteControls(
   paletteType,
   size,
 ) {
-  if (elements.baseColorInput) {
-    elements.baseColorInput.value =
+  if (dom.baseColorInput) {
+    dom.baseColorInput.value =
       baseColor;
   }
 
-  if (elements.baseColorPicker) {
-    elements.baseColorPicker.value =
+  if (dom.baseColorPicker) {
+    dom.baseColorPicker.value =
       baseColor;
   }
 
-  if (elements.paletteTypeSelect) {
-    elements.paletteTypeSelect.value =
+  if (dom.paletteTypeSelect) {
+    dom.paletteTypeSelect.value =
       paletteType;
   }
 
-  if (elements.colorCountSelect) {
-    elements.colorCountSelect.value =
+  if (dom.colorCountSelect) {
+    dom.colorCountSelect.value =
       String(size);
   }
 }
@@ -388,23 +388,23 @@ function handleGenerate() {
         "Please enter a valid HEX color.",
     );
 
-    elements.baseColorInput?.focus();
+    dom.baseColorInput?.focus();
 
     return;
   }
 
   const paletteType =
-    elements.paletteTypeSelect?.value ||
+    dom.paletteTypeSelect?.value ||
     DEFAULT_PALETTE_TYPE;
 
   const size = normalizeUiSize(
-    elements.colorCountSelect?.value,
+    dom.colorCountSelect?.value,
   );
 
   setGenerating(true);
 
   setButtonBusy(
-    elements.generatePaletteButton,
+    dom.generatePaletteButton,
     true,
     "Generating...",
   );
@@ -439,7 +439,7 @@ function handleGenerate() {
       setGenerating(false);
 
       setButtonBusy(
-        elements.generatePaletteButton,
+        dom.generatePaletteButton,
         false,
         "Generate Palette",
       );
@@ -471,7 +471,7 @@ function handleRandomize() {
 
 function handlePaletteTypeChange() {
   const paletteType =
-    elements.paletteTypeSelect?.value;
+    dom.paletteTypeSelect?.value;
 
   if (!updatePaletteType(paletteType)) {
     return;
@@ -484,7 +484,7 @@ function handlePaletteTypeChange() {
 
 function handlePaletteSizeChange() {
   const size = normalizeUiSize(
-    elements.colorCountSelect?.value,
+    dom.colorCountSelect?.value,
   );
 
   if (!updatePaletteSize(size)) {
@@ -501,7 +501,7 @@ function handleBaseColorChange() {
     readBaseColorFromControls();
 
   if (!baseColor) {
-    elements.baseColorInput?.classList.add(
+    dom.baseColorInput?.classList.add(
       "is-invalid",
     );
 
@@ -513,7 +513,7 @@ function handleBaseColorChange() {
     return;
   }
 
-  elements.baseColorInput?.classList.remove(
+  dom.baseColorInput?.classList.remove(
     "is-invalid",
   );
 
@@ -573,10 +573,10 @@ function generateFromControls() {
   const palette =
     generateNewPalette(
       baseColor,
-      elements.paletteTypeSelect?.value ||
+      dom.paletteTypeSelect?.value ||
         DEFAULT_PALETTE_TYPE,
       normalizeUiSize(
-        elements.colorCountSelect?.value,
+        dom.colorCountSelect?.value,
       ),
     );
 
@@ -619,18 +619,18 @@ function handleReset() {
 function renderPalette(
   palette = getCurrentPalette(),
 ) {
-  if (!elements.currentPalette) {
+  if (!dom.currentPalette) {
     return;
   }
 
-  elements.currentPalette.replaceChildren();
+  dom.currentPalette.replaceChildren();
 
   if (
     !palette ||
     !Array.isArray(palette.colors) ||
     palette.colors.length === 0
   ) {
-    elements.currentPalette.innerHTML = `
+    dom.currentPalette.innerHTML = `
       <div class="alert alert-light border w-100 mb-0">
         No colors in the current palette.
       </div>
@@ -641,7 +641,7 @@ function renderPalette(
 
   palette.colors.forEach(
     (color, index) => {
-      elements.currentPalette.append(
+      dom.currentPalette.append(
         createColorCard(
           color,
           index,
@@ -892,7 +892,7 @@ async function handlePaletteAction(event) {
   if (action === "contrast") {
     setContrastBackground(color);
 
-    elements.contrastChecker?.scrollIntoView({
+    dom.contrastChecker?.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
@@ -921,21 +921,21 @@ function openSaveModal() {
 
   clearPaletteNameError();
 
-  if (elements.paletteNameInput) {
-    elements.paletteNameInput.value = "";
+  if (dom.paletteNameInput) {
+    dom.paletteNameInput.value = "";
   }
 
   if (saveModal) {
     saveModal.show();
 
     window.setTimeout(() => {
-      elements.paletteNameInput?.focus();
+      dom.paletteNameInput?.focus();
     }, 150);
 
     return;
   }
 
-  elements.paletteNameInput?.focus();
+  dom.paletteNameInput?.focus();
 }
 
 function handlePaletteNameKeydown(event) {
@@ -950,7 +950,7 @@ function handlePaletteNameKeydown(event) {
 
 function handleConfirmSave() {
   const name =
-    elements.paletteNameInput?.value
+    dom.paletteNameInput?.value
       ?.trim() || "";
 
   if (!name) {
@@ -977,7 +977,7 @@ function handleConfirmSave() {
   setSaving(true);
 
   setButtonBusy(
-    elements.confirmSavePaletteButton,
+    dom.confirmSavePaletteButton,
     true,
     "Saving...",
   );
@@ -1020,7 +1020,7 @@ function handleConfirmSave() {
     setSaving(false);
 
     setButtonBusy(
-      elements.confirmSavePaletteButton,
+      dom.confirmSavePaletteButton,
       false,
       "Save Palette",
     );
@@ -1043,32 +1043,32 @@ function loadSavedPalettes() {
 }
 
 function renderSavedPalettes() {
-  if (!elements.savedPalettesList) {
+  if (!dom.savedPalettesList) {
     return;
   }
 
   const palettes =
     getStoredPalettes();
 
-  elements.savedPalettesList.replaceChildren();
+  dom.savedPalettesList.replaceChildren();
 
   if (palettes.length === 0) {
-    if (elements.savedPalettesEmptyState) {
-      elements.savedPalettesEmptyState.hidden =
+    if (dom.savedPalettesEmptyState) {
+      dom.savedPalettesEmptyState.hidden =
         false;
     }
 
     return;
   }
 
-  if (elements.savedPalettesEmptyState) {
-    elements.savedPalettesEmptyState.hidden =
+  if (dom.savedPalettesEmptyState) {
+    dom.savedPalettesEmptyState.hidden =
       true;
   }
 
   palettes.forEach(
     (palette) => {
-      elements.savedPalettesList.append(
+      dom.savedPalettesList.append(
         createSavedPaletteCard(palette),
       );
     },
@@ -1332,14 +1332,14 @@ function deleteSavedPalette(id) {
 function closeSavedPalettes() {
   if (
     !window.bootstrap ||
-    !elements.savedPalettesOffcanvas
+    !dom.savedPalettesOffcanvas
   ) {
     return;
   }
 
   window.bootstrap.Offcanvas
     .getOrCreateInstance(
-      elements.savedPalettesOffcanvas,
+      dom.savedPalettesOffcanvas,
     )
     .hide();
 }
@@ -1366,12 +1366,12 @@ function persistCurrentSettings() {
 function initializeContrast() {
   const foreground =
     normalizeHex(
-      elements.foregroundHexInput?.value,
+      dom.foregroundHexInput?.value,
     ) || "#FFFFFF";
 
   const background =
     normalizeHex(
-      elements.backgroundHexInput?.value,
+      dom.backgroundHexInput?.value,
     ) || DEFAULT_BASE_COLOR;
 
   setContrastColors(
@@ -1541,12 +1541,12 @@ function getContrastValues() {
   return {
     foreground:
       normalizeHex(
-        elements.foregroundHexInput?.value,
+        dom.foregroundHexInput?.value,
       ) || "#FFFFFF",
 
     background:
       normalizeHex(
-        elements.backgroundHexInput?.value,
+        dom.backgroundHexInput?.value,
       ) || DEFAULT_BASE_COLOR,
   };
 }
@@ -1555,23 +1555,23 @@ function syncContrastControls(
   foreground,
   background,
 ) {
-  if (elements.foregroundHexInput) {
-    elements.foregroundHexInput.value =
+  if (dom.foregroundHexInput) {
+    dom.foregroundHexInput.value =
       foreground;
   }
 
-  if (elements.foregroundColorPicker) {
-    elements.foregroundColorPicker.value =
+  if (dom.foregroundColorPicker) {
+    dom.foregroundColorPicker.value =
       foreground;
   }
 
-  if (elements.backgroundHexInput) {
-    elements.backgroundHexInput.value =
+  if (dom.backgroundHexInput) {
+    dom.backgroundHexInput.value =
       background;
   }
 
-  if (elements.backgroundColorPicker) {
-    elements.backgroundColorPicker.value =
+  if (dom.backgroundColorPicker) {
+    dom.backgroundColorPicker.value =
       background;
   }
 }
@@ -1602,44 +1602,44 @@ function updateContrastUI() {
     background,
   });
 
-  if (elements.contrastPreview) {
-    elements.contrastPreview.style.color =
+  if (dom.contrastPreview) {
+    dom.contrastPreview.style.color =
       foreground;
 
-    elements.contrastPreview.style.backgroundColor =
+    dom.contrastPreview.style.backgroundColor =
       background;
   }
 
-  if (elements.contrastPreviewText) {
-    elements.contrastPreviewText.style.color =
+  if (dom.contrastPreviewText) {
+    dom.contrastPreviewText.style.color =
       foreground;
   }
 
-  if (elements.contrastRatio) {
-    elements.contrastRatio.textContent =
+  if (dom.contrastRatio) {
+    dom.contrastRatio.textContent =
       `${Number(results.ratio || 0).toFixed(2)} : 1`;
   }
 
   updateResultCard(
-    elements.normalTextResult,
-    elements.normalTextStatus,
-    elements.normalTextLevel,
+    dom.normalTextResult,
+    dom.normalTextStatus,
+    dom.normalTextLevel,
     results.normalText,
     "WCAG AA / AAA",
   );
 
   updateResultCard(
-    elements.largeTextResult,
-    elements.largeTextStatus,
-    elements.largeTextLevel,
+    dom.largeTextResult,
+    dom.largeTextStatus,
+    dom.largeTextLevel,
     results.largeText,
     "WCAG AA / AAA",
   );
 
   updateResultCard(
-    elements.uiComponentResult,
-    elements.uiComponentStatus,
-    elements.uiComponentLevel,
+    dom.uiComponentResult,
+    dom.uiComponentStatus,
+    dom.uiComponentLevel,
     results.uiComponent
       ? "pass"
       : "fail",
@@ -1720,7 +1720,7 @@ function updateResultCard(
 
 function readBaseColorFromControls() {
   const value =
-    elements.baseColorInput?.value
+    dom.baseColorInput?.value
       ?.trim();
 
   return normalizeHex(value);
@@ -1729,13 +1729,13 @@ function readBaseColorFromControls() {
 function syncBaseColorControls(
   color,
 ) {
-  if (elements.baseColorInput) {
-    elements.baseColorInput.value =
+  if (dom.baseColorInput) {
+    dom.baseColorInput.value =
       color;
   }
 
-  if (elements.baseColorPicker) {
-    elements.baseColorPicker.value =
+  if (dom.baseColorPicker) {
+    dom.baseColorPicker.value =
       color;
   }
 }
@@ -1762,7 +1762,7 @@ function normalizeUiSize(value) {
    ========================================================= */
 
 function setStatus(message) {
-  if (!elements.paletteStatus) {
+  if (!dom.paletteStatus) {
     return;
   }
 
@@ -1770,12 +1770,12 @@ function setStatus(message) {
     statusTimer,
   );
 
-  elements.paletteStatus.textContent =
+  dom.paletteStatus.textContent =
     message;
 
   statusTimer = window.setTimeout(
     () => {
-      elements.paletteStatus.textContent =
+      dom.paletteStatus.textContent =
         "Ready to generate a palette.";
     },
     3500,
@@ -1789,11 +1789,11 @@ function setStatus(message) {
 function updateSavedPaletteCount(
   count,
 ) {
-  if (!elements.savedPalettesCount) {
+  if (!dom.savedPalettesCount) {
     return;
   }
 
-  elements.savedPalettesCount.textContent =
+  dom.savedPalettesCount.textContent =
     String(count);
 }
 
@@ -1802,23 +1802,23 @@ function updateSavedPaletteCount(
    ========================================================= */
 
 function showPaletteNameError() {
-  elements.paletteNameInput?.classList.add(
+  dom.paletteNameInput?.classList.add(
     "is-invalid",
   );
 
-  elements.paletteNameError?.classList.add(
+  dom.paletteNameError?.classList.add(
     "d-block",
   );
 
-  elements.paletteNameInput?.focus();
+  dom.paletteNameInput?.focus();
 }
 
 function clearPaletteNameError() {
-  elements.paletteNameInput?.classList.remove(
+  dom.paletteNameInput?.classList.remove(
     "is-invalid",
   );
 
-  elements.paletteNameError?.classList.remove(
+  dom.paletteNameError?.classList.remove(
     "d-block",
   );
 }
