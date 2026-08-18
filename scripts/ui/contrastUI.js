@@ -40,7 +40,6 @@ export function initializeContrastUI() {
   }
 
   initializeColors();
-  updateContrast();
 }
 
 
@@ -85,20 +84,32 @@ function initializeColors() {
 
   const foreground =
     normalizeHex(state?.foreground) ||
-    normalizeHex(DEFAULT_CONTRAST_COLORS?.FOREGROUND) ||
+    normalizeHex(
+      DEFAULT_CONTRAST_COLORS?.FOREGROUND,
+    ) ||
     "#FFFFFF";
 
   const background =
     normalizeHex(state?.background) ||
-    normalizeHex(DEFAULT_CONTRAST_COLORS?.BACKGROUND) ||
+    normalizeHex(
+      DEFAULT_CONTRAST_COLORS?.BACKGROUND,
+    ) ||
     normalizeHex(DEFAULT_BASE_COLOR) ||
     "#000000";
 
+  /*
+   * Establish the application state first.
+   *
+   * The state becomes the single source of truth.
+   */
   setContrastColors(
     foreground,
     background,
   );
 
+  /*
+   * Synchronize the DOM from state.
+   */
   syncColorControls(
     "foreground",
     foreground,
@@ -106,6 +117,14 @@ function initializeColors() {
 
   syncColorControls(
     "background",
+    background,
+  );
+
+  /*
+   * Render contrast using the exact same values.
+   */
+  updateContrast(
+    foreground,
     background,
   );
 }
@@ -170,41 +189,51 @@ function handleColorInput(type, value) {
       : "";
 
   /*
-   * Do not update anything while the user is
-   * temporarily entering an incomplete HEX value.
+   * Allow incomplete HEX values while typing.
    */
   if (!isValidHex(color)) {
     return;
   }
 
-  const normalized = normalizeHex(color);
+  const normalized =
+    normalizeHex(color);
 
   if (!normalized) {
     return;
   }
 
-  const state = getContrastState();
+  const state =
+    getContrastState();
+
+  const currentForeground =
+    normalizeHex(state?.foreground) ||
+    getDefaultForeground();
+
+  const currentBackground =
+    normalizeHex(state?.background) ||
+    getDefaultBackground();
 
   const foreground =
     type === "foreground"
       ? normalized
-      : normalizeHex(state?.foreground) ||
-        getForegroundColor();
+      : currentForeground;
 
   const background =
     type === "background"
       ? normalized
-      : normalizeHex(state?.background) ||
-        getBackgroundColor();
+      : currentBackground;
 
   /*
-   * Keep both state and controls synchronized.
+   * Update state first.
    */
   setContrastColors(
     foreground,
     background,
   );
 
+  /*
+   * Synchronize both controls.
+   */
   syncColorControls(
     "foreground",
     foreground,
@@ -215,6 +244,9 @@ function handleColorInput(type, value) {
     background,
   );
 
+  /*
+   * Recalculate using the exact current values.
+   */
   updateContrast(
     foreground,
     background,
@@ -227,20 +259,24 @@ function handleColorInput(type, value) {
    ========================================================= */
 
 function handleSwapColors(event) {
-  /*
-   * Prevent form submission if the button happens
-   * to be inside a form.
-   */
   event?.preventDefault();
 
   /*
-   * Read both values BEFORE changing either input.
+   * IMPORTANT:
    *
-   * This is important. We must preserve the original
-   * foreground and background before swapping them.
+   * Read both colors from application state.
+   * Do not read one from the DOM and one from state.
+   *
+   * Both values are captured before anything changes.
    */
-  const foreground = getForegroundColor();
-  const background = getBackgroundColor();
+  const state =
+    getContrastState();
+
+  const foreground =
+    normalizeHex(state?.foreground);
+
+  const background =
+    normalizeHex(state?.background);
 
   if (!foreground || !background) {
     showErrorToast(
@@ -251,7 +287,7 @@ function handleSwapColors(event) {
   }
 
   /*
-   * The actual swap.
+   * Swap the values.
    *
    * Old:
    * foreground = A
@@ -261,11 +297,14 @@ function handleSwapColors(event) {
    * foreground = B
    * background = A
    */
-  const swappedForeground = background;
-  const swappedBackground = foreground;
+  const swappedForeground =
+    background;
+
+  const swappedBackground =
+    foreground;
 
   /*
-   * Update the color state first.
+   * Update application state.
    */
   setContrastColors(
     swappedForeground,
@@ -273,7 +312,7 @@ function handleSwapColors(event) {
   );
 
   /*
-   * Update both HEX inputs and both color pickers.
+   * Update the visible controls.
    */
   syncColorControls(
     "foreground",
@@ -286,10 +325,7 @@ function handleSwapColors(event) {
   );
 
   /*
-   * Calculate using the swapped values directly.
-   *
-   * Do NOT let updateContrast() read the DOM again here.
-   * This prevents stale values from being used.
+   * Calculate and render using the swapped values.
    */
   updateContrast(
     swappedForeground,
@@ -307,8 +343,8 @@ function handleSwapColors(event) {
    ========================================================= */
 
 export function updateContrast(
-  foreground = getForegroundColor(),
-  background = getBackgroundColor(),
+  foreground,
+  background,
 ) {
   const normalizedForeground =
     normalizeHex(foreground);
@@ -317,17 +353,23 @@ export function updateContrast(
     normalizeHex(background);
 
   /*
-   * Invalid input.
+   * Invalid colors.
    */
   if (
     !normalizedForeground ||
     !normalizedBackground
   ) {
     setContrastState({
-      foreground: normalizedForeground,
-      background: normalizedBackground,
+      foreground:
+        normalizedForeground,
+
+      background:
+        normalizedBackground,
+
       ratio: 0,
-      level: CONTRAST_LEVELS.FAIL,
+
+      level:
+        CONTRAST_LEVELS.FAIL,
     });
 
     renderInvalidResult();
@@ -336,13 +378,13 @@ export function updateContrast(
   }
 
   /*
-   * Calculate contrast using the exact colors
-   * passed into this function.
+   * Calculate contrast.
    */
-  const result = checkContrast(
-    normalizedForeground,
-    normalizedBackground,
-  );
+  const result =
+    checkContrast(
+      normalizedForeground,
+      normalizedBackground,
+    );
 
   if (!result || !result.valid) {
     setContrastState({
@@ -368,19 +410,25 @@ export function updateContrast(
   }
 
   /*
-   * Store the complete current result.
+   * Store the complete result.
    */
   setContrastState({
-    foreground: result.foreground,
-    background: result.background,
-    ratio: result.ratio,
+    foreground:
+      result.foreground,
+
+    background:
+      result.background,
+
+    ratio:
+      result.ratio,
+
     level:
       result.level ||
       CONTRAST_LEVELS.FAIL,
   });
 
   /*
-   * Render everything from the same result.
+   * Render from the same result.
    */
   renderContrastResult(result);
 }
@@ -748,39 +796,10 @@ function syncColorControls(
 
 
 /* =========================================================
-   Get Foreground Color
+   Default Foreground
    ========================================================= */
 
-function getForegroundColor() {
-  /*
-   * The visible HEX input is the primary source.
-   */
-  const inputValue =
-    dom.foregroundHexInput?.value?.trim();
-
-  if (isValidHex(inputValue)) {
-    return normalizeHex(inputValue);
-  }
-
-  /*
-   * Fall back to application state.
-   */
-  const state =
-    getContrastState();
-
-  if (
-    isValidHex(
-      state?.foreground,
-    )
-  ) {
-    return normalizeHex(
-      state.foreground,
-    );
-  }
-
-  /*
-   * Final fallback.
-   */
+function getDefaultForeground() {
   return (
     normalizeHex(
       DEFAULT_CONTRAST_COLORS?.FOREGROUND,
@@ -791,46 +810,15 @@ function getForegroundColor() {
 
 
 /* =========================================================
-   Get Background Color
+   Default Background
    ========================================================= */
 
-function getBackgroundColor() {
-  /*
-   * The visible HEX input is the primary source.
-   */
-  const inputValue =
-    dom.backgroundHexInput?.value?.trim();
-
-  if (isValidHex(inputValue)) {
-    return normalizeHex(inputValue);
-  }
-
-  /*
-   * Fall back to application state.
-   */
-  const state =
-    getContrastState();
-
-  if (
-    isValidHex(
-      state?.background,
-    )
-  ) {
-    return normalizeHex(
-      state.background,
-    );
-  }
-
-  /*
-   * Final fallback.
-   */
+function getDefaultBackground() {
   return (
     normalizeHex(
       DEFAULT_CONTRAST_COLORS?.BACKGROUND,
     ) ||
-    normalizeHex(
-      DEFAULT_BASE_COLOR,
-    ) ||
+    normalizeHex(DEFAULT_BASE_COLOR) ||
     "#000000"
   );
 }

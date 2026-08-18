@@ -255,11 +255,6 @@ function bindEvents() {
     dom.backgroundColorPicker,
     "background",
   );
-
-  dom.swapContrastColorsButton?.addEventListener(
-    "click",
-    swapContrastColors,
-  );
 }
 
 /* =========================================================
@@ -1470,38 +1465,6 @@ function setContrastBackground(
   );
 
   initializeContrastUI();
-}
-
-function swapContrastColors() {
-  const current =
-    getContrastValues();
-
-  const foreground =
-    current.background;
-
-  const background =
-    current.foreground;
-
-  setContrastColors(
-    foreground,
-    background,
-  );
-
-  setContrastState({
-    foreground,
-    background,
-  });
-
-  syncContrastControls(
-    foreground,
-    background,
-  );
-
-  initializeContrastUI();
-
-  showSuccessToast(
-    "Foreground and background swapped.",
-  );
 }
 
 function getContrastValues() {
