@@ -149,35 +149,13 @@ function handleSwapColors(event) {
     return;
   }
 
-  // Swap the values
-  const newForeground = background;
-  const newBackground = foreground;
+  // Swap
+  syncColorControls("foreground", background);
+  syncColorControls("background", foreground);
 
-  // Update application state
-  setContrastColors(newForeground, newBackground);
+  setContrastColors(background, foreground);
 
-  // Update the visible controls
-  syncColorControls("foreground", newForeground);
-  syncColorControls("background", newBackground);
-
-  // Recalculate using the swapped values
-  const result = checkContrast(newForeground, newBackground);
-
-  if (!result || !result.valid) {
-    renderInvalidResult();
-    return;
-  }
-
-  // Update contrast state
-  setContrastState({
-    foreground: result.foreground,
-    background: result.background,
-    ratio: result.ratio,
-    level: result.level || CONTRAST_LEVELS.FAIL,
-  });
-
-  // Render result
-  renderContrastResult(result);
+  updateContrast(background, foreground);
 
   showSuccessToast("Foreground and background swapped");
 }
@@ -208,21 +186,23 @@ function updateContrastColors(type, color) {
    Update Contrast
    ========================================================= */
 
-export function updateContrast() {
-  const foreground = getForegroundColor();
+export function updateContrast(
+  foreground = getForegroundColor(),
+  background = getBackgroundColor(),
+) {
+  const normalizedForeground = normalizeHex(foreground);
+  const normalizedBackground = normalizeHex(background);
 
-  const background = getBackgroundColor();
-
-  const result = checkContrast(foreground, background);
+  const result = checkContrast(
+    normalizedForeground,
+    normalizedBackground,
+  );
 
   if (!result || !result.valid) {
     setContrastState({
-      foreground: result?.foreground || foreground,
-
-      background: result?.background || background,
-
+      foreground: result?.foreground || normalizedForeground,
+      background: result?.background || normalizedBackground,
       ratio: result?.ratio ?? 0,
-
       level: result?.level || CONTRAST_LEVELS.FAIL,
     });
 
@@ -233,11 +213,8 @@ export function updateContrast() {
 
   setContrastState({
     foreground: result.foreground,
-
     background: result.background,
-
     ratio: result.ratio,
-
     level: result.level || CONTRAST_LEVELS.FAIL,
   });
 
