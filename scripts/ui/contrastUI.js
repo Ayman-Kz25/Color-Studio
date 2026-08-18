@@ -10,13 +10,22 @@ import {
   setContrastState,
 } from "../core/state.js";
 
-import { isValidHex, normalizeHex } from "../modules/palette/colorUtils.js";
+import {
+  isValidHex,
+  normalizeHex,
+} from "../modules/palette/colorUtils.js";
 
-import { showSuccessToast, showErrorToast } from "./toastUI.js";
+import {
+  showSuccessToast,
+  showErrorToast,
+} from "./toastUI.js";
 
 import { dom } from "./dom.js";
 
-import { checkContrast } from "../modules/contrast/contrastChecker.js";
+import {
+  checkContrast,
+} from "../modules/contrast/contrastChecker.js";
+
 
 /* =========================================================
    Initialization
@@ -34,88 +43,135 @@ export function initializeContrastUI() {
   updateContrast();
 }
 
+
 /* =========================================================
    Event Binding
    ========================================================= */
 
 function bindEvents() {
-  dom.foregroundHexInput?.addEventListener("input", handleForegroundInput);
+  dom.foregroundHexInput?.addEventListener(
+    "input",
+    handleForegroundInput,
+  );
 
-  dom.foregroundColorPicker?.addEventListener("input", handleForegroundPicker);
+  dom.foregroundColorPicker?.addEventListener(
+    "input",
+    handleForegroundPicker,
+  );
 
-  dom.backgroundHexInput?.addEventListener("input", handleBackgroundInput);
+  dom.backgroundHexInput?.addEventListener(
+    "input",
+    handleBackgroundInput,
+  );
 
-  dom.backgroundColorPicker?.addEventListener("input", handleBackgroundPicker);
+  dom.backgroundColorPicker?.addEventListener(
+    "input",
+    handleBackgroundPicker,
+  );
 
-  dom.swapContrastColorsButton?.addEventListener("click", handleSwapColors);
+  dom.swapContrastColorsButton?.addEventListener(
+    "click",
+    handleSwapColors,
+  );
 }
+
 
 /* =========================================================
    Initialize Colors
    ========================================================= */
 
 function initializeColors() {
-  const contrastState = getContrastState();
+  const state = getContrastState();
 
-  const foreground = normalizeOrFallback(
-    contrastState?.foreground,
-    DEFAULT_CONTRAST_COLORS.FOREGROUND,
+  const foreground =
+    normalizeHex(state?.foreground) ||
+    normalizeHex(DEFAULT_CONTRAST_COLORS?.FOREGROUND) ||
+    "#FFFFFF";
+
+  const background =
+    normalizeHex(state?.background) ||
+    normalizeHex(DEFAULT_CONTRAST_COLORS?.BACKGROUND) ||
+    normalizeHex(DEFAULT_BASE_COLOR) ||
+    "#000000";
+
+  setContrastColors(
+    foreground,
+    background,
   );
 
-  const background = normalizeOrFallback(
-    contrastState?.background,
-    DEFAULT_CONTRAST_COLORS.BACKGROUND || DEFAULT_BASE_COLOR,
+  syncColorControls(
+    "foreground",
+    foreground,
   );
 
-  setContrastColors(foreground, background);
-
-  syncColorControls("foreground", foreground);
-
-  syncColorControls("background", background);
+  syncColorControls(
+    "background",
+    background,
+  );
 }
+
 
 /* =========================================================
    Foreground Input
    ========================================================= */
 
 function handleForegroundInput(event) {
-  handleColorInput("foreground", event?.target?.value);
+  handleColorInput(
+    "foreground",
+    event?.target?.value,
+  );
 }
+
 
 /* =========================================================
    Foreground Picker
    ========================================================= */
 
 function handleForegroundPicker(event) {
-  handleColorInput("foreground", event?.target?.value);
+  handleColorInput(
+    "foreground",
+    event?.target?.value,
+  );
 }
+
 
 /* =========================================================
    Background Input
    ========================================================= */
 
 function handleBackgroundInput(event) {
-  handleColorInput("background", event?.target?.value);
+  handleColorInput(
+    "background",
+    event?.target?.value,
+  );
 }
+
 
 /* =========================================================
    Background Picker
    ========================================================= */
 
 function handleBackgroundPicker(event) {
-  handleColorInput("background", event?.target?.value);
+  handleColorInput(
+    "background",
+    event?.target?.value,
+  );
 }
+
 
 /* =========================================================
    Handle Color Input
    ========================================================= */
 
 function handleColorInput(type, value) {
-  const color = typeof value === "string" ? value.trim() : "";
+  const color =
+    typeof value === "string"
+      ? value.trim()
+      : "";
 
   /*
-   * Allow text inputs to remain temporarily invalid
-   * while the user is typing.
+   * Do not update anything while the user is
+   * temporarily entering an incomplete HEX value.
    */
   if (!isValidHex(color)) {
     return;
@@ -127,60 +183,124 @@ function handleColorInput(type, value) {
     return;
   }
 
-  syncColorControls(type, normalized);
+  const state = getContrastState();
 
-  updateContrastColors(type, normalized);
+  const foreground =
+    type === "foreground"
+      ? normalized
+      : normalizeHex(state?.foreground) ||
+        getForegroundColor();
 
-  updateContrast();
+  const background =
+    type === "background"
+      ? normalized
+      : normalizeHex(state?.background) ||
+        getBackgroundColor();
+
+  /*
+   * Keep both state and controls synchronized.
+   */
+  setContrastColors(
+    foreground,
+    background,
+  );
+
+  syncColorControls(
+    "foreground",
+    foreground,
+  );
+
+  syncColorControls(
+    "background",
+    background,
+  );
+
+  updateContrast(
+    foreground,
+    background,
+  );
 }
+
 
 /* =========================================================
    Swap Colors
    ========================================================= */
 
 function handleSwapColors(event) {
+  /*
+   * Prevent form submission if the button happens
+   * to be inside a form.
+   */
   event?.preventDefault();
 
-  const foreground = normalizeHex(getForegroundColor());
-  const background = normalizeHex(getBackgroundColor());
+  /*
+   * Read both values BEFORE changing either input.
+   *
+   * This is important. We must preserve the original
+   * foreground and background before swapping them.
+   */
+  const foreground = getForegroundColor();
+  const background = getBackgroundColor();
 
   if (!foreground || !background) {
-    showErrorToast("Please enter valid HEX colors first.");
+    showErrorToast(
+      "Please enter valid HEX colors first.",
+    );
+
     return;
   }
 
-  // Swap
-  syncColorControls("foreground", background);
-  syncColorControls("background", foreground);
+  /*
+   * The actual swap.
+   *
+   * Old:
+   * foreground = A
+   * background = B
+   *
+   * New:
+   * foreground = B
+   * background = A
+   */
+  const swappedForeground = background;
+  const swappedBackground = foreground;
 
-  setContrastColors(background, foreground);
+  /*
+   * Update the color state first.
+   */
+  setContrastColors(
+    swappedForeground,
+    swappedBackground,
+  );
 
-  updateContrast(background, foreground);
+  /*
+   * Update both HEX inputs and both color pickers.
+   */
+  syncColorControls(
+    "foreground",
+    swappedForeground,
+  );
 
-  showSuccessToast("Foreground and background swapped");
+  syncColorControls(
+    "background",
+    swappedBackground,
+  );
+
+  /*
+   * Calculate using the swapped values directly.
+   *
+   * Do NOT let updateContrast() read the DOM again here.
+   * This prevents stale values from being used.
+   */
+  updateContrast(
+    swappedForeground,
+    swappedBackground,
+  );
+
+  showSuccessToast(
+    "Foreground and background swapped",
+  );
 }
 
-/* =========================================================
-   Update Contrast Colors
-   ========================================================= */
-
-function updateContrastColors(type, color) {
-  const currentState = getContrastState();
-
-  if (!currentState) {
-    return;
-  }
-
-  if (type === "foreground") {
-    setContrastColors(color, currentState.background);
-
-    return;
-  }
-
-  if (type === "background") {
-    setContrastColors(currentState.foreground, color);
-  }
-}
 
 /* =========================================================
    Update Contrast
@@ -190,20 +310,24 @@ export function updateContrast(
   foreground = getForegroundColor(),
   background = getBackgroundColor(),
 ) {
-  const normalizedForeground = normalizeHex(foreground);
-  const normalizedBackground = normalizeHex(background);
+  const normalizedForeground =
+    normalizeHex(foreground);
 
-  const result = checkContrast(
-    normalizedForeground,
-    normalizedBackground,
-  );
+  const normalizedBackground =
+    normalizeHex(background);
 
-  if (!result || !result.valid) {
+  /*
+   * Invalid input.
+   */
+  if (
+    !normalizedForeground ||
+    !normalizedBackground
+  ) {
     setContrastState({
-      foreground: result?.foreground || normalizedForeground,
-      background: result?.background || normalizedBackground,
-      ratio: result?.ratio ?? 0,
-      level: result?.level || CONTRAST_LEVELS.FAIL,
+      foreground: normalizedForeground,
+      background: normalizedBackground,
+      ratio: 0,
+      level: CONTRAST_LEVELS.FAIL,
     });
 
     renderInvalidResult();
@@ -211,15 +335,56 @@ export function updateContrast(
     return;
   }
 
+  /*
+   * Calculate contrast using the exact colors
+   * passed into this function.
+   */
+  const result = checkContrast(
+    normalizedForeground,
+    normalizedBackground,
+  );
+
+  if (!result || !result.valid) {
+    setContrastState({
+      foreground:
+        result?.foreground ||
+        normalizedForeground,
+
+      background:
+        result?.background ||
+        normalizedBackground,
+
+      ratio:
+        result?.ratio ?? 0,
+
+      level:
+        result?.level ||
+        CONTRAST_LEVELS.FAIL,
+    });
+
+    renderInvalidResult();
+
+    return;
+  }
+
+  /*
+   * Store the complete current result.
+   */
   setContrastState({
     foreground: result.foreground,
     background: result.background,
     ratio: result.ratio,
-    level: result.level || CONTRAST_LEVELS.FAIL,
+    level:
+      result.level ||
+      CONTRAST_LEVELS.FAIL,
   });
 
+  /*
+   * Render everything from the same result.
+   */
   renderContrastResult(result);
 }
+
 
 /* =========================================================
    Render Contrast Result
@@ -231,21 +396,28 @@ function renderContrastResult(result) {
     return;
   }
 
-  renderRatio(result.formattedRatio);
+  renderRatio(
+    result.formattedRatio,
+  );
 
-  renderNormalTextResult(result.normalText);
+  renderNormalTextResult(
+    result.normalText,
+  );
 
-  renderLargeTextResult(result.largeText);
+  renderLargeTextResult(
+    result.largeText,
+  );
 
-  /*
-   * contrastChecker.js uses "uiComponent"
-   * (singular). Keep the UI consistent with
-   * that public result shape.
-   */
-  renderUIComponentResult(result.uiComponent);
+  renderUIComponentResult(
+    result.uiComponent,
+  );
 
-  renderPreview(result.foreground, result.background);
+  renderPreview(
+    result.foreground,
+    result.background,
+  );
 }
+
 
 /* =========================================================
    Render Ratio
@@ -256,8 +428,10 @@ function renderRatio(ratio) {
     return;
   }
 
-  dom.contrastRatio.textContent = ratio || "N/A";
+  dom.contrastRatio.textContent =
+    ratio || "N/A";
 }
+
 
 /* =========================================================
    Render Normal Text Result
@@ -268,31 +442,44 @@ function renderNormalTextResult(result) {
     return;
   }
 
-  const aaPassed = Boolean(result?.aa);
-  const aaaPassed = Boolean(result?.aaa);
+  const aaPassed =
+    Boolean(result?.aa);
 
-  const passed = aaPassed || aaaPassed;
+  const aaaPassed =
+    Boolean(result?.aaa);
 
-  dom.normalTextResult.classList.toggle("is-pass", passed);
+  const passed =
+    aaPassed || aaaPassed;
 
-  dom.normalTextResult.classList.toggle("is-fail", !passed);
+  dom.normalTextResult.classList.toggle(
+    "is-pass",
+    passed,
+  );
+
+  dom.normalTextResult.classList.toggle(
+    "is-fail",
+    !passed,
+  );
 
   if (dom.normalTextStatus) {
-    dom.normalTextStatus.textContent = aaaPassed
-      ? "AAA Pass"
-      : aaPassed
-        ? "AA Pass"
-        : "Fail";
+    dom.normalTextStatus.textContent =
+      aaaPassed
+        ? "AAA Pass"
+        : aaPassed
+          ? "AA Pass"
+          : "Fail";
   }
 
   if (dom.normalTextLevel) {
-    dom.normalTextLevel.textContent = aaaPassed
-      ? "WCAG AAA"
-      : aaPassed
-        ? "WCAG AA"
-        : "WCAG AA / AAA";
+    dom.normalTextLevel.textContent =
+      aaaPassed
+        ? "WCAG AAA"
+        : aaPassed
+          ? "WCAG AA"
+          : "WCAG AA / AAA";
   }
 }
+
 
 /* =========================================================
    Render Large Text Result
@@ -303,31 +490,44 @@ function renderLargeTextResult(result) {
     return;
   }
 
-  const aaPassed = Boolean(result?.aa);
-  const aaaPassed = Boolean(result?.aaa);
+  const aaPassed =
+    Boolean(result?.aa);
 
-  const passed = aaPassed || aaaPassed;
+  const aaaPassed =
+    Boolean(result?.aaa);
 
-  dom.largeTextResult.classList.toggle("is-pass", passed);
+  const passed =
+    aaPassed || aaaPassed;
 
-  dom.largeTextResult.classList.toggle("is-fail", !passed);
+  dom.largeTextResult.classList.toggle(
+    "is-pass",
+    passed,
+  );
+
+  dom.largeTextResult.classList.toggle(
+    "is-fail",
+    !passed,
+  );
 
   if (dom.largeTextStatus) {
-    dom.largeTextStatus.textContent = aaaPassed
-      ? "AAA Pass"
-      : aaPassed
-        ? "AA Pass"
-        : "Fail";
+    dom.largeTextStatus.textContent =
+      aaaPassed
+        ? "AAA Pass"
+        : aaPassed
+          ? "AA Pass"
+          : "Fail";
   }
 
   if (dom.largeTextLevel) {
-    dom.largeTextLevel.textContent = aaaPassed
-      ? "WCAG AAA"
-      : aaPassed
-        ? "WCAG AA"
-        : "WCAG AA / AAA";
+    dom.largeTextLevel.textContent =
+      aaaPassed
+        ? "WCAG AAA"
+        : aaPassed
+          ? "WCAG AA"
+          : "WCAG AA / AAA";
   }
 }
+
 
 /* =========================================================
    Render UI Component Result
@@ -341,46 +541,70 @@ function renderUIComponentResult(result) {
   const passed =
     typeof result === "boolean"
       ? result
-      : Boolean(result?.aa ?? result?.pass ?? result?.passed);
+      : Boolean(
+          result?.aa ??
+          result?.pass ??
+          result?.passed,
+        );
 
-  dom.uiComponentResult.classList.toggle("is-pass", passed);
+  dom.uiComponentResult.classList.toggle(
+    "is-pass",
+    passed,
+  );
 
-  dom.uiComponentResult.classList.toggle("is-fail", !passed);
+  dom.uiComponentResult.classList.toggle(
+    "is-fail",
+    !passed,
+  );
 
   if (dom.uiComponentStatus) {
-    dom.uiComponentStatus.textContent = passed ? "Pass" : "Fail";
+    dom.uiComponentStatus.textContent =
+      passed
+        ? "Pass"
+        : "Fail";
   }
 
   if (dom.uiComponentLevel) {
-    dom.uiComponentLevel.textContent = "WCAG 1.4.11";
+    dom.uiComponentLevel.textContent =
+      "WCAG 1.4.11";
   }
 }
+
 
 /* =========================================================
    Render Preview
    ========================================================= */
 
-function renderPreview(foreground, background) {
+function renderPreview(
+  foreground,
+  background,
+) {
   if (!dom.contrastPreview) {
     return;
   }
 
-  dom.contrastPreview.style.backgroundColor = background;
+  dom.contrastPreview.style.backgroundColor =
+    background;
 
-  dom.contrastPreview.style.color = foreground;
+  dom.contrastPreview.style.color =
+    foreground;
 
   if (dom.contrastPreviewLabel) {
-    dom.contrastPreviewLabel.style.color = foreground;
+    dom.contrastPreviewLabel.style.color =
+      foreground;
   }
 
   if (dom.contrastPreviewHeading) {
-    dom.contrastPreviewHeading.style.color = foreground;
+    dom.contrastPreviewHeading.style.color =
+      foreground;
   }
 
   if (dom.contrastPreviewText) {
-    dom.contrastPreviewText.style.color = foreground;
+    dom.contrastPreviewText.style.color =
+      foreground;
   }
 }
+
 
 /* =========================================================
    Render Invalid Result
@@ -416,29 +640,41 @@ function renderInvalidResult() {
   clearPreview();
 }
 
+
 /* =========================================================
    Clear Preview
    ========================================================= */
 
 function clearPreview() {
   if (dom.contrastPreview) {
-    dom.contrastPreview.style.removeProperty("background-color");
+    dom.contrastPreview.style.removeProperty(
+      "background-color",
+    );
 
-    dom.contrastPreview.style.removeProperty("color");
+    dom.contrastPreview.style.removeProperty(
+      "color",
+    );
   }
 
   if (dom.contrastPreviewLabel) {
-    dom.contrastPreviewLabel.style.removeProperty("color");
+    dom.contrastPreviewLabel.style.removeProperty(
+      "color",
+    );
   }
 
   if (dom.contrastPreviewHeading) {
-    dom.contrastPreviewHeading.style.removeProperty("color");
+    dom.contrastPreviewHeading.style.removeProperty(
+      "color",
+    );
   }
 
   if (dom.contrastPreviewText) {
-    dom.contrastPreviewText.style.removeProperty("color");
+    dom.contrastPreviewText.style.removeProperty(
+      "color",
+    );
   }
 }
+
 
 /* =========================================================
    Render Invalid Result Card
@@ -457,20 +693,27 @@ function renderResultCardInvalid(
   }
 
   if (status) {
-    status.textContent = statusText;
+    status.textContent =
+      statusText;
   }
 
   if (description) {
-    description.textContent = descriptionText;
+    description.textContent =
+      descriptionText;
   }
 }
+
 
 /* =========================================================
    Sync Color Controls
    ========================================================= */
 
-function syncColorControls(type, color) {
-  const normalized = normalizeHex(color);
+function syncColorControls(
+  type,
+  color,
+) {
+  const normalized =
+    normalizeHex(color);
 
   if (!normalized) {
     return;
@@ -478,11 +721,13 @@ function syncColorControls(type, color) {
 
   if (type === "foreground") {
     if (dom.foregroundHexInput) {
-      dom.foregroundHexInput.value = normalized;
+      dom.foregroundHexInput.value =
+        normalized;
     }
 
     if (dom.foregroundColorPicker) {
-      dom.foregroundColorPicker.value = normalized;
+      dom.foregroundColorPicker.value =
+        normalized;
     }
 
     return;
@@ -490,69 +735,102 @@ function syncColorControls(type, color) {
 
   if (type === "background") {
     if (dom.backgroundHexInput) {
-      dom.backgroundHexInput.value = normalized;
+      dom.backgroundHexInput.value =
+        normalized;
     }
 
     if (dom.backgroundColorPicker) {
-      dom.backgroundColorPicker.value = normalized;
+      dom.backgroundColorPicker.value =
+        normalized;
     }
   }
 }
+
 
 /* =========================================================
    Get Foreground Color
    ========================================================= */
 
 function getForegroundColor() {
-  const contrastState = getContrastState();
-
-  const inputValue = dom.foregroundHexInput?.value?.trim();
+  /*
+   * The visible HEX input is the primary source.
+   */
+  const inputValue =
+    dom.foregroundHexInput?.value?.trim();
 
   if (isValidHex(inputValue)) {
     return normalizeHex(inputValue);
   }
 
-  if (isValidHex(contrastState?.foreground)) {
-    return normalizeHex(contrastState.foreground);
+  /*
+   * Fall back to application state.
+   */
+  const state =
+    getContrastState();
+
+  if (
+    isValidHex(
+      state?.foreground,
+    )
+  ) {
+    return normalizeHex(
+      state.foreground,
+    );
   }
 
-  return normalizeHex(DEFAULT_CONTRAST_COLORS?.FOREGROUND) || "#FFFFFF";
+  /*
+   * Final fallback.
+   */
+  return (
+    normalizeHex(
+      DEFAULT_CONTRAST_COLORS?.FOREGROUND,
+    ) ||
+    "#FFFFFF"
+  );
 }
+
 
 /* =========================================================
    Get Background Color
    ========================================================= */
 
 function getBackgroundColor() {
-  const contrastState = getContrastState();
-
-  const inputValue = dom.backgroundHexInput?.value?.trim();
+  /*
+   * The visible HEX input is the primary source.
+   */
+  const inputValue =
+    dom.backgroundHexInput?.value?.trim();
 
   if (isValidHex(inputValue)) {
     return normalizeHex(inputValue);
   }
 
-  if (isValidHex(contrastState?.background)) {
-    return normalizeHex(contrastState.background);
+  /*
+   * Fall back to application state.
+   */
+  const state =
+    getContrastState();
+
+  if (
+    isValidHex(
+      state?.background,
+    )
+  ) {
+    return normalizeHex(
+      state.background,
+    );
   }
 
+  /*
+   * Final fallback.
+   */
   return (
-    normalizeHex(DEFAULT_CONTRAST_COLORS?.BACKGROUND) ||
-    normalizeHex(DEFAULT_BASE_COLOR) ||
-    DEFAULT_BASE_COLOR
+    normalizeHex(
+      DEFAULT_CONTRAST_COLORS?.BACKGROUND,
+    ) ||
+    normalizeHex(
+      DEFAULT_BASE_COLOR,
+    ) ||
+    "#000000"
   );
-}
-
-/* =========================================================
-   Normalize Or Fallback
-   ========================================================= */
-
-function normalizeOrFallback(color, fallback) {
-  const normalized = normalizeHex(color);
-
-  if (normalized) {
-    return normalized;
-  }
-
-  return normalizeHex(fallback) || fallback;
 }
