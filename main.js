@@ -101,9 +101,7 @@ function initializeApp() {
 
   renderSavedPalettes();
 
-  initializeContrast();
-
-  updateContrastUI();
+  initializeContrastUI();
 
   setStatus("Ready to generate a palette.");
 }
@@ -1359,37 +1357,6 @@ function persistCurrentSettings() {
   });
 }
 
-/* =========================================================
-   Contrast Initialization
-   ========================================================= */
-
-function initializeContrast() {
-  const foreground =
-    normalizeHex(
-      dom.foregroundHexInput?.value,
-    ) || "#FFFFFF";
-
-  const background =
-    normalizeHex(
-      dom.backgroundHexInput?.value,
-    ) || DEFAULT_BASE_COLOR;
-
-  setContrastColors(
-    foreground,
-    background,
-  );
-
-  setContrastState({
-    foreground,
-    background,
-  });
-
-  syncContrastControls(
-    foreground,
-    background,
-  );
-}
-
 function bindContrastInput(
   textInput,
   picker,
@@ -1468,7 +1435,7 @@ function updateContrastSide(
     next.background,
   );
 
-  updateContrastUI();
+  initializeContrastUI();
 }
 
 function setContrastBackground(
@@ -1502,7 +1469,7 @@ function setContrastBackground(
     normalized,
   );
 
-  updateContrastUI();
+  initializeContrastUI();
 }
 
 function swapContrastColors() {
@@ -1530,7 +1497,7 @@ function swapContrastColors() {
     background,
   );
 
-  updateContrastUI();
+  initializeContrastUI();
 
   showSuccessToast(
     "Foreground and background swapped.",
@@ -1574,72 +1541,6 @@ function syncContrastControls(
     dom.backgroundColorPicker.value =
       background;
   }
-}
-
-/* =========================================================
-   Contrast UI
-   ========================================================= */
-
-function updateContrastUI() {
-  const {
-    foreground,
-    background,
-  } = getContrastValues();
-
-  const results =
-    getContrastResults(
-      foreground,
-      background,
-    );
-
-  if (!results) {
-    return;
-  }
-
-  setContrastState({
-    ...results,
-    foreground,
-    background,
-  });
-
-  if (elements.contrastPreview) {
-    elements.contrastPreview.style.color =
-      foreground;
-
-    elements.contrastPreview.style.backgroundColor =
-      background;
-  }
-
-  if (elements.contrastPreviewText) {
-    elements.contrastPreviewText.style.color =
-      foreground;
-  }
-
-  if (elements.contrastRatio) {
-    elements.contrastRatio.textContent =
-      `${Number(results.ratio || 0).toFixed(2)} : 1`;
-  }
-
-  updateTextContrastCard(
-    elements.normalTextResult,
-    elements.normalTextStatus,
-    elements.normalTextLevel,
-    results.normalText,
-  );
-
-  updateTextContrastCard(
-    elements.largeTextResult,
-    elements.largeTextStatus,
-    elements.largeTextLevel,
-    results.largeText,
-  );
-
-  updateUIComponentCard(
-    elements.uiComponentResult,
-    elements.uiComponentStatus,
-    elements.uiComponentLevel,
-    results.uiComponent,
-  );
 }
 
 function updateResultCard(
