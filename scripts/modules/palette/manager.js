@@ -34,50 +34,84 @@ import {
    Initialize Palette
    ========================================================= */
 
+/**
+ * Creates the initial palette state.
+ *
+ * This function does NOT render anything and does NOT touch
+ * the DOM. UI initialization belongs to main.js / paletteUI.js.
+ *
+ * If the state already contains a valid palette, it is kept.
+ * Otherwise a new palette is generated from the current
+ * state/settings or defaults.
+ */
 export function initializePalette() {
-  const paletteState =
-    getPaletteState();
+  const state = getPaletteState();
 
-  const baseColor =
-    normalizeBaseColor(
-      paletteState?.baseColor,
+  const baseColor = normalizeBaseColor(
+    state?.baseColor,
+  );
+
+  const paletteType = normalizePaletteType(
+    state?.type,
+  );
+
+  const size = normalizePaletteSize(
+    state?.size ?? PALETTE_SIZE,
+  );
+
+  /*
+   * If a valid palette already exists, keep it.
+   *
+   * This is important during application startup because
+   * initialization should not unnecessarily generate a new
+   * palette every time the page loads.
+   */
+  if (
+    hasValidPalette(
+      state?.colors,
+      size,
+    )
+  ) {
+    const colors = normalizePaletteColors(
+      state.colors,
     );
 
-  const paletteType =
-    normalizePaletteType(
-      paletteState?.type,
+    const locked = createLockState(
+      colors.length,
+      state.locked,
     );
 
-  const paletteSize =
-    normalizePaletteSize(
-      paletteState?.size,
-    );
+    setBaseColor(baseColor);
+    setPaletteType(paletteType);
+    setPaletteColors(colors);
+    setLockedColors(locked);
 
-  const colors =
-    safelyGeneratePalette(
-      baseColor,
-      paletteType,
-      paletteSize,
-    );
+    setPaletteState({
+      size: colors.length,
+    });
+
+    return getCurrentPalette();
+  }
+
+  /*
+   * No usable palette exists, so create one.
+   */
+  const colors = safelyGeneratePalette(
+    baseColor,
+    paletteType,
+    size,
+  );
 
   if (!colors) {
     return null;
   }
 
-  /*
-   * Initialization starts with a completely
-   * unlocked palette.
-   */
   setBaseColor(baseColor);
-
   setPaletteType(paletteType);
-
   setPaletteColors(colors);
 
   setLockedColors(
-    createLockState(
-      colors.length,
-    ),
+    createLockState(colors.length),
   );
 
   setPaletteState({
@@ -92,36 +126,30 @@ export function initializePalette() {
    Generate New Palette
    ========================================================= */
 
-/*
- * Generates a palette while preserving existing
- * locked colors.
+/**
+ * Generates a new palette while preserving existing
+ * locked colors by index.
  */
 export function generateNewPalette(
   baseColor,
   paletteType,
   size,
 ) {
-  const currentState =
-    getPaletteState();
+  const currentState = getPaletteState();
 
-  const nextBaseColor =
-    normalizeBaseColor(
-      baseColor ??
-        currentState?.baseColor,
-    );
+  const nextBaseColor = normalizeBaseColor(
+    baseColor ?? currentState?.baseColor,
+  );
 
-  const nextPaletteType =
-    normalizePaletteType(
-      paletteType ??
-        currentState?.type,
-    );
+  const nextPaletteType = normalizePaletteType(
+    paletteType ?? currentState?.type,
+  );
 
-  const nextSize =
-    normalizePaletteSize(
-      size ??
-        currentState?.size ??
-        PALETTE_SIZE,
-    );
+  const nextSize = normalizePaletteSize(
+    size ??
+      currentState?.size ??
+      PALETTE_SIZE,
+  );
 
   const generatedColors =
     safelyGeneratePalette(
@@ -134,38 +162,21 @@ export function generateNewPalette(
     return null;
   }
 
-  const colors =
-    applyLockedColors(
-      generatedColors,
-      currentState?.colors,
-      currentState?.locked,
-    );
-
-  /*
-   * Preserve locks only for indexes that still
-   * exist in the new palette.
-   */
-  const locks =
-    createLockState(
-      colors.length,
-      currentState?.locked,
-    );
-
-  setBaseColor(
-    nextBaseColor,
+  const colors = applyLockedColors(
+    generatedColors,
+    currentState?.colors,
+    currentState?.locked,
   );
 
-  setPaletteType(
-    nextPaletteType,
+  const locked = createLockState(
+    colors.length,
+    currentState?.locked,
   );
 
-  setPaletteColors(
-    colors,
-  );
-
-  setLockedColors(
-    locks,
-  );
+  setBaseColor(nextBaseColor);
+  setPaletteType(nextPaletteType);
+  setPaletteColors(colors);
+  setLockedColors(locked);
 
   setPaletteState({
     size: colors.length,
@@ -180,42 +191,33 @@ export function generateNewPalette(
    ========================================================= */
 
 export function randomizeUnlockedColors() {
-  const currentState =
-    getPaletteState();
+  const currentState = getPaletteState();
 
   if (
-    !currentState ||
     !Array.isArray(
-      currentState.colors,
+      currentState?.colors,
     )
   ) {
     return null;
   }
 
-  const colors =
-    currentState.colors.map(
-      (color, index) => {
-        const isLocked =
-          Boolean(
-            currentState.locked?.[index],
-          );
+  const colors = currentState.colors.map(
+    (color, index) => {
+      if (
+        Boolean(
+          currentState.locked?.[index],
+        )
+      ) {
+        return color;
+      }
 
-        if (isLocked) {
-          return color;
-        }
-
-        const randomColor =
-          generateRandomColor();
-
-        return normalizeBaseColor(
-          randomColor,
-        );
-      },
-    );
-
-  setPaletteColors(
-    colors,
+      return normalizeBaseColor(
+        generateRandomColor(),
+      );
+    },
   );
+
+  setPaletteColors(colors);
 
   setPaletteState({
     size: colors.length,
@@ -230,19 +232,18 @@ export function randomizeUnlockedColors() {
    ========================================================= */
 
 export function regeneratePalette() {
-  const currentState =
-    getPaletteState();
+  const state = getPaletteState();
 
   return generateNewPalette(
-    currentState?.baseColor,
-    currentState?.type,
-    currentState?.size,
+    state?.baseColor,
+    state?.type,
+    state?.size,
   );
 }
 
 
 /* =========================================================
-   Set Base Color
+   Base Color
    ========================================================= */
 
 export function updateBaseColor(
@@ -259,34 +260,31 @@ export function updateBaseColor(
     return false;
   }
 
-  setBaseColor(
-    normalizedColor,
-  );
+  setBaseColor(normalizedColor);
 
   return true;
 }
 
 
 /* =========================================================
-   Set Palette Type
+   Palette Type
    ========================================================= */
 
 export function updatePaletteType(
   paletteType,
 ) {
-  const normalizedType =
-    normalizePaletteType(
+  if (
+    !isSupportedPaletteType(
       paletteType,
-    );
-
-  if (!isSupportedPaletteType(
-    paletteType,
-  )) {
+    )
+  ) {
     return false;
   }
 
   setPaletteType(
-    normalizedType,
+    normalizePaletteType(
+      paletteType,
+    ),
   );
 
   return true;
@@ -294,37 +292,30 @@ export function updatePaletteType(
 
 
 /* =========================================================
-   Set Palette Size
+   Palette Size
    ========================================================= */
 
-/*
- * Changes the palette size and regenerates the palette.
- *
- * Existing locked colors are preserved where possible.
- */
 export function updatePaletteSize(
   size,
 ) {
   const normalizedSize =
-    normalizePaletteSize(
-      size,
-    );
+    normalizePaletteSize(size);
 
-  if (!Number.isInteger(
-    normalizedSize,
-  )) {
+  if (
+    !Number.isInteger(
+      normalizedSize,
+    )
+  ) {
     return false;
   }
 
-  const currentState =
-    getPaletteState();
+  const state = getPaletteState();
 
-  const palette =
-    generateNewPalette(
-      currentState?.baseColor,
-      currentState?.type,
-      normalizedSize,
-    );
+  const palette = generateNewPalette(
+    state?.baseColor,
+    state?.type,
+    normalizedSize,
+  );
 
   return Boolean(palette);
 }
@@ -335,29 +326,25 @@ export function updatePaletteSize(
    ========================================================= */
 
 export function lockColor(index) {
-  const currentState =
-    getPaletteState();
+  const state = getPaletteState();
 
   if (
     !isValidIndex(
       index,
-      currentState?.colors,
+      state?.colors,
     )
   ) {
     return false;
   }
 
-  const locked =
-    createLockState(
-      currentState.colors.length,
-      currentState.locked,
-    );
+  const locked = createLockState(
+    state.colors.length,
+    state.locked,
+  );
 
   locked[index] = true;
 
-  setLockedColors(
-    locked,
-  );
+  setLockedColors(locked);
 
   return true;
 }
@@ -368,29 +355,25 @@ export function lockColor(index) {
    ========================================================= */
 
 export function unlockColor(index) {
-  const currentState =
-    getPaletteState();
+  const state = getPaletteState();
 
   if (
     !isValidIndex(
       index,
-      currentState?.colors,
+      state?.colors,
     )
   ) {
     return false;
   }
 
-  const locked =
-    createLockState(
-      currentState.colors.length,
-      currentState.locked,
-    );
+  const locked = createLockState(
+    state.colors.length,
+    state.locked,
+  );
 
   locked[index] = false;
 
-  setLockedColors(
-    locked,
-  );
+  setLockedColors(locked);
 
   return true;
 }
@@ -401,120 +384,103 @@ export function unlockColor(index) {
    ========================================================= */
 
 export function toggleColorLock(index) {
-  const currentState =
-    getPaletteState();
+  const state = getPaletteState();
 
   if (
     !isValidIndex(
       index,
-      currentState?.colors,
+      state?.colors,
     )
   ) {
     return false;
   }
 
-  const locked =
-    createLockState(
-      currentState.colors.length,
-      currentState.locked,
-    );
-
-  locked[index] =
-    !locked[index];
-
-  setLockedColors(
-    locked,
+  const locked = createLockState(
+    state.colors.length,
+    state.locked,
   );
+
+  locked[index] = !locked[index];
+
+  setLockedColors(locked);
 
   return locked[index];
 }
 
 
 /* =========================================================
-   Get Current Palette
+   Current Palette
    ========================================================= */
 
 export function getCurrentPalette() {
-  const currentState =
-    getPaletteState();
+  const state = getPaletteState();
 
-  const colors =
-    Array.isArray(
-      currentState?.colors,
-    )
-      ? currentState.colors
-      : [];
+  const colors = Array.isArray(
+    state?.colors,
+  )
+    ? [...state.colors]
+    : [];
 
   return {
-    colors: [
-      ...colors,
-    ],
+    colors,
 
-    locked:
-      createLockState(
-        colors.length,
-        currentState?.locked,
-      ),
+    locked: createLockState(
+      colors.length,
+      state?.locked,
+    ),
 
     baseColor:
-      currentState?.baseColor ??
-      DEFAULT_BASE_COLOR,
+      normalizeBaseColor(
+        state?.baseColor,
+      ),
 
     type:
-      currentState?.type ??
-      DEFAULT_PALETTE_TYPE,
+      normalizePaletteType(
+        state?.type,
+      ),
 
-    size:
-      colors.length,
+    size: colors.length,
   };
 }
 
 
 /* =========================================================
-   Get Colors
+   Palette Colors
    ========================================================= */
 
 export function getPaletteColors() {
-  const currentState =
-    getPaletteState();
+  const state = getPaletteState();
 
   return Array.isArray(
-    currentState?.colors,
+    state?.colors,
   )
-    ? [
-        ...currentState.colors,
-      ]
+    ? [...state.colors]
     : [];
 }
 
 
 /* =========================================================
-   Get Locked Color Indexes
+   Locked Color Indexes
    ========================================================= */
 
 export function getLockedColorIndexes() {
-  const currentState =
-    getPaletteState();
+  const state = getPaletteState();
 
-  const colors =
-    Array.isArray(
-      currentState?.colors,
-    )
-      ? currentState.colors
-      : [];
+  const colors = Array.isArray(
+    state?.colors,
+  )
+    ? state.colors
+    : [];
 
-  const locked =
-    createLockState(
-      colors.length,
-      currentState?.locked,
-    );
+  const locked = createLockState(
+    colors.length,
+    state?.locked,
+  );
 
   return locked
     .map(
       (isLocked, index) =>
-        isLocked
-          ? index
-          : null,
+        isLocked ? index : null,
     )
     .filter(
       (index) =>
@@ -536,9 +502,7 @@ export function setCurrentPalette(
   }
 
   const normalizedColors =
-    normalizePaletteColors(
-      colors,
-    );
+    normalizePaletteColors(colors);
 
   if (
     normalizedColors.length <
@@ -562,8 +526,7 @@ export function setCurrentPalette(
   );
 
   setPaletteState({
-    size:
-      normalizedColors.length,
+    size: normalizedColors.length,
   });
 
   return true;
@@ -578,13 +541,12 @@ export function replaceColor(
   index,
   color,
 ) {
-  const currentState =
-    getPaletteState();
+  const state = getPaletteState();
 
   if (
     !isValidIndex(
       index,
-      currentState?.colors,
+      state?.colors,
     ) ||
     !isValidHex(color)
   ) {
@@ -599,15 +561,12 @@ export function replaceColor(
   }
 
   const colors = [
-    ...currentState.colors,
+    ...state.colors,
   ];
 
-  colors[index] =
-    normalizedColor;
+  colors[index] = normalizedColor;
 
-  setPaletteColors(
-    colors,
-  );
+  setPaletteColors(colors);
 
   return true;
 }
@@ -618,20 +577,16 @@ export function replaceColor(
    ========================================================= */
 
 export function resetLocks() {
-  const currentState =
-    getPaletteState();
+  const state = getPaletteState();
 
-  const colorCount =
-    Array.isArray(
-      currentState?.colors,
-    )
-      ? currentState.colors.length
-      : 0;
+  const size = Array.isArray(
+    state?.colors,
+  )
+    ? state.colors.length
+    : 0;
 
   setLockedColors(
-    createLockState(
-      colorCount,
-    ),
+    createLockState(size),
   );
 
   return true;
@@ -642,14 +597,11 @@ export function resetLocks() {
    Reset Palette
    ========================================================= */
 
-/*
- * A real reset:
+/**
+ * Resets the palette to application defaults.
  *
- * - default base color
- * - default palette type
- * - default size
- * - NEW colors
- * - NO locked colors
+ * Reset intentionally generates fresh colors and clears
+ * all locks.
  */
 export function resetPalette() {
   const colors =
@@ -671,14 +623,10 @@ export function resetPalette() {
     DEFAULT_PALETTE_TYPE,
   );
 
-  setPaletteColors(
-    colors,
-  );
+  setPaletteColors(colors);
 
   setLockedColors(
-    createLockState(
-      colors.length,
-    ),
+    createLockState(colors.length),
   );
 
   setPaletteState({
@@ -693,14 +641,11 @@ export function resetPalette() {
    Helpers
    ========================================================= */
 
+/* ---------------------------------------------------------
+   Base Color
+   --------------------------------------------------------- */
 
-/* =========================================================
-   Normalize Base Color
-   ========================================================= */
-
-function normalizeBaseColor(
-  color,
-) {
+function normalizeBaseColor(color) {
   if (!isValidHex(color)) {
     return DEFAULT_BASE_COLOR;
   }
@@ -712,13 +657,11 @@ function normalizeBaseColor(
 }
 
 
-/* =========================================================
-   Normalize Palette Type
-   ========================================================= */
+/* ---------------------------------------------------------
+   Palette Type
+   --------------------------------------------------------- */
 
-function normalizePaletteType(
-  type,
-) {
+function normalizePaletteType(type) {
   if (
     typeof type !== "string" ||
     !type.trim()
@@ -737,20 +680,15 @@ function normalizePaletteType(
 }
 
 
-/* =========================================================
-   Normalize Palette Size
-   ========================================================= */
+/* ---------------------------------------------------------
+   Palette Size
+   --------------------------------------------------------- */
 
-function normalizePaletteSize(
-  size,
-) {
-  const numericSize =
-    Number(size);
+function normalizePaletteSize(size) {
+  const numericSize = Number(size);
 
   if (
-    !Number.isFinite(
-      numericSize,
-    )
+    !Number.isFinite(numericSize)
   ) {
     return PALETTE_SIZE;
   }
@@ -759,59 +697,50 @@ function normalizePaletteSize(
     MIN_PALETTE_SIZE,
     Math.min(
       MAX_PALETTE_SIZE,
-      Math.floor(
-        numericSize,
-      ),
+      Math.floor(numericSize),
     ),
   );
 }
 
 
-/* =========================================================
-   Normalize Palette Colors
-   ========================================================= */
+/* ---------------------------------------------------------
+   Palette Colors
+   --------------------------------------------------------- */
 
-function normalizePaletteColors(
-  colors,
-) {
+function normalizePaletteColors(colors) {
+  if (!Array.isArray(colors)) {
+    return [];
+  }
+
   return colors
-    .slice(
-      0,
-      MAX_PALETTE_SIZE,
-    )
-    .map(
-      (color) => {
-        if (!isValidHex(color)) {
-          return null;
-        }
+    .slice(0, MAX_PALETTE_SIZE)
+    .map((color) => {
+      if (!isValidHex(color)) {
+        return null;
+      }
 
-        return normalizeHex(
-          color,
-        );
-      },
-    )
+      return normalizeHex(color);
+    })
     .filter(Boolean);
 }
 
 
-/* =========================================================
-   Create Lock State
-   ========================================================= */
+/* ---------------------------------------------------------
+   Lock State
+   --------------------------------------------------------- */
 
 function createLockState(
   size,
   existingLocks = [],
 ) {
   const normalizedSize =
-    Number.isInteger(size) &&
-    size >= 0
+    Number.isInteger(size) && size >= 0
       ? size
       : 0;
 
   return Array.from(
     {
-      length:
-        normalizedSize,
+      length: normalizedSize,
     },
     (_, index) =>
       Boolean(
@@ -821,9 +750,9 @@ function createLockState(
 }
 
 
-/* =========================================================
+/* ---------------------------------------------------------
    Apply Existing Locks
-   ========================================================= */
+   --------------------------------------------------------- */
 
 function applyLockedColors(
   generatedColors,
@@ -831,14 +760,9 @@ function applyLockedColors(
   locked = [],
 ) {
   return generatedColors.map(
-    (
-      generatedColor,
-      index,
-    ) => {
+    (generatedColor, index) => {
       const isLocked =
-        Boolean(
-          locked?.[index],
-        );
+        Boolean(locked?.[index]);
 
       const existingColor =
         currentColors?.[index];
@@ -848,9 +772,7 @@ function applyLockedColors(
         isValidHex(existingColor)
       ) {
         return (
-          normalizeHex(
-            existingColor,
-          ) ||
+          normalizeHex(existingColor) ||
           generatedColor
         );
       }
@@ -861,9 +783,9 @@ function applyLockedColors(
 }
 
 
-/* =========================================================
+/* ---------------------------------------------------------
    Safe Palette Generation
-   ========================================================= */
+   --------------------------------------------------------- */
 
 function safelyGeneratePalette(
   baseColor,
@@ -871,25 +793,21 @@ function safelyGeneratePalette(
   size,
 ) {
   try {
-    const colors =
-      generatePalette(
-        baseColor,
-        paletteType,
-        size,
-      );
+    const colors = generatePalette(
+      baseColor,
+      paletteType,
+      size,
+    );
 
     if (!Array.isArray(colors)) {
       return null;
     }
 
     const normalizedColors =
-      normalizePaletteColors(
-        colors,
-      );
+      normalizePaletteColors(colors);
 
     if (
-      normalizedColors.length !==
-      size
+      normalizedColors.length !== size
     ) {
       return null;
     }
@@ -897,7 +815,7 @@ function safelyGeneratePalette(
     return normalizedColors;
   } catch (error) {
     console.error(
-      "Palette generation failed:",
+      "Color Studio: palette generation failed.",
       error,
     );
 
@@ -906,9 +824,36 @@ function safelyGeneratePalette(
 }
 
 
-/* =========================================================
+/* ---------------------------------------------------------
+   Existing Palette Validation
+   --------------------------------------------------------- */
+
+function hasValidPalette(
+  colors,
+  expectedSize,
+) {
+  if (!Array.isArray(colors)) {
+    return false;
+  }
+
+  if (
+    colors.length !== expectedSize
+  ) {
+    return false;
+  }
+
+  return colors.every(
+    (color) =>
+      Boolean(
+        normalizeHex(color),
+      ),
+  );
+}
+
+
+/* ---------------------------------------------------------
    Palette Type Validation
-   ========================================================= */
+   --------------------------------------------------------- */
 
 function isSupportedPaletteType(
   paletteType,
@@ -921,9 +866,9 @@ function isSupportedPaletteType(
 }
 
 
-/* =========================================================
-   Validate Color Index
-   ========================================================= */
+/* ---------------------------------------------------------
+   Color Index Validation
+   --------------------------------------------------------- */
 
 function isValidIndex(
   index,
