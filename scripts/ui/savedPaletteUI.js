@@ -20,11 +20,9 @@ import {
 } from "./toastUI.js";
 
 import {
-  savedPalettesList,
-  saveCurrentPaletteButton,
-  savedPalettesEmptyState,
-  savedPalettesCount,
+  dom,
 } from "./dom.js";
+
 
 /* =========================================================
    Initialization
@@ -32,32 +30,34 @@ import {
 
 export function initializeSavedUI() {
   bindEvents();
-
   renderSavedPalettes();
 }
+
 
 /* =========================================================
    Event Binding
    ========================================================= */
 
 function bindEvents() {
-  saveCurrentPaletteButton?.addEventListener(
+  dom.saveCurrentPaletteButton?.addEventListener(
     "click",
     handleSavePalette,
   );
 
-  savedPalettesList?.addEventListener(
+  dom.savedPalettesList?.addEventListener(
     "click",
     handleSavedPaletteClick,
   );
 }
+
 
 /* =========================================================
    Save Current Palette
    ========================================================= */
 
 function handleSavePalette() {
-  const palette = getCurrentPalette();
+  const palette =
+    getCurrentPalette();
 
   if (
     !palette ||
@@ -71,12 +71,13 @@ function handleSavePalette() {
     return;
   }
 
-  const savedPalette = savePalette({
-    colors: palette.colors,
-    locked: palette.locked,
-    baseColor: palette.baseColor,
-    type: palette.type,
-  });
+  const savedPalette =
+    savePalette({
+      colors: palette.colors,
+      locked: palette.locked,
+      baseColor: palette.baseColor,
+      type: palette.type,
+    });
 
   if (!savedPalette) {
     showErrorToast(
@@ -93,14 +94,23 @@ function handleSavePalette() {
   );
 }
 
+
 /* =========================================================
    Saved Palette Click
    ========================================================= */
 
 function handleSavedPaletteClick(event) {
-  const card = event.target.closest(
-    "[data-saved-palette-id]",
-  );
+  const target =
+    event?.target;
+
+  if (!(target instanceof Element)) {
+    return;
+  }
+
+  const card =
+    target.closest(
+      "[data-saved-palette-id]",
+    );
 
   if (!card) {
     return;
@@ -114,7 +124,9 @@ function handleSavedPaletteClick(event) {
   }
 
   const action =
-    event.target.closest("[data-action]");
+    target.closest(
+      "[data-action]",
+    );
 
   if (!action) {
     return;
@@ -125,11 +137,15 @@ function handleSavedPaletteClick(event) {
 
   switch (actionType) {
     case "load":
-      loadSavedPalette(paletteId);
+      loadSavedPalette(
+        paletteId,
+      );
       break;
 
     case "delete":
-      removeSavedPalette(paletteId);
+      removeSavedPalette(
+        paletteId,
+      );
       break;
 
     default:
@@ -137,11 +153,14 @@ function handleSavedPaletteClick(event) {
   }
 }
 
+
 /* =========================================================
    Load Saved Palette
    ========================================================= */
 
-function loadSavedPalette(paletteId) {
+function loadSavedPalette(
+  paletteId,
+) {
   const savedPalettes =
     getSavedPalettes();
 
@@ -160,10 +179,11 @@ function loadSavedPalette(paletteId) {
     return;
   }
 
-  const loaded = setCurrentPalette(
-    savedPalette.colors,
-    savedPalette.locked,
-  );
+  const loaded =
+    setCurrentPalette(
+      savedPalette.colors,
+      savedPalette.locked,
+    );
 
   if (!loaded) {
     showErrorToast(
@@ -178,7 +198,8 @@ function loadSavedPalette(paletteId) {
       "colorstudio:palettechange",
       {
         detail: {
-          palette: getCurrentPalette(),
+          palette:
+            getCurrentPalette(),
         },
       },
     ),
@@ -189,13 +210,18 @@ function loadSavedPalette(paletteId) {
   );
 }
 
+
 /* =========================================================
    Delete Saved Palette
    ========================================================= */
 
-function removeSavedPalette(paletteId) {
+function removeSavedPalette(
+  paletteId,
+) {
   const deleted =
-    deletePalette(paletteId);
+    deletePalette(
+      paletteId,
+    );
 
   if (!deleted) {
     showErrorToast(
@@ -212,19 +238,21 @@ function removeSavedPalette(paletteId) {
   );
 }
 
+
 /* =========================================================
    Render Saved Palettes
    ========================================================= */
 
 export function renderSavedPalettes() {
-  if (!savedPalettesList) {
+  if (!dom.savedPalettesList) {
     return;
   }
 
   const savedPalettes =
     getSavedPalettes();
 
-  savedPalettesList.innerHTML = "";
+  dom.savedPalettesList.innerHTML =
+    "";
 
   updateSavedPalettesCount(
     savedPalettes.length,
@@ -232,7 +260,6 @@ export function renderSavedPalettes() {
 
   if (savedPalettes.length === 0) {
     renderEmptyState();
-
     return;
   }
 
@@ -245,33 +272,41 @@ export function renderSavedPalettes() {
           palette,
         );
 
-      savedPalettesList.appendChild(
+      dom.savedPalettesList.appendChild(
         card,
       );
     },
   );
 }
 
+
 /* =========================================================
    Saved Palettes Count
    ========================================================= */
 
-function updateSavedPalettesCount(count) {
-  if (!savedPalettesCount) {
+function updateSavedPalettesCount(
+  count,
+) {
+  if (!dom.savedPalettesCount) {
     return;
   }
 
-  savedPalettesCount.textContent =
+  dom.savedPalettesCount.textContent =
     String(count);
 }
+
 
 /* =========================================================
    Create Saved Palette Card
    ========================================================= */
 
-function createSavedPaletteCard(palette) {
+function createSavedPaletteCard(
+  palette,
+) {
   const card =
-    document.createElement("article");
+    document.createElement(
+      "article",
+    );
 
   card.className =
     "saved-palette-card";
@@ -284,17 +319,18 @@ function createSavedPaletteCard(palette) {
       ? palette.colors
       : [];
 
-  const swatches = colors
-    .map(
-      (color) => `
-        <span
-          class="saved-palette-card__swatch"
-          style="background-color: ${escapeHTML(color)};"
-          title="${escapeHTML(color)}"
-        ></span>
-      `,
-    )
-    .join("");
+  const swatches =
+    colors
+      .map(
+        (color) => `
+          <span
+            class="saved-palette-card__swatch"
+            style="background-color: ${escapeHTML(color)};"
+            title="${escapeHTML(color)}"
+          ></span>
+        `,
+      )
+      .join("");
 
   const paletteName =
     palette.name ||
@@ -361,25 +397,28 @@ function createSavedPaletteCard(palette) {
   return card;
 }
 
+
 /* =========================================================
    Empty State
    ========================================================= */
 
 function renderEmptyState() {
-  savedPalettesEmptyState?.classList.remove(
+  dom.savedPalettesEmptyState?.classList.remove(
     "d-none",
   );
 }
+
 
 /* =========================================================
    Hide Empty State
    ========================================================= */
 
 function hideEmptyState() {
-  savedPalettesEmptyState?.classList.add(
+  dom.savedPalettesEmptyState?.classList.add(
     "d-none",
   );
 }
+
 
 /* =========================================================
    Format Date
@@ -411,13 +450,16 @@ function formatDate(value) {
   ).format(date);
 }
 
+
 /* =========================================================
    Escape HTML
    ========================================================= */
 
 function escapeHTML(value) {
   const element =
-    document.createElement("div");
+    document.createElement(
+      "div",
+    );
 
   element.textContent =
     String(value);
