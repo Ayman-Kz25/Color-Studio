@@ -1602,48 +1602,43 @@ function updateContrastUI() {
     background,
   });
 
-  if (dom.contrastPreview) {
-    dom.contrastPreview.style.color =
+  if (elements.contrastPreview) {
+    elements.contrastPreview.style.color =
       foreground;
 
-    dom.contrastPreview.style.backgroundColor =
+    elements.contrastPreview.style.backgroundColor =
       background;
   }
 
-  if (dom.contrastPreviewText) {
-    dom.contrastPreviewText.style.color =
+  if (elements.contrastPreviewText) {
+    elements.contrastPreviewText.style.color =
       foreground;
   }
 
-  if (dom.contrastRatio) {
-    dom.contrastRatio.textContent =
+  if (elements.contrastRatio) {
+    elements.contrastRatio.textContent =
       `${Number(results.ratio || 0).toFixed(2)} : 1`;
   }
 
-  updateResultCard(
-    dom.normalTextResult,
-    dom.normalTextStatus,
-    dom.normalTextLevel,
+  updateTextContrastCard(
+    elements.normalTextResult,
+    elements.normalTextStatus,
+    elements.normalTextLevel,
     results.normalText,
-    "WCAG AA / AAA",
   );
 
-  updateResultCard(
-    dom.largeTextResult,
-    dom.largeTextStatus,
-    dom.largeTextLevel,
+  updateTextContrastCard(
+    elements.largeTextResult,
+    elements.largeTextStatus,
+    elements.largeTextLevel,
     results.largeText,
-    "WCAG AA / AAA",
   );
 
-  updateResultCard(
-    dom.uiComponentResult,
-    dom.uiComponentStatus,
-    dom.uiComponentLevel,
-    results.uiComponent
-      ? "pass"
-      : "fail",
-    "WCAG 1.4.11",
+  updateUIComponentCard(
+    elements.uiComponentResult,
+    elements.uiComponentStatus,
+    elements.uiComponentLevel,
+    results.uiComponent,
   );
 }
 
