@@ -4,11 +4,9 @@
    ========================================================= */
 
 import {
-  toastContainer,
-  appToast,
-  toastMessage,
-  toastIcon,
+  dom,
 } from "./dom.js";
+
 
 /* =========================================================
    Constants
@@ -24,6 +22,7 @@ const TOAST_TYPES = Object.freeze({
   INFO: "info",
 });
 
+
 /* =========================================================
    State
    ========================================================= */
@@ -31,6 +30,7 @@ const TOAST_TYPES = Object.freeze({
 let hideTimer = null;
 let removeHidingTimer = null;
 let eventsBound = false;
+
 
 /* =========================================================
    Initialization
@@ -45,13 +45,14 @@ export function initializeToastUI() {
 
   eventsBound = true;
 
-  if (appToast) {
-    appToast.setAttribute(
+  if (dom.appToast) {
+    dom.appToast.setAttribute(
       "aria-hidden",
       "true",
     );
   }
 }
+
 
 /* =========================================================
    Event Binding
@@ -64,12 +65,14 @@ function bindEvents() {
   );
 }
 
+
 /* =========================================================
    Toast Event
    ========================================================= */
 
 function handleToastEvent(event) {
-  const detail = event?.detail;
+  const detail =
+    event?.detail;
 
   if (!detail) {
     return;
@@ -85,7 +88,9 @@ function handleToastEvent(event) {
   }
 
   const type =
-    normalizeToastType(detail.type);
+    normalizeToastType(
+      detail.type,
+    );
 
   const duration =
     normalizeDuration(
@@ -100,6 +105,7 @@ function handleToastEvent(event) {
   );
 }
 
+
 /* =========================================================
    Show Toast
    ========================================================= */
@@ -113,6 +119,7 @@ export function showToast(
     duration,
   );
 }
+
 
 /* =========================================================
    Success Toast
@@ -129,6 +136,7 @@ export function showSuccessToast(
   );
 }
 
+
 /* =========================================================
    Error Toast
    ========================================================= */
@@ -143,6 +151,7 @@ export function showErrorToast(
     duration,
   );
 }
+
 
 /* =========================================================
    Warning Toast
@@ -159,6 +168,7 @@ export function showWarningToast(
   );
 }
 
+
 /* =========================================================
    Info Toast
    ========================================================= */
@@ -174,42 +184,44 @@ export function showInfoToast(
   );
 }
 
+
 /* =========================================================
    Hide Toast
    ========================================================= */
 
 export function hideToast() {
-  if (!appToast) {
+  if (!dom.appToast) {
     return;
   }
 
   clearTimeout(hideTimer);
   clearTimeout(removeHidingTimer);
 
-  appToast.classList.remove(
+  dom.appToast.classList.remove(
     "is-visible",
   );
 
-  appToast.classList.add(
+  dom.appToast.classList.add(
     "is-hiding",
   );
 
-  appToast.setAttribute(
+  dom.appToast.setAttribute(
     "aria-hidden",
     "true",
   );
 
-  toastContainer?.classList.remove(
+  dom.toastContainer?.classList.remove(
     "is-active",
   );
 
   removeHidingTimer =
     window.setTimeout(() => {
-      appToast?.classList.remove(
+      dom.appToast?.classList.remove(
         "is-hiding",
       );
     }, 200);
 }
+
 
 /* =========================================================
    Typed Toast
@@ -220,7 +232,7 @@ function showTypedToast(
   type,
   duration,
 ) {
-  if (!appToast) {
+  if (!dom.appToast) {
     console.warn(
       "[ColorStudio] Toast element not found.",
     );
@@ -261,7 +273,7 @@ function showTypedToast(
     normalizedType,
   );
 
-  appToast.classList.remove(
+  dom.appToast.classList.remove(
     "is-hiding",
   );
 
@@ -270,73 +282,77 @@ function showTypedToast(
    * visibility transition when a toast
    * is shown immediately after another one.
    */
-  void appToast.offsetWidth;
+  void dom.appToast.offsetWidth;
 
-  appToast.classList.add(
+  dom.appToast.classList.add(
     "is-visible",
   );
 
-  appToast.setAttribute(
+  dom.appToast.setAttribute(
     "aria-hidden",
     "false",
   );
 
-  toastContainer?.classList.add(
+  dom.toastContainer?.classList.add(
     "is-active",
   );
 
   if (normalizedDuration > 0) {
-    hideTimer = window.setTimeout(
-      hideToast,
-      normalizedDuration,
-    );
+    hideTimer =
+      window.setTimeout(
+        hideToast,
+        normalizedDuration,
+      );
   }
 }
+
 
 /* =========================================================
    Set Toast Message
    ========================================================= */
 
 function setToastMessage(message) {
-  if (!toastMessage) {
+  if (!dom.toastMessage) {
     return;
   }
 
   /*
    * textContent prevents HTML injection.
    */
-  toastMessage.textContent =
+  dom.toastMessage.textContent =
     message;
 }
+
 
 /* =========================================================
    Set Toast Type
    ========================================================= */
 
 function setToastType(type) {
-  appToast?.classList.remove(
+  dom.appToast?.classList.remove(
     "toast-success",
     "toast-error",
     "toast-warning",
     "toast-info",
   );
 
-  appToast?.classList.add(
+  dom.appToast?.classList.add(
     `toast-${type}`,
   );
 }
+
 
 /* =========================================================
    Set Toast Icon
    ========================================================= */
 
 function setToastIcon(type) {
-  if (!toastIcon) {
+  if (!dom.toastIcon) {
     return;
   }
 
   const icon =
-    toastIcon.querySelector("i");
+    dom.toastIcon.querySelector("i");
 
   if (!icon) {
     return;
@@ -368,6 +384,7 @@ function setToastIcon(type) {
   }
 }
 
+
 /* =========================================================
    Normalize Toast Type
    ========================================================= */
@@ -389,6 +406,7 @@ function normalizeToastType(type) {
     : TOAST_TYPES.SUCCESS;
 }
 
+
 /* =========================================================
    Normalize Message
    ========================================================= */
@@ -402,6 +420,7 @@ function normalizeMessage(message) {
 
   return message.trim();
 }
+
 
 /* =========================================================
    Normalize Duration
@@ -424,13 +443,16 @@ function normalizeDuration(
   return value;
 }
 
+
 /* =========================================================
    Default Duration
    ========================================================= */
 
 function getDefaultDuration(type) {
-  return type === TOAST_TYPES.ERROR ||
+  return (
+    type === TOAST_TYPES.ERROR ||
     type === TOAST_TYPES.WARNING
+  )
     ? ERROR_DURATION
     : DEFAULT_DURATION;
 }
