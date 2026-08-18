@@ -1,7 +1,5 @@
 // scripts/ui/paletteUI.js
 
-// scripts/ui/paletteUI.js
-
 import {
   getPaletteState,
   setSelectedColorIndex,
@@ -45,7 +43,7 @@ import {
 
 
 /* =========================================================
-   State
+   Module State
    ========================================================= */
 
 let eventsBound = false;
@@ -55,6 +53,12 @@ let eventsBound = false;
    Initialization
    ========================================================= */
 
+/**
+ * Initialize palette UI.
+ *
+ * Event listeners are bound only once so this function can
+ * safely be called more than once during application startup.
+ */
 export function initializePaletteUI() {
   if (!eventsBound) {
     bindEvents();
@@ -113,15 +117,12 @@ function bindEvents() {
 
 
 /* =========================================================
-   Generate Palette
+   Generate
    ========================================================= */
 
 function handleGenerate() {
-  const baseColor =
-    getBaseColorFromInput();
-
-  const paletteType =
-    getSelectedPaletteType();
+  const baseColor = getBaseColorFromInput();
+  const paletteType = getSelectedPaletteType();
 
   if (!baseColor) {
     showErrorToast(
@@ -140,18 +141,13 @@ function handleGenerate() {
     return;
   }
 
-  const palette =
-    generateNewPalette(
-      baseColor,
-      paletteType,
-    );
+  const palette = generateNewPalette(
+    baseColor,
+    paletteType,
+  );
 
   if (!palette) {
-    showErrorToast(
-      MESSAGES.PALETTE_GENERATION_ERROR ||
-        "Unable to generate palette.",
-    );
-
+    showPaletteGenerationError();
     return;
   }
 
@@ -165,31 +161,24 @@ function handleGenerate() {
 
 
 /* =========================================================
-   Randomize Palette
+   Randomize
    ========================================================= */
 
 function handleRandomize() {
-  const paletteState =
-    getPaletteState();
+  const paletteState = getPaletteState();
 
-  const baseColor =
-    normalizeOrFallback(
-      paletteState?.baseColor,
-      DEFAULT_BASE_COLOR,
-    );
+  const baseColor = normalizeOrFallback(
+    paletteState?.baseColor,
+    DEFAULT_BASE_COLOR,
+  );
 
-  const palette =
-    generateNewPalette(
-      baseColor,
-      PALETTE_TYPES.RANDOM,
-    );
+  const palette = generateNewPalette(
+    baseColor,
+    PALETTE_TYPES.RANDOM,
+  );
 
   if (!palette) {
-    showErrorToast(
-      MESSAGES.PALETTE_GENERATION_ERROR ||
-        "Unable to generate palette.",
-    );
-
+    showPaletteGenerationError();
     return;
   }
 
@@ -202,25 +191,20 @@ function handleRandomize() {
 
 
 /* =========================================================
-   Reset Palette
+   Reset
    ========================================================= */
 
 function handleReset() {
-  const baseColor =
-    normalizeOrFallback(
-      DEFAULT_BASE_COLOR,
-      "#000000",
-    );
+  const baseColor = normalizeOrFallback(
+    DEFAULT_BASE_COLOR,
+    "#000000",
+  );
 
-  const paletteType =
-    PALETTE_TYPES.RANDOM;
-
-  const palette =
-    generateNewPalette(
-      baseColor,
-      paletteType,
-      PALETTE_SIZE,
-    );
+  const palette = generateNewPalette(
+    baseColor,
+    PALETTE_TYPES.RANDOM,
+    PALETTE_SIZE,
+  );
 
   if (!palette) {
     showErrorToast(
@@ -230,10 +214,6 @@ function handleReset() {
 
     return;
   }
-
-  syncControlsFromPalette(
-    palette,
-  );
 
   renderPalette();
 
@@ -245,66 +225,61 @@ function handleReset() {
 
 
 /* =========================================================
-   Base Color Input
+   Base Color
    ========================================================= */
 
 function handleBaseColorInput(event) {
-  const value =
-    event?.target?.value?.trim();
+  const value = event?.target?.value?.trim();
 
   /*
-   * Allow the user to type freely.
-   * Only update application state once the
-   * value becomes a valid HEX color.
+   * Do not reject intermediate typing states.
+   * State is updated only after a valid HEX is entered.
    */
   if (!isValidHex(value)) {
     return;
   }
 
-  const normalized =
-    normalizeHex(value);
+  const normalized = normalizeHex(value);
 
   if (!normalized) {
     return;
   }
 
-  updateBaseColor(
-    normalized,
-  );
+  updateBaseColor(normalized);
 
-  if (dom.baseColorPicker) {
-    dom.baseColorPicker.value =
-      normalized;
-  }
+  syncBaseColorPicker(normalized);
 }
 
 
-/* =========================================================
-   Base Color Picker
-   ========================================================= */
-
 function handleBaseColorPicker(event) {
-  const value =
-    event?.target?.value;
+  const value = event?.target?.value;
 
   if (!isValidHex(value)) {
     return;
   }
 
-  const normalized =
-    normalizeHex(value);
+  const normalized = normalizeHex(value);
 
   if (!normalized) {
     return;
   }
 
-  updateBaseColor(
-    normalized,
-  );
+  updateBaseColor(normalized);
 
+  syncBaseColorInput(normalized);
+}
+
+
+function syncBaseColorInput(color) {
   if (dom.baseColorInput) {
-    dom.baseColorInput.value =
-      normalized;
+    dom.baseColorInput.value = color;
+  }
+}
+
+
+function syncBaseColorPicker(color) {
+  if (dom.baseColorPicker) {
+    dom.baseColorPicker.value = color;
   }
 }
 
@@ -314,49 +289,35 @@ function handleBaseColorPicker(event) {
    ========================================================= */
 
 function handlePaletteTypeChange(event) {
-  const paletteType =
-    event?.target?.value;
+  const paletteType = event?.target?.value;
 
-  if (!isSupportedPaletteType(
-    paletteType,
-  )) {
+  if (!isSupportedPaletteType(paletteType)) {
     return;
   }
 
-  updatePaletteType(
+  updatePaletteType(paletteType);
+
+  const paletteState = getPaletteState();
+
+  const baseColor = normalizeOrFallback(
+    paletteState?.baseColor,
+    DEFAULT_BASE_COLOR,
+  );
+
+  const palette = generateNewPalette(
+    baseColor,
     paletteType,
   );
 
-  const paletteState =
-    getPaletteState();
-
-  const baseColor =
-    normalizeOrFallback(
-      paletteState?.baseColor,
-      DEFAULT_BASE_COLOR,
-    );
-
-  const palette =
-    generateNewPalette(
-      baseColor,
-      paletteType,
-    );
-
   if (!palette) {
-    showErrorToast(
-      MESSAGES.PALETTE_GENERATION_ERROR ||
-        "Unable to generate palette.",
-    );
-
+    showPaletteGenerationError();
     return;
   }
 
   renderPalette();
 
   showSuccessToast(
-    `${getPaletteTypeLabel(
-      paletteType,
-    )} palette generated.`,
+    `${getPaletteTypeLabel(paletteType)} palette generated.`,
   );
 }
 
@@ -366,43 +327,30 @@ function handlePaletteTypeChange(event) {
    ========================================================= */
 
 function handlePaletteSizeChange(event) {
-  const requestedSize =
-    Number(
-      event?.target?.value,
-    );
+  const requestedSize = Number(
+    event?.target?.value,
+  );
 
-  if (
-    !Number.isInteger(
-      requestedSize,
-    ) ||
-    requestedSize < MIN_PALETTE_SIZE ||
-    requestedSize > MAX_PALETTE_SIZE
-  ) {
+  if (!isValidPaletteSize(requestedSize)) {
     return;
   }
 
-  const paletteState =
-    getPaletteState();
+  const paletteState = getPaletteState();
 
-  const baseColor =
-    normalizeOrFallback(
-      paletteState?.baseColor,
-      DEFAULT_BASE_COLOR,
-    );
+  const baseColor = normalizeOrFallback(
+    paletteState?.baseColor,
+    DEFAULT_BASE_COLOR,
+  );
 
-  const paletteType =
-    isSupportedPaletteType(
-      paletteState?.type,
-    )
-      ? paletteState.type
-      : PALETTE_TYPES.RANDOM;
+  const paletteType = getValidPaletteType(
+    paletteState?.type,
+  );
 
-  const palette =
-    generateNewPalette(
-      baseColor,
-      paletteType,
-      requestedSize,
-    );
+  const palette = generateNewPalette(
+    baseColor,
+    paletteType,
+    requestedSize,
+  );
 
   if (!palette) {
     showErrorToast(
@@ -422,56 +370,60 @@ function handlePaletteSizeChange(event) {
    ========================================================= */
 
 async function handlePaletteClick(event) {
-  const target =
-    event?.target;
+  const target = event?.target;
 
   if (!(target instanceof Element)) {
     return;
   }
 
-  const colorCard =
-    target.closest(
-      "[data-color-index]",
-    );
+  const card = target.closest(
+    ".palette-color-card",
+  );
 
-  if (!colorCard) {
+  if (!card || !dom.currentPalette?.contains(card)) {
     return;
   }
 
-  const index =
-    Number(
-      colorCard.dataset.colorIndex,
-    );
+  const index = Number(
+    card.dataset.colorIndex,
+  );
 
-  if (
-    !Number.isInteger(index) ||
-    index < 0
-  ) {
+  if (!isValidColorIndex(index)) {
     return;
   }
 
-  const copyButton =
-    target.closest(
-      "[data-action='copy']",
-    );
+  const actionButton = target.closest(
+    "[data-action]",
+  );
 
-  const lockButton =
-    target.closest(
-      "[data-action='lock']",
-    );
+  if (actionButton) {
+    const action = actionButton.dataset.action;
 
-  if (copyButton) {
-    await handleCopyColor(index);
+    if (action === "copy") {
+      await handleCopyColor(index);
+      return;
+    }
+
+    if (action === "lock") {
+      handleToggleLock(index);
+      return;
+    }
+  }
+
+  handleSelectColor(index);
+}
+
+
+/* =========================================================
+   Select Color
+   ========================================================= */
+
+function handleSelectColor(index) {
+  if (!isValidColorIndex(index)) {
     return;
   }
 
-  if (lockButton) {
-    handleToggleLock(index);
-    return;
-  }
-
-  const selected =
-    setSelectedColorIndex(index);
+  const selected = setSelectedColorIndex(index);
 
   if (selected === false) {
     return;
@@ -486,18 +438,19 @@ async function handlePaletteClick(event) {
    ========================================================= */
 
 async function handleCopyColor(index) {
-  const palette =
-    getCurrentPalette();
+  const palette = getCurrentPalette();
 
-  const color =
-    palette?.colors?.[index];
+  if (!isValidPalette(palette)) {
+    return;
+  }
+
+  const color = palette.colors[index];
 
   if (!color) {
     return;
   }
 
-  const copied =
-    await copyColor(color);
+  const copied = await copyColor(color);
 
   if (!copied) {
     showErrorToast(
@@ -521,29 +474,37 @@ async function handleCopyColor(index) {
    ========================================================= */
 
 function handleToggleLock(index) {
-  const result = toggleColorLock(index);
-
-  /*
-   * toggleColorLock() returns false both when:
-   * 1. the color was successfully unlocked
-   * 2. the index was invalid
-   *
-   * Therefore, validate the index before displaying
-   * the notification.
-   */
-  const palette = getCurrentPalette();
+  const paletteBeforeToggle = getCurrentPalette();
 
   if (
-    !palette ||
-    !Array.isArray(palette.colors) ||
-    !Number.isInteger(index) ||
-    index < 0 ||
-    index >= palette.colors.length
+    !isValidPalette(paletteBeforeToggle) ||
+    !isValidColorIndex(
+      index,
+      paletteBeforeToggle.colors.length,
+    )
   ) {
     return;
   }
 
+  const result = toggleColorLock(index);
+
+  /*
+   * toggleColorLock() returns true when the color is locked
+   * and false when it is unlocked.
+   */
   const isLocked = result === true;
+
+  const palette = getCurrentPalette();
+
+  if (
+    !isValidPalette(palette) ||
+    !isValidColorIndex(
+      index,
+      palette.colors.length,
+    )
+  ) {
+    return;
+  }
 
   updateLockButton(
     index,
@@ -559,67 +520,65 @@ function handleToggleLock(index) {
 
 
 /* =========================================================
-   Render Palette
+   Render
    ========================================================= */
 
+/**
+ * Render the complete palette.
+ *
+ * The palette surface is owned by this function. Individual
+ * cards are recreated whenever the palette changes.
+ */
 export function renderPalette() {
-  if (!dom.currentPalette) {
+  const container = dom.currentPalette;
+
+  if (!container) {
     return;
   }
 
-  const palette =
-    getCurrentPalette();
+  const palette = getCurrentPalette();
 
-  if (
-    !palette ||
-    !Array.isArray(
-      palette.colors,
-    )
-  ) {
-    dom.currentPalette.innerHTML =
-      "";
-
+  if (!isValidPalette(palette)) {
+    container.replaceChildren();
+    container.style.removeProperty(
+      "--palette-count",
+    );
     return;
   }
 
-  dom.currentPalette.innerHTML =
-    "";
+  container.style.setProperty(
+    "--palette-count",
+    String(palette.colors.length),
+  );
+
+  const fragment = document.createDocumentFragment();
 
   palette.colors.forEach(
     (color, index) => {
-      const card =
-        createColorCard(
-          color,
-          index,
-          Boolean(
-            palette.locked?.[index],
-          ),
-        );
-
-      dom.currentPalette.appendChild(
-        card,
+      const card = createColorCard(
+        color,
+        index,
+        Boolean(palette.locked?.[index]),
       );
+
+      fragment.appendChild(card);
     },
   );
 
-  updatePaletteControls(
-    palette,
-  );
+  container.replaceChildren(fragment);
 
-  /*
-   * Restore the visual selected state
-   * after rebuilding the cards.
-   */
+  updatePaletteControls(palette);
+
   const selectedIndex =
-    getPaletteState()
-      ?.selectedColorIndex;
+    getPaletteState()?.selectedColorIndex;
 
   if (
-    Number.isInteger(selectedIndex)
-  ) {
-    updateSelectedColor(
+    isValidColorIndex(
       selectedIndex,
-    );
+      palette.colors.length,
+    )
+  ) {
+    updateSelectedColor(selectedIndex);
   }
 }
 
@@ -633,16 +592,20 @@ function createColorCard(
   index,
   isLocked,
 ) {
-  const card =
-    document.createElement(
-      "article",
-    );
+  const card = document.createElement(
+    "article",
+  );
 
   card.className =
     "palette-color-card";
 
   card.dataset.colorIndex =
     String(index);
+
+  card.setAttribute(
+    "aria-label",
+    `Color ${index + 1}: ${color}`,
+  );
 
   card.style.setProperty(
     "--palette-color",
@@ -652,110 +615,215 @@ function createColorCard(
   card.style.color =
     getBestTextColor(color);
 
-  /*
-   * The color is produced by the palette
-   * generator and should already be normalized.
-   *
-   * Escape it before putting it into HTML
-   * anyway so this UI layer does not rely
-   * on that assumption.
-   */
-  const safeColor =
-    escapeHTML(color);
 
-  const lockLabel =
-    isLocked
-      ? "Unlock color"
-      : "Lock color";
+  /* -------------------------------------------------------
+     Preview
+     ------------------------------------------------------- */
 
-  const lockTitle =
-    isLocked
-      ? "Unlock color"
-      : "Lock color";
+  const preview = document.createElement(
+    "div",
+  );
 
-  card.innerHTML = `
-    <div class="palette-color-card__preview">
+  preview.className =
+    "palette-color-card__preview";
 
-      <span class="palette-color-card__index">
-        ${String(index + 1).padStart(2, "0")}
-      </span>
 
-      <button
-        type="button"
-        class="palette-color-card__lock"
-        data-action="lock"
-        aria-label="${lockLabel}"
-        title="${lockTitle}"
-      >
-        <i
-          class="fa-solid ${
-            isLocked
-              ? "fa-lock"
-              : "fa-lock-open"
-          }"
-          aria-hidden="true"
-        ></i>
-      </button>
+  /* -------------------------------------------------------
+     Index
+     ------------------------------------------------------- */
 
-    </div>
+  const indexLabel = document.createElement(
+    "span",
+  );
 
-    <div class="palette-color-card__info">
+  indexLabel.className =
+    "palette-color-card__index";
 
-      <strong class="palette-color-card__value">
-        ${safeColor}
-      </strong>
+  indexLabel.textContent =
+    String(index + 1).padStart(2, "0");
 
-      <button
-        type="button"
-        class="palette-color-card__copy"
-        data-action="copy"
-      >
-        <i
-          class="fa-regular fa-copy"
-          aria-hidden="true"
-        ></i>
+  preview.appendChild(indexLabel);
 
-        <span>Copy</span>
-      </button>
 
-    </div>
-  `;
+  /* -------------------------------------------------------
+     Lock Button
+     ------------------------------------------------------- */
+
+  const lockButton =
+    createLockButton(isLocked);
+
+  preview.appendChild(lockButton);
+
+  card.appendChild(preview);
+
+
+  /* -------------------------------------------------------
+     Information
+     ------------------------------------------------------- */
+
+  const info = document.createElement(
+    "div",
+  );
+
+  info.className =
+    "palette-color-card__info";
+
+
+  /* -------------------------------------------------------
+     Color Value
+     ------------------------------------------------------- */
+
+  const value = document.createElement(
+    "strong",
+  );
+
+  value.className =
+    "palette-color-card__value";
+
+  value.textContent = color;
+
+  info.appendChild(value);
+
+
+  /* -------------------------------------------------------
+     Copy Button
+     ------------------------------------------------------- */
+
+  const copyButton =
+    createCopyButton();
+
+  info.appendChild(copyButton);
+
+  card.appendChild(info);
 
   return card;
 }
 
 
 /* =========================================================
-   Update Lock Button
+   Create Lock Button
+   ========================================================= */
+
+function createLockButton(isLocked) {
+  const button = document.createElement(
+    "button",
+  );
+
+  button.type = "button";
+
+  button.className =
+    "palette-color-card__lock";
+
+  button.dataset.action = "lock";
+
+  const label = isLocked
+    ? "Unlock color"
+    : "Lock color";
+
+  button.setAttribute(
+    "aria-label",
+    label,
+  );
+
+  button.setAttribute(
+    "title",
+    label,
+  );
+
+  const icon = document.createElement(
+    "i",
+  );
+
+  icon.className = isLocked
+    ? "fa-solid fa-lock"
+    : "fa-solid fa-lock-open";
+
+  icon.setAttribute(
+    "aria-hidden",
+    "true",
+  );
+
+  button.appendChild(icon);
+
+  return button;
+}
+
+
+/* =========================================================
+   Create Copy Button
+   ========================================================= */
+
+function createCopyButton() {
+  const button = document.createElement(
+    "button",
+  );
+
+  button.type = "button";
+
+  button.className =
+    "palette-color-card__copy";
+
+  button.dataset.action = "copy";
+
+  button.setAttribute(
+    "aria-label",
+    "Copy color",
+  );
+
+  const icon = document.createElement(
+    "i",
+  );
+
+  icon.className =
+    "fa-regular fa-copy";
+
+  icon.setAttribute(
+    "aria-hidden",
+    "true",
+  );
+
+  const label = document.createElement(
+    "span",
+  );
+
+  label.textContent = "Copy";
+
+  button.append(
+    icon,
+    label,
+  );
+
+  return button;
+}
+
+
+/* =========================================================
+   Lock Button UI
    ========================================================= */
 
 function updateLockButton(
   index,
   isLocked,
 ) {
-  const card =
-    getColorCard(index);
+  const card = getColorCard(index);
 
   if (!card) {
     return;
   }
 
-  const button =
-    card.querySelector(
-      "[data-action='lock']",
-    );
+  const button = card.querySelector(
+    "[data-action='lock']",
+  );
 
   if (!button) {
     return;
   }
 
-  const icon =
-    button.querySelector("i");
+  const icon = button.querySelector("i");
 
-  const label =
-    isLocked
-      ? "Unlock color"
-      : "Lock color";
+  const label = isLocked
+    ? "Unlock color"
+    : "Lock color";
 
   button.setAttribute(
     "aria-label",
@@ -782,44 +850,54 @@ function updateLockButton(
 
 
 /* =========================================================
-   Update Selected Color
+   Selected Color UI
    ========================================================= */
 
 function updateSelectedColor(index) {
-  dom.currentPalette
-    ?.querySelectorAll(
+  const cards =
+    dom.currentPalette?.querySelectorAll(
       ".palette-color-card",
-    )
-    .forEach((card) => {
-      const cardIndex =
-        Number(
-          card.dataset.colorIndex,
-        );
+    );
 
-      card.classList.toggle(
-        "is-selected",
-        cardIndex === index,
-      );
-    });
+  cards?.forEach((card) => {
+    const cardIndex = Number(
+      card.dataset.colorIndex,
+    );
+
+    const selected =
+      cardIndex === index;
+
+    card.classList.toggle(
+      "is-selected",
+      selected,
+    );
+
+    card.setAttribute(
+      "aria-current",
+      selected ? "true" : "false",
+    );
+  });
 }
 
 
 /* =========================================================
-   Update Palette Controls
+   Palette Controls
    ========================================================= */
 
 function updatePaletteControls(
   palette,
 ) {
-  if (dom.baseColorInput) {
-    dom.baseColorInput.value =
-      palette.baseColor;
+  if (!palette) {
+    return;
   }
 
-  if (dom.baseColorPicker) {
-    dom.baseColorPicker.value =
-      palette.baseColor;
-  }
+  syncBaseColorInput(
+    palette.baseColor,
+  );
+
+  syncBaseColorPicker(
+    palette.baseColor,
+  );
 
   if (dom.paletteTypeSelect) {
     dom.paletteTypeSelect.value =
@@ -831,57 +909,32 @@ function updatePaletteControls(
     Array.isArray(palette.colors)
   ) {
     dom.colorCountSelect.value =
-      String(
-        palette.colors.length,
-      );
+      String(palette.colors.length);
   }
 }
 
 
 /* =========================================================
-   Sync Controls From Palette
-   ========================================================= */
-
-function syncControlsFromPalette(
-  palette,
-) {
-  if (!palette) {
-    return;
-  }
-
-  updatePaletteControls(
-    palette,
-  );
-}
-
-
-/* =========================================================
-   Get Color Card
+   DOM Helpers
    ========================================================= */
 
 function getColorCard(index) {
   return dom.currentPalette?.querySelector(
-    `[data-color-index="${index}"]`,
+    `.palette-color-card[data-color-index="${index}"]`,
   );
 }
 
 
-/* =========================================================
-   Mark Color As Copied
-   ========================================================= */
-
 function markCopied(index) {
-  const card =
-    getColorCard(index);
+  const card = getColorCard(index);
 
   if (!card) {
     return;
   }
 
-  const button =
-    card.querySelector(
-      "[data-action='copy']",
-    );
+  const button = card.querySelector(
+    "[data-action='copy']",
+  );
 
   if (!button) {
     return;
@@ -895,7 +948,6 @@ function markCopied(index) {
       class="fa-solid fa-check"
       aria-hidden="true"
     ></i>
-
     <span>Copied</span>
   `;
 
@@ -903,32 +955,59 @@ function markCopied(index) {
     "is-copied",
   );
 
-  window.setTimeout(
-    () => {
-      /*
-       * The card may have been removed because
-       * the palette was regenerated. Only restore
-       * the button if it is still connected.
-       */
-      if (!button.isConnected) {
-        return;
-      }
+  window.setTimeout(() => {
+    if (!button.isConnected) {
+      return;
+    }
 
-      button.innerHTML =
-        originalHTML;
+    button.innerHTML = originalHTML;
 
-      button.classList.remove(
-        "is-copied",
-      );
-    },
-    1500,
-  );
+    button.classList.remove(
+      "is-copied",
+    );
+  }, 1500);
 }
 
 
 /* =========================================================
-   Palette Type Helpers
+   Validation
    ========================================================= */
+
+function isValidPalette(palette) {
+  return Boolean(
+    palette &&
+    Array.isArray(palette.colors) &&
+    palette.colors.length > 0,
+  );
+}
+
+
+function isValidColorIndex(
+  index,
+  length,
+) {
+  const paletteLength =
+    Number.isInteger(length)
+      ? length
+      : getCurrentPalette()?.colors?.length;
+
+  return (
+    Number.isInteger(index) &&
+    index >= 0 &&
+    Number.isInteger(paletteLength) &&
+    index < paletteLength
+  );
+}
+
+
+function isValidPaletteSize(size) {
+  return (
+    Number.isInteger(size) &&
+    size >= MIN_PALETTE_SIZE &&
+    size <= MAX_PALETTE_SIZE
+  );
+}
+
 
 function isSupportedPaletteType(
   paletteType,
@@ -938,6 +1017,19 @@ function isSupportedPaletteType(
   ).includes(paletteType);
 }
 
+
+function getValidPaletteType(
+  paletteType,
+) {
+  return isSupportedPaletteType(paletteType)
+    ? paletteType
+    : PALETTE_TYPES.RANDOM;
+}
+
+
+/* =========================================================
+   Palette Type Helpers
+   ========================================================= */
 
 function getPaletteTypeLabel(
   paletteType,
@@ -965,10 +1057,7 @@ function getPaletteTypeLabel(
       "Tetradic",
   };
 
-  return (
-    labels[paletteType] ||
-    "Color"
-  );
+  return labels[paletteType] || "Color";
 }
 
 
@@ -984,9 +1073,7 @@ function getBaseColorFromInput() {
     inputValue &&
     isValidHex(inputValue)
   ) {
-    return normalizeHex(
-      inputValue,
-    );
+    return normalizeHex(inputValue);
   }
 
   return normalizeOrFallback(
@@ -1000,9 +1087,7 @@ function getSelectedPaletteType() {
   const value =
     dom.paletteTypeSelect?.value;
 
-  return isSupportedPaletteType(value)
-    ? value
-    : PALETTE_TYPES.RANDOM;
+  return getValidPaletteType(value);
 }
 
 
@@ -1024,11 +1109,13 @@ function normalizeOrFallback(
 }
 
 
-function escapeHTML(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+/* =========================================================
+   Notifications
+   ========================================================= */
+
+function showPaletteGenerationError() {
+  showErrorToast(
+    MESSAGES.PALETTE_GENERATION_ERROR ||
+      "Unable to generate palette.",
+  );
 }

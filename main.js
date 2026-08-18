@@ -63,6 +63,7 @@ import {
 
 import { dom } from "./scripts/ui/dom.js";
 import { initializeContrastUI } from "./scripts/ui/contrastUI.js";
+import { initializePaletteUI } from "./scripts/ui/paletteUI.js";
 
 /* =========================================================
    Runtime State
@@ -95,7 +96,9 @@ function initializeApp() {
 
   loadSavedPalettes();
 
-  initializePalette();
+  initializePaletteUI();
+  
+  // initializePalette();
 
   renderPalette();
 

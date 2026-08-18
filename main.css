@@ -4,12 +4,20 @@
 
 /* =========================================================
    COLOR STUDIO
-   Visual System
+   Monochrome Black & White Theme
+   Light Default + Dark Mode
+   ========================================================= */
+
+
+/* =========================================================
+   THEME VARIABLES
    ========================================================= */
 
 :root {
 
-    /* Typography */
+    /* =====================================================
+       Typography
+       ===================================================== */
 
     --font-family-base:
         "Inter",
@@ -21,87 +29,125 @@
 
 
     /* =====================================================
-       Brand Palette
-       Inspired by the app icon
+       Neutral Colors
        ===================================================== */
 
-    --color-primary: #F15F63;
-    --color-primary-hover: #E04E53;
-    --color-primary-active: #C94349;
+    --color-white: #ffffff;
+    --color-black: #000000;
 
-    --color-coral: #F15F63;
-    --color-coral-light: #FFE5E3;
-
-    --color-sky: #9ED0F5;
-    --color-sky-light: #EAF5FF;
-    --color-sky-soft: #F4FAFF;
-
-    --color-blue: #4B8FC7;
-    --color-blue-dark: #326F9F;
-
-    --color-pink: #F45FAF;
-    --color-pink-light: #FFE5F2;
-
-    --color-yellow: #FFC44D;
-    --color-yellow-light: #FFF3D6;
-
-    --color-green: #78C9A5;
-    --color-green-light: #E4F6ED;
-
-    --color-peach: #F09A68;
-    --color-peach-light: #FFE9DC;
+    --color-gray-25: #fcfcfc;
+    --color-gray-50: #f8f8f8;
+    --color-gray-100: #f2f2f2;
+    --color-gray-200: #e7e7e7;
+    --color-gray-300: #d4d4d4;
+    --color-gray-400: #a3a3a3;
+    --color-gray-500: #737373;
+    --color-gray-600: #525252;
+    --color-gray-700: #404040;
+    --color-gray-800: #262626;
+    --color-gray-900: #171717;
 
 
     /* =====================================================
-       Neutrals
+       Brand
        ===================================================== */
 
-    --color-white: #FFFFFF;
-    --color-black: #101820;
+    --color-primary: #111111;
+    --color-primary-hover: #2a2a2a;
+    --color-primary-active: #000000;
 
-    --color-gray-50: #F8FBFE;
-    --color-gray-100: #F1F6FA;
-    --color-gray-200: #E5EEF5;
-    --color-gray-300: #D5E2EB;
-    --color-gray-400: #AABCC9;
-    --color-gray-500: #7D919F;
-    --color-gray-600: #5D707E;
-    --color-gray-700: #405360;
-    --color-gray-800: #293D4A;
-    --color-gray-900: #172B37;
+    --color-primary-soft: #f2f2f2;
+    --color-primary-pale: #fafafa;
 
 
     /* =====================================================
        Semantic Colors
        ===================================================== */
 
-    --color-success: #4EAD82;
-    --color-success-light: #E3F5EC;
+    --color-success: #166534;
+    --color-success-light: #f0fdf4;
 
-    --color-warning: #D89B35;
-    --color-warning-light: #FFF2D5;
+    --color-warning: #92400e;
+    --color-warning-light: #fffbeb;
 
-    --color-danger: #D94E58;
-    --color-danger-light: #FBE4E6;
+    --color-danger: #b91c1c;
+    --color-danger-light: #fef2f2;
 
-    --color-info: #4D8FC5;
-    --color-info-light: #E5F2FD;
+    --color-info: #404040;
+    --color-info-light: #f5f5f5;
 
 
     /* =====================================================
-       Application Colors
+       Application Surfaces
        ===================================================== */
 
-    --app-background: #F5FAFE;
-    --app-surface: #FFFFFF;
-    --app-surface-raised: #FFFFFF;
+    --app-background: #f7f7f7;
+    --app-background-deep: #eeeeee;
 
-    --app-text: #1B303D;
-    --app-text-secondary: #5C707E;
-    --app-text-muted: #8799A6;
+    --app-surface: #ffffff;
+    --app-surface-raised: #ffffff;
+    --app-surface-soft: #fafafa;
 
-    --app-border: #DCE8F0;
-    --app-border-light: #EDF4F8;
+
+    /* =====================================================
+       Application Text
+       ===================================================== */
+
+    --app-text: #111111;
+    --app-text-secondary: #525252;
+    --app-text-muted: #737373;
+
+
+    /* =====================================================
+       Borders
+       ===================================================== */
+
+    --app-border: #e5e5e5;
+    --app-border-light: #eeeeee;
+    --app-border-strong: #d4d4d4;
+
+
+    /* =====================================================
+       Header / Form / Button Surfaces
+       ===================================================== */
+
+    --header-background: rgba(255, 255, 255, 0.94);
+    --header-border: rgba(229, 229, 229, 0.95);
+
+    --input-background: #ffffff;
+    --input-background-hover: #fafafa;
+
+    --button-secondary-background: #ffffff;
+    --button-secondary-hover: #f5f5f5;
+
+    --footer-background-start: #ffffff;
+    --footer-background-end: #f7f7f7;
+
+
+    /* =====================================================
+       Gradients
+       ===================================================== */
+
+    --app-gradient-primary:
+        linear-gradient(
+            135deg,
+            #111111 0%,
+            #3a3a3a 100%
+        );
+
+    --app-gradient-section:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #f7f7f7 100%
+        );
+
+    --app-gradient-soft:
+        linear-gradient(
+            135deg,
+            #f5f5f5 0%,
+            #ffffff 100%
+        );
 
 
     /* =====================================================
@@ -128,7 +174,8 @@
     --radius-sm: 0.5rem;
     --radius-md: 0.75rem;
     --radius-lg: 1rem;
-    --radius-xl: 1.5rem;
+    --radius-xl: 1.25rem;
+    --radius-2xl: 1.5rem;
     --radius-full: 9999px;
 
 
@@ -137,16 +184,22 @@
        ===================================================== */
 
     --shadow-xs:
-        0 1px 2px rgba(39, 72, 92, 0.04);
+        0 1px 2px rgba(0, 0, 0, 0.04);
 
     --shadow-sm:
-        0 4px 14px rgba(39, 72, 92, 0.07);
+        0 4px 12px rgba(0, 0, 0, 0.06);
 
     --shadow-md:
-        0 10px 30px rgba(39, 72, 92, 0.09);
+        0 10px 28px rgba(0, 0, 0, 0.08);
 
     --shadow-lg:
-        0 20px 55px rgba(39, 72, 92, 0.13);
+        0 20px 50px rgba(0, 0, 0, 0.12);
+
+    --shadow-primary:
+        0 8px 22px rgba(0, 0, 0, 0.16);
+
+    --shadow-blue:
+        0 8px 22px rgba(0, 0, 0, 0.10);
 
 
     /* =====================================================
@@ -154,22 +207,169 @@
        ===================================================== */
 
     --app-max-width: 1440px;
-
-    --section-padding-y: 5rem;
+    --section-padding-y: 4.5rem;
 
 
     /* =====================================================
-       Transitions
+       Motion
        ===================================================== */
 
     --transition-fast: 150ms ease;
-    --transition-base: 200ms ease;
-    --transition-slow: 300ms ease;
+    --transition-base: 220ms ease;
+    --transition-slow: 320ms ease;
+
+
+    color-scheme: light;
 }
 
 
 /* =========================================================
-   Global Reset
+   DARK THEME
+   ========================================================= */
+
+body.dark {
+
+    color-scheme: dark;
+
+
+    /* =====================================================
+       Neutral Colors
+       ===================================================== */
+
+    --color-white: #ffffff;
+    --color-black: #000000;
+
+    --color-gray-25: #0a0a0a;
+    --color-gray-50: #101010;
+    --color-gray-100: #171717;
+    --color-gray-200: #222222;
+    --color-gray-300: #2e2e2e;
+    --color-gray-400: #525252;
+    --color-gray-500: #737373;
+    --color-gray-600: #a3a3a3;
+    --color-gray-700: #c4c4c4;
+    --color-gray-800: #e5e5e5;
+    --color-gray-900: #f5f5f5;
+
+
+    /* =====================================================
+       Brand
+       ===================================================== */
+
+    --color-primary: #ffffff;
+    --color-primary-hover: #e5e5e5;
+    --color-primary-active: #cccccc;
+
+    --color-primary-soft: #1c1c1c;
+    --color-primary-pale: #141414;
+
+
+    /* =====================================================
+       Semantic
+       ===================================================== */
+
+    --color-success: #86efac;
+    --color-success-light: #102217;
+
+    --color-warning: #fcd34d;
+    --color-warning-light: #241d0b;
+
+    --color-danger: #fca5a5;
+    --color-danger-light: #241010;
+
+    --color-info: #d4d4d4;
+    --color-info-light: #181818;
+
+
+    /* =====================================================
+       Application
+       ===================================================== */
+
+    --app-background: #0a0a0a;
+    --app-background-deep: #050505;
+
+    --app-surface: #111111;
+    --app-surface-raised: #181818;
+    --app-surface-soft: #0d0d0d;
+
+    --app-text: #f5f5f5;
+    --app-text-secondary: #bdbdbd;
+    --app-text-muted: #888888;
+
+    --app-border: #292929;
+    --app-border-light: #202020;
+    --app-border-strong: #3a3a3a;
+
+
+    /* =====================================================
+       UI Surfaces
+       ===================================================== */
+
+    --header-background: rgba(10, 10, 10, 0.94);
+    --header-border: rgba(45, 45, 45, 0.95);
+
+    --input-background: #151515;
+    --input-background-hover: #1c1c1c;
+
+    --button-secondary-background: #151515;
+    --button-secondary-hover: #202020;
+
+    --footer-background-start: #111111;
+    --footer-background-end: #0a0a0a;
+
+
+    /* =====================================================
+       Gradients
+       ===================================================== */
+
+    --app-gradient-primary:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #a3a3a3 100%
+        );
+
+    --app-gradient-section:
+        linear-gradient(
+            180deg,
+            #111111 0%,
+            #0a0a0a 100%
+        );
+
+    --app-gradient-soft:
+        linear-gradient(
+            135deg,
+            #1c1c1c 0%,
+            #111111 100%
+        );
+
+
+    /* =====================================================
+       Shadows
+       ===================================================== */
+
+    --shadow-xs:
+        0 1px 2px rgba(0, 0, 0, 0.30);
+
+    --shadow-sm:
+        0 4px 14px rgba(0, 0, 0, 0.32);
+
+    --shadow-md:
+        0 12px 30px rgba(0, 0, 0, 0.38);
+
+    --shadow-lg:
+        0 24px 60px rgba(0, 0, 0, 0.48);
+
+    --shadow-primary:
+        0 8px 24px rgba(0, 0, 0, 0.42);
+
+    --shadow-blue:
+        0 8px 24px rgba(0, 0, 0, 0.30);
+}
+
+
+/* =========================================================
+   GLOBAL RESET
    ========================================================= */
 
 *,
@@ -186,20 +386,25 @@ html {
 }
 
 
+html::-webkit-scrollbar {
+    display: none;
+}
+
+
 body {
     min-height: 100vh;
     margin: 0;
 
     background:
         radial-gradient(
-            circle at 8% 0%,
-            rgba(158, 208, 245, 0.24),
+            circle at 85% 0%,
+            rgba(0, 0, 0, 0.035),
             transparent 28rem
         ),
         radial-gradient(
-            circle at 94% 12%,
-            rgba(244, 95, 175, 0.07),
-            transparent 22rem
+            circle at 5% 20%,
+            rgba(0, 0, 0, 0.025),
+            transparent 24rem
         ),
         var(--app-background);
 
@@ -212,6 +417,26 @@ body {
 
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    transition:
+        background-color var(--transition-slow),
+        color var(--transition-slow);
+}
+
+
+body.dark {
+    background:
+        radial-gradient(
+            circle at 85% 0%,
+            rgba(255, 255, 255, 0.035),
+            transparent 28rem
+        ),
+        radial-gradient(
+            circle at 5% 20%,
+            rgba(255, 255, 255, 0.02),
+            transparent 24rem
+        ),
+        var(--app-background);
 }
 
 
@@ -222,9 +447,7 @@ h4,
 h5,
 h6 {
     margin-top: 0;
-
     color: var(--app-text);
-
     font-weight: 700;
     line-height: 1.2;
 }
@@ -237,6 +460,8 @@ p {
 
 a {
     color: inherit;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
 }
 
 
@@ -260,13 +485,19 @@ svg {
 
 
 ::selection {
-    background-color: rgba(241, 95, 99, 0.22);
+    background: rgba(0, 0, 0, 0.12);
     color: var(--app-text);
 }
 
 
+body.dark ::selection {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+}
+
+
 /* =========================================================
-   Application Shell
+   APPLICATION SHELL
    ========================================================= */
 
 .color-studio-app {
@@ -288,7 +519,7 @@ svg {
 
 
 /* =========================================================
-   Header
+   HEADER
    ========================================================= */
 
 .app-header {
@@ -296,42 +527,55 @@ svg {
     top: 0;
     z-index: 1030;
 
-    background: rgba(255, 255, 255, 0.88);
+    background: var(--header-background);
 
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
 
-    border-bottom: 1px solid rgba(220, 232, 240, 0.9) !important;
+    border-bottom: 1px solid var(--header-border) !important;
 
     box-shadow:
-        0 1px 0 rgba(39, 72, 92, 0.02);
+        0 1px 3px rgba(0, 0, 0, 0.05);
+
+    transition:
+        background-color var(--transition-base),
+        border-color var(--transition-base),
+        box-shadow var(--transition-base);
+}
+
+
+body.dark .app-header {
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.02),
+        0 8px 30px rgba(0, 0, 0, 0.18);
 }
 
 
 .app-header__inner {
-    min-height: 70px;
+    min-height: 68px;
 }
 
 
 .app-brand {
     display: inline-flex;
     align-items: center;
-
     gap: 0.7rem;
 
     color: var(--app-text);
 
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 750;
+
+    text-decoration: none;
 
     transition:
         color var(--transition-fast),
-        opacity var(--transition-fast);
+        transform var(--transition-fast);
 }
 
 
 .app-brand:hover {
-    color: var(--color-primary);
+    color: var(--app-text);
 }
 
 
@@ -343,21 +587,29 @@ svg {
     width: 38px;
     height: 38px;
 
-    border-radius: 12px;
+    border-radius: 11px;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--color-coral) 0%,
-            var(--color-peach) 100%
-        );
+    background: var(--app-gradient-primary);
+    color: #ffffff;
 
-    color: var(--color-white);
-
-    font-size: 1rem;
+    font-size: 0.95rem;
 
     box-shadow:
-        0 7px 18px rgba(241, 95, 99, 0.20);
+        0 6px 16px rgba(0, 0, 0, 0.18);
+
+    transition:
+        box-shadow var(--transition-base);
+}
+
+
+body.dark .app-brand__icon {
+    color: #000000;
+}
+
+
+.app-brand:hover .app-brand__icon {
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
 
@@ -367,7 +619,7 @@ svg {
 
 
 /* =========================================================
-   Main Sections
+   MAIN SECTIONS
    ========================================================= */
 
 .palette-generator,
@@ -380,36 +632,19 @@ svg {
 .palette-generator {
     position: relative;
     overflow: hidden;
-
-    background:
-        radial-gradient(
-            circle at 88% 8%,
-            rgba(158, 208, 245, 0.28),
-            transparent 25rem
-        ),
-        radial-gradient(
-            circle at 4% 90%,
-            rgba(244, 95, 175, 0.07),
-            transparent 18rem
-        ),
-        transparent;
+    background: transparent;
 }
 
 
 .contrast-checker {
-    background:
-        linear-gradient(
-            180deg,
-            #FFFFFF 0%,
-            #F7FBFE 100%
-        );
-
+    position: relative;
+    background: var(--app-gradient-section);
     border-top: 1px solid var(--app-border);
 }
 
 
 /* =========================================================
-   Section Typography
+   SECTION TYPOGRAPHY
    ========================================================= */
 
 .section-header {
@@ -419,14 +654,22 @@ svg {
 
 
 .section-eyebrow {
-    margin-bottom: 0.75rem !important;
+    display: inline-flex;
+    align-items: center;
 
-    color: var(--color-primary);
+    margin-bottom: 0.85rem !important;
+    padding: 0.35rem 0.65rem;
 
-    font-size: 0.7rem;
+    color: var(--app-text);
+    background: var(--color-primary-soft);
+
+    border: 1px solid var(--app-border);
+    border-radius: var(--radius-full);
+
+    font-size: 0.68rem;
     font-weight: 800;
 
-    letter-spacing: 0.16em;
+    letter-spacing: 0.12em;
     line-height: 1.2;
 
     text-transform: uppercase;
@@ -435,21 +678,15 @@ svg {
 
 .section-title {
     max-width: 820px;
-
     margin-bottom: 1rem;
 
     color: var(--app-text);
 
-    font-size: clamp(
-        2.25rem,
-        5vw,
-        4rem
-    );
-
+    font-size: clamp(2.35rem, 5vw, 4rem);
     font-weight: 750;
 
-    letter-spacing: -0.055em;
-    line-height: 1.05;
+    letter-spacing: -0.06em;
+    line-height: 1.02;
 }
 
 
@@ -458,17 +695,17 @@ svg {
 
     color: var(--app-text-secondary);
 
-    font-size: 1.02rem;
-    line-height: 1.7;
+    font-size: 1rem;
+    line-height: 1.65;
 }
 
 
 /* =========================================================
-   Palette Generator
+   PALETTE GENERATOR
    ========================================================= */
 
 .palette-generator__header {
-    margin-bottom: 2.5rem;
+    margin-bottom: 2.25rem;
 }
 
 
@@ -478,20 +715,39 @@ svg {
 
 
 .palette-generator__controls {
+    position: relative;
+
     margin-bottom: 2rem;
+    padding: 1.5rem;
 
-    padding: 1.35rem;
-
-    background:
-        rgba(255, 255, 255, 0.92);
+    background: var(--app-surface);
 
     border: 1px solid var(--app-border);
-
-    border-radius: 1.25rem;
+    border-radius: var(--radius-xl);
 
     box-shadow: var(--shadow-sm);
 
-    backdrop-filter: blur(12px);
+    transition:
+        background-color var(--transition-base),
+        border-color var(--transition-base),
+        box-shadow var(--transition-base);
+}
+
+
+.palette-generator__controls::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 1.5rem;
+    right: 1.5rem;
+
+    height: 2px;
+
+    background: var(--app-text);
+
+    border-radius: var(--radius-full);
+    opacity: 0.9;
 }
 
 
@@ -501,13 +757,163 @@ svg {
 
 
 /* =========================================================
-   Forms
+   PALETTE DISPLAY
+   ========================================================= */
+
+.palette-display {
+    width: 100%;
+    padding: 0;
+
+    background: var(--app-surface);
+
+    border: 1px solid var(--app-border);
+    border-radius: var(--radius-xl);
+
+    box-shadow: var(--shadow-md);
+
+    overflow: hidden;
+
+    transition:
+        background-color var(--transition-base),
+        border-color var(--transition-base),
+        box-shadow var(--transition-base);
+}
+
+
+/* =========================================================
+   PALETTE CONTAINER
+   ========================================================= */
+
+.palette,
+.palette-display .palette,
+.palette-generator .palette,
+.palette-colors,
+.color-palette {
+
+    display: flex !important;
+
+    flex-direction: row;
+    flex-wrap: nowrap !important;
+
+    width: 100%;
+
+    gap: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border-radius: 0 !important;
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   PALETTE ITEMS
+   ========================================================= */
+
+.palette > *,
+.palette-display .palette > *,
+.palette-generator .palette > *,
+.palette-colors > *,
+.color-palette > * {
+
+    flex: 1 1 0 !important;
+
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border-radius: 0 !important;
+}
+
+
+/* =========================================================
+   COLOR BOX
+   ========================================================= */
+
+.color-box {
+
+    position: relative;
+
+    flex: 1 1 0;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 280px;
+
+    overflow: hidden;
+
+    /*
+       IMPORTANT:
+       Palette color boxes intentionally have NO radius.
+    */
+    border-radius: 0 !important;
+
+    background: var(--color-gray-200);
+
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+
+    transition:
+        transform var(--transition-base),
+        filter var(--transition-base),
+        box-shadow var(--transition-base);
+}
+
+
+.color-box:hover {
+    z-index: 2;
+
+    transform: none;
+
+    filter: brightness(1.035);
+
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.25),
+        0 8px 20px rgba(0, 0, 0, 0.10);
+}
+
+
+/* =========================================================
+   HARD RESET — PALETTE RADIUS
+   ========================================================= */
+
+.palette *,
+.palette-display .palette *,
+.palette-generator .palette *,
+.palette-colors *,
+.color-palette * {
+
+    /*
+       Prevent Bootstrap or component styles from
+       reintroducing rounded palette corners.
+    */
+    --bs-border-radius: 0;
+
+}
+
+
+.palette .color-box,
+.palette-display .color-box,
+.palette-generator .color-box,
+.palette-colors .color-box,
+.color-palette .color-box {
+
+    border-radius: 0 !important;
+}
+
+
+/* =========================================================
+   FORMS
    ========================================================= */
 
 .form-label {
     margin-bottom: var(--space-2);
 
-    color: var(--color-gray-700);
+    color: var(--app-text-secondary);
 
     font-size: 0.78rem;
     font-weight: 700;
@@ -518,23 +924,26 @@ svg {
 
 .form-control,
 .form-select {
+
     min-height: 46px;
 
-    background-color: #FFFFFF;
+    background: var(--input-background);
 
-    border-color: #D7E3EB;
+    border: 1px solid var(--app-border-strong);
     border-radius: 0.7rem;
 
     color: var(--app-text);
 
     font-size: 0.9rem;
 
-    box-shadow: none;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03);
 
     transition:
         border-color var(--transition-fast),
         box-shadow var(--transition-fast),
-        background-color var(--transition-fast);
+        background-color var(--transition-fast),
+        color var(--transition-fast);
 }
 
 
@@ -545,24 +954,43 @@ svg {
 
 .form-control:hover,
 .form-select:hover {
-    border-color: #C6D8E4;
+    background: var(--input-background-hover);
+    border-color: var(--app-border-strong);
 }
 
 
 .form-control:focus,
 .form-select:focus {
-    background-color: #FFFFFF;
 
-    border-color: var(--color-primary);
+    background: var(--input-background);
+
+    border-color: var(--app-text);
 
     color: var(--app-text);
 
     box-shadow:
-        0 0 0 4px rgba(241, 95, 99, 0.10);
+        0 0 0 3px rgba(0, 0, 0, 0.10);
+}
+
+
+body.dark .form-control,
+body.dark .form-select {
+    color-scheme: dark;
+}
+
+
+body.dark .form-control:focus,
+body.dark .form-select:focus {
+
+    border-color: #ffffff;
+
+    box-shadow:
+        0 0 0 3px rgba(255, 255, 255, 0.12);
 }
 
 
 .form-control-color {
+
     width: 54px;
     min-width: 54px;
     min-height: 46px;
@@ -571,21 +999,39 @@ svg {
 
     cursor: pointer;
 
-    border-color: #D7E3EB;
+    background: var(--input-background);
+
+    border: 1px solid var(--app-border-strong);
     border-radius: 0.7rem;
+
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+
+.form-control-color:hover {
+
+    border-color: var(--app-text);
+
+    transform: translateY(-1px);
+
+    box-shadow: var(--shadow-sm);
 }
 
 
 /* =========================================================
-   Buttons
+   BUTTONS
    ========================================================= */
 
 .btn {
+
     min-height: 44px;
 
     padding: 0.65rem 1rem;
 
-    border-radius: 0.75rem;
+    border-radius: 0.7rem;
 
     font-size: 0.875rem;
     font-weight: 650;
@@ -607,67 +1053,129 @@ svg {
 
 
 .btn-primary {
-    --bs-btn-bg: var(--color-primary);
-    --bs-btn-border-color: var(--color-primary);
 
-    --bs-btn-hover-bg: var(--color-primary-hover);
-    --bs-btn-hover-border-color: var(--color-primary-hover);
+    --bs-btn-bg: #111111;
+    --bs-btn-border-color: #111111;
 
-    --bs-btn-active-bg: var(--color-primary-active);
-    --bs-btn-active-border-color: var(--color-primary-active);
+    --bs-btn-hover-bg: #2a2a2a;
+    --bs-btn-hover-border-color: #2a2a2a;
 
-    --bs-btn-color: #FFFFFF;
-    --bs-btn-hover-color: #FFFFFF;
+    --bs-btn-active-bg: #000000;
+    --bs-btn-active-border-color: #000000;
 
-    box-shadow:
-        0 7px 18px rgba(241, 95, 99, 0.18);
+    --bs-btn-color: #ffffff;
+    --bs-btn-hover-color: #ffffff;
+
+    box-shadow: var(--shadow-primary);
 }
 
 
 .btn-primary:hover {
+
     transform: translateY(-1px);
 
     box-shadow:
-        0 10px 24px rgba(241, 95, 99, 0.25);
+        0 10px 24px rgba(0, 0, 0, 0.20);
+}
+
+
+.btn-primary:focus-visible {
+
+    box-shadow:
+        0 0 0 4px rgba(0, 0, 0, 0.10),
+        0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+
+body.dark .btn-primary {
+
+    --bs-btn-bg: #ffffff;
+    --bs-btn-border-color: #ffffff;
+
+    --bs-btn-hover-bg: #e5e5e5;
+    --bs-btn-hover-border-color: #e5e5e5;
+
+    --bs-btn-active-bg: #cccccc;
+    --bs-btn-active-border-color: #cccccc;
+
+    --bs-btn-color: #000000;
+    --bs-btn-hover-color: #000000;
 }
 
 
 .btn-dark {
-    --bs-btn-bg: var(--color-gray-900);
-    --bs-btn-border-color: var(--color-gray-900);
 
-    --bs-btn-hover-bg: var(--color-gray-800);
-    --bs-btn-hover-border-color: var(--color-gray-800);
+    --bs-btn-bg: #171717;
+    --bs-btn-border-color: #171717;
 
-    --bs-btn-color: #FFFFFF;
-    --bs-btn-hover-color: #FFFFFF;
+    --bs-btn-hover-bg: #262626;
+    --bs-btn-hover-border-color: #262626;
+
+    --bs-btn-color: #ffffff;
+    --bs-btn-hover-color: #ffffff;
 
     box-shadow:
-        0 7px 16px rgba(23, 43, 55, 0.12);
+        0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+
+body.dark .btn-dark {
+
+    --bs-btn-bg: #ffffff;
+    --bs-btn-border-color: #ffffff;
+
+    --bs-btn-hover-bg: #e5e5e5;
+    --bs-btn-hover-border-color: #e5e5e5;
+
+    --bs-btn-color: #000000;
+    --bs-btn-hover-color: #000000;
+}
+
+
+.btn-dark:hover {
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 9px 20px rgba(0, 0, 0, 0.18);
 }
 
 
 .btn-outline-secondary {
-    --bs-btn-color: var(--color-gray-700);
-    --bs-btn-border-color: #D2E0E8;
+
+    --bs-btn-color: var(--app-text-secondary);
+    --bs-btn-border-color: var(--app-border-strong);
 
     --bs-btn-hover-color: var(--app-text);
-    --bs-btn-hover-bg: #F1F7FB;
-    --bs-btn-hover-border-color: #C2D4DF;
+    --bs-btn-hover-bg: var(--button-secondary-hover);
+    --bs-btn-hover-border-color: var(--app-text);
+
+    background: var(--button-secondary-background);
+}
+
+
+.btn-outline-secondary:hover {
+
+    transform: translateY(-1px);
+
+    box-shadow: var(--shadow-sm);
 }
 
 
 /* =========================================================
-   Palette Footer
+   PALETTE FOOTER
    ========================================================= */
 
 .palette-generator__footer {
+
     margin-top: 1.25rem;
+
     padding: 0.25rem 0;
 }
 
 
 .palette-status {
+
     display: inline-flex;
     align-items: center;
 
@@ -677,18 +1185,21 @@ svg {
 
     color: var(--app-text-secondary);
 
-    background: rgba(255, 255, 255, 0.76);
+    background: var(--app-surface);
 
-    border: 1px solid var(--app-border-light);
+    border: 1px solid var(--app-border);
     border-radius: var(--radius-full);
+
+    box-shadow: var(--shadow-xs);
 }
 
 
 /* =========================================================
-   Contrast Checker
+   CONTRAST CHECKER
    ========================================================= */
 
 .contrast-checker {
+
     padding-top: 5rem;
     padding-bottom: 5.5rem;
 }
@@ -700,6 +1211,9 @@ svg {
 
 
 .contrast-controls {
+
+    position: relative;
+
     display: flex;
     flex-direction: column;
 
@@ -709,13 +1223,37 @@ svg {
 
     padding: 1.5rem;
 
-    background: #FFFFFF;
+    background: var(--app-surface);
 
     border: 1px solid var(--app-border);
-
-    border-radius: 1.25rem;
+    border-radius: var(--radius-xl);
 
     box-shadow: var(--shadow-sm);
+
+    transition:
+        background-color var(--transition-base),
+        border-color var(--transition-base),
+        box-shadow var(--transition-base);
+}
+
+
+.contrast-controls::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 1.5rem;
+    right: 1.5rem;
+
+    height: 2px;
+
+    background: var(--app-text);
+
+    border-radius: var(--radius-full);
+
+    opacity: 0.85;
 }
 
 
@@ -726,72 +1264,82 @@ svg {
 
 
 /* =========================================================
-   Contrast Preview
+   CONTRAST PREVIEW
    ========================================================= */
 
 .contrast-preview {
+
     display: flex;
     flex-direction: column;
     justify-content: center;
 
     min-height: 100%;
 
-    padding: 2.25rem;
-
-    border-radius: 1.25rem;
+    padding: 2.5rem;
 
     overflow: hidden;
+
+    border-radius: var(--radius-xl);
 
     box-shadow: var(--shadow-md);
 
     transition:
         color var(--transition-base),
-        background-color var(--transition-base);
+        background-color var(--transition-base),
+        box-shadow var(--transition-base);
+}
+
+
+.contrast-preview:hover {
+    box-shadow: var(--shadow-lg);
 }
 
 
 .contrast-preview__label {
+
     margin-bottom: var(--space-3);
 
     font-size: 0.68rem;
-    font-weight: 700;
+    font-weight: 750;
 
     text-transform: uppercase;
+
     letter-spacing: 0.14em;
 
-    opacity: 0.75;
+    opacity: 0.78;
 }
 
 
 .contrast-preview__heading {
+
     margin-bottom: var(--space-3);
 
-    font-size: clamp(
-        3.5rem,
-        8vw,
-        6.5rem
-    );
+    font-size: clamp(3.5rem, 8vw, 6.5rem);
 
     font-weight: 700;
 
     letter-spacing: -0.07em;
+
     line-height: 1;
 }
 
 
 .contrast-preview__text {
+
     max-width: 620px;
 
     font-size: 1.05rem;
+
     line-height: 1.7;
 }
 
 
 /* =========================================================
-   Contrast Results
+   CONTRAST RESULTS
    ========================================================= */
 
 .contrast-results {
+
     display: grid;
 
     grid-template-columns:
@@ -804,6 +1352,9 @@ svg {
 
 
 .contrast-result-card {
+
+    position: relative;
+
     display: flex;
     flex-direction: column;
 
@@ -813,31 +1364,33 @@ svg {
 
     padding: 1.25rem;
 
-    background: #FFFFFF;
+    background: var(--app-surface);
 
     border: 1px solid var(--app-border);
-
-    border-radius: 1rem;
+    border-radius: var(--radius-lg);
 
     box-shadow: var(--shadow-xs);
 
     transition:
         transform var(--transition-fast),
         box-shadow var(--transition-fast),
-        border-color var(--transition-fast);
+        border-color var(--transition-fast),
+        background-color var(--transition-base);
 }
 
 
 .contrast-result-card:hover {
-    transform: translateY(-2px);
 
-    border-color: #C9D9E3;
+    transform: translateY(-3px);
+
+    border-color: var(--app-border-strong);
 
     box-shadow: var(--shadow-sm);
 }
 
 
 .contrast-result-card__label {
+
     color: var(--app-text-secondary);
 
     font-size: 0.75rem;
@@ -846,6 +1399,7 @@ svg {
 
 
 .contrast-result-card__value {
+
     margin-top: auto;
 
     color: var(--app-text);
@@ -853,11 +1407,13 @@ svg {
     font-size: 1.8rem;
 
     letter-spacing: -0.04em;
+
     line-height: 1;
 }
 
 
 .contrast-result-card__status {
+
     margin-top: auto;
 
     color: var(--app-text);
@@ -867,6 +1423,7 @@ svg {
 
 
 .contrast-result-card__description {
+
     color: var(--app-text-muted);
 
     font-size: 0.75rem;
@@ -874,50 +1431,53 @@ svg {
 
 
 /* =========================================================
-   Result States
+   RESULT STATES
    ========================================================= */
 
 .contrast-result-card.is-pass {
-    border-color: rgba(120, 201, 165, 0.45);
+
+    border-color: rgba(22, 101, 52, 0.25);
 
     background:
         linear-gradient(
             145deg,
-            #FFFFFF 0%,
-            #F7FDF9 100%
+            var(--app-surface) 0%,
+            var(--color-success-light) 100%
         );
 }
 
 
 .contrast-result-card.is-pass
 .contrast-result-card__status {
-    color: #3F9B70;
+    color: var(--color-success);
 }
 
 
 .contrast-result-card.is-fail {
-    border-color: rgba(241, 95, 99, 0.25);
+
+    border-color: rgba(185, 28, 28, 0.22);
 
     background:
         linear-gradient(
             145deg,
-            #FFFFFF 0%,
-            #FFF9F8 100%
+            var(--app-surface) 0%,
+            var(--color-danger-light) 100%
         );
 }
 
 
 .contrast-result-card.is-fail
 .contrast-result-card__status {
-    color: var(--color-primary);
+    color: var(--color-danger);
 }
 
 
 /* =========================================================
-   Saved Palettes
+   SAVED PALETTES
    ========================================================= */
 
 .saved-palettes-empty-state {
+
     padding: 4rem 1.25rem;
 
     color: var(--app-text-muted);
@@ -925,31 +1485,32 @@ svg {
 
 
 .saved-palettes-empty-state__icon {
+
     display: flex;
     align-items: center;
     justify-content: center;
 
-    width: 64px;
-    height: 64px;
+    width: 68px;
+    height: 68px;
 
     margin: 0 auto 1rem;
 
-    border-radius: var(--radius-full);
+    border-radius: 18px;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--color-sky-light),
-            var(--color-pink-light)
-        );
+    background: var(--app-gradient-soft);
 
-    color: var(--color-blue);
+    border: 1px solid var(--app-border);
+
+    color: var(--app-text);
 
     font-size: 1.25rem;
+
+    box-shadow: var(--shadow-sm);
 }
 
 
 .saved-palettes-empty-state h3 {
+
     margin-bottom: var(--space-2);
 
     color: var(--app-text);
@@ -959,6 +1520,7 @@ svg {
 
 
 .saved-palettes-empty-state p {
+
     margin-bottom: 0;
 
     font-size: 0.875rem;
@@ -966,15 +1528,41 @@ svg {
 
 
 /* =========================================================
-   Footer
+   FOOTER
    ========================================================= */
 
 .app-footer {
+
+    position: relative;
+
     color: var(--app-text-muted);
+
+    background:
+        linear-gradient(
+            180deg,
+            var(--footer-background-start),
+            var(--footer-background-end)
+        );
 
     border-color: var(--app-border) !important;
 
     font-size: 0.8125rem;
+}
+
+
+.app-footer::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 1px;
+
+    background: var(--app-border-strong);
 }
 
 
@@ -984,7 +1572,7 @@ svg {
 
 
 /* =========================================================
-   Bootstrap Overrides
+   BOOTSTRAP OVERRIDES
    ========================================================= */
 
 .badge {
@@ -993,25 +1581,39 @@ svg {
 
 
 .offcanvas {
+
     --bs-offcanvas-width: min(430px, 92vw);
 
-    background: #FBFDFF;
+    background:
+        linear-gradient(
+            180deg,
+            var(--app-surface) 0%,
+            var(--app-surface-soft) 100%
+        );
 
     color: var(--app-text);
 
     border-left: 1px solid var(--app-border);
+
+    box-shadow:
+        -15px 0 45px rgba(0, 0, 0, 0.12);
 }
 
 
 .offcanvas-header {
+
     padding: 1.25rem 1.35rem;
+
+    background: var(--app-surface-soft);
 
     border-bottom: 1px solid var(--app-border-light);
 }
 
 
 .offcanvas-title {
+
     font-size: 1.05rem;
+
     font-weight: 750;
 
     letter-spacing: -0.02em;
@@ -1024,20 +1626,26 @@ svg {
 
 
 .modal-content {
+
     overflow: hidden;
 
     background: var(--app-surface);
 
     border: 1px solid var(--app-border);
 
-    border-radius: 1.25rem;
+    border-radius: var(--radius-xl);
 
     box-shadow: var(--shadow-lg);
+
+    color: var(--app-text);
 }
 
 
 .modal-header {
+
     padding: 1.25rem 1.35rem;
+
+    background: var(--app-surface-soft);
 
     border-color: var(--app-border-light);
 }
@@ -1049,67 +1657,169 @@ svg {
 
 
 .modal-footer {
+
     padding: 1rem 1.35rem;
+
+    background: var(--app-surface-soft);
 
     border-color: var(--app-border-light);
 }
 
 
 .toast {
+
     overflow: hidden;
 
-    background: #FFFFFF;
+    background: var(--app-surface);
 
     border: 1px solid var(--app-border);
 
     border-radius: 0.9rem;
 
     box-shadow: var(--shadow-lg);
+
+    color: var(--app-text);
 }
 
 
 #savedPalettesButton {
+
     min-height: 40px;
 
     border-radius: 0.7rem;
 
-    background: rgba(255, 255, 255, 0.78);
+    background: var(--button-secondary-background);
+
+    border-color: var(--app-border);
+
+    color: var(--app-text-secondary);
+
+    transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        color var(--transition-fast);
+}
+
+
+#savedPalettesButton:hover {
+
+    background: var(--button-secondary-hover);
+
+    border-color: var(--app-border-strong);
+
+    color: var(--app-text);
+
+    transform: translateY(-1px);
+
+    box-shadow: var(--shadow-sm);
 }
 
 
 /* =========================================================
-   Accessibility
+   DARK BOOTSTRAP CONTROLS
+   ========================================================= */
+
+body.dark .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+
+body.dark .dropdown-menu {
+
+    --bs-dropdown-bg: var(--app-surface);
+    --bs-dropdown-color: var(--app-text);
+    --bs-dropdown-border-color: var(--app-border);
+
+    --bs-dropdown-link-color: var(--app-text-secondary);
+    --bs-dropdown-link-hover-color: var(--app-text);
+    --bs-dropdown-link-hover-bg: var(--app-surface-raised);
+
+    background-color: var(--app-surface);
+
+    border-color: var(--app-border);
+
+    box-shadow: var(--shadow-lg);
+}
+
+
+body.dark .list-group {
+
+    --bs-list-group-bg: var(--app-surface);
+    --bs-list-group-color: var(--app-text);
+    --bs-list-group-border-color: var(--app-border);
+}
+
+
+body.dark .card {
+
+    --bs-card-bg: var(--app-surface);
+    --bs-card-color: var(--app-text);
+    --bs-card-border-color: var(--app-border);
+
+    background: var(--app-surface);
+
+    color: var(--app-text);
+
+    border-color: var(--app-border);
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
    ========================================================= */
 
 :focus-visible {
-    outline: 3px solid rgba(241, 95, 99, 0.28);
+
+    outline: 3px solid rgba(0, 0, 0, 0.20);
+
     outline-offset: 3px;
 }
 
 
+body.dark :focus-visible {
+    outline-color: rgba(255, 255, 255, 0.35);
+}
+
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+
+    border-color: var(--color-danger);
+
+    box-shadow:
+        0 0 0 3px rgba(185, 28, 28, 0.08);
+}
+
+
 /* =========================================================
-   Responsive
+   TABLET
    ========================================================= */
 
 @media (max-width: 991.98px) {
 
     .palette-generator,
     .contrast-checker {
+
         padding-top: 3.75rem;
         padding-bottom: 4rem;
     }
 
 
     .section-title {
-        font-size: clamp(
-            2.15rem,
-            8vw,
-            3.25rem
-        );
+
+        font-size:
+            clamp(
+                2.15rem,
+                8vw,
+                3.25rem
+            );
     }
 
 
     .palette-generator__actions {
+
         justify-content: flex-start !important;
 
         margin-top: 0.5rem;
@@ -1117,11 +1827,67 @@ svg {
 
 
     .contrast-results {
+
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
     }
 }
 
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 767.98px) {
+
+    .palette,
+    .palette-display .palette,
+    .palette-generator .palette,
+    .palette-colors,
+    .color-palette {
+
+        flex-direction: column !important;
+
+        flex-wrap: nowrap !important;
+
+        gap: 0 !important;
+
+        border-radius: 0 !important;
+    }
+
+
+    .palette > *,
+    .palette-display .palette > *,
+    .palette-generator .palette > *,
+    .palette-colors > *,
+    .color-palette > * {
+
+        flex: 1 1 auto !important;
+
+        width: 100% !important;
+
+        max-width: none !important;
+
+        min-width: 100% !important;
+
+        border-radius: 0 !important;
+    }
+
+
+    .color-box {
+
+        width: 100%;
+
+        min-height: 110px;
+
+        border-radius: 0 !important;
+    }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
 
 @media (max-width: 575.98px) {
 
@@ -1131,6 +1897,7 @@ svg {
 
 
     .app-brand__icon {
+
         width: 34px;
         height: 34px;
     }
@@ -1148,21 +1915,44 @@ svg {
 
     .palette-generator__controls,
     .contrast-controls {
+
         padding: 1rem;
 
-        border-radius: 1rem;
+        border-radius: var(--radius-lg);
     }
 
 
-    .palette-generator__actions .btn-primary {
+    .palette-generator__controls::before,
+    .contrast-controls::before {
+
+        left: 1rem;
+        right: 1rem;
+    }
+
+
+    /*
+       Keep the OUTER palette display rounded if desired,
+       but the actual color cards remain square.
+    */
+
+    .palette-display {
+        padding: 0;
+        border-radius: var(--radius-lg);
+    }
+
+
+    .palette-generator__actions .btn {
         flex: 1;
     }
 
 
     .contrast-preview {
+
         min-height: 340px;
 
         padding: 1.5rem;
+
+        border-radius: var(--radius-lg);
     }
 
 
@@ -1188,7 +1978,7 @@ svg {
 
 
 /* =========================================================
-   Reduced Motion
+   REDUCED MOTION
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1201,8 +1991,46 @@ svg {
     *,
     *::before,
     *::after {
+
         transition-duration: 0.01ms !important;
+
         animation-duration: 0.01ms !important;
+
         animation-iteration-count: 1 !important;
     }
+}
+
+
+/* =========================================================
+   FINAL PALETTE RADIUS OVERRIDE
+   =========================================================
+
+   This intentionally comes LAST so that neither Bootstrap,
+   components.css, responsive.css, nor earlier rules can
+   restore rounded corners on the actual palette colors.
+   ========================================================= */
+
+.palette,
+.palette > *,
+.palette-display .palette,
+.palette-display .palette > *,
+.palette-generator .palette,
+.palette-generator .palette > *,
+.palette-colors,
+.palette-colors > *,
+.color-palette,
+.color-palette > *,
+.color-box {
+
+    border-radius: none !important;
+}
+
+
+.palette .color-box,
+.palette-display .palette .color-box,
+.palette-generator .palette .color-box,
+.palette-colors .color-box,
+.color-palette .color-box {
+
+    border-radius: none !important;
 }

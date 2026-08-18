@@ -1,12 +1,35 @@
+@import url("../main.css");
+/* =========================================================
+   COLOR STUDIO — PALETTE UI
+   ---------------------------------------------------------
+   Design:
+   - Neutral black / white interface
+   - Light mode by default
+   - Dark mode via body.dark
+   - One unified palette surface
+   - Equal-width color segments
+   - No floating individual cards
+   - Responsive grid
+   ========================================================= */
+
+
 /* =========================================================
    CURRENT PALETTE
    ========================================================= */
 
 .current-palette {
+    --palette-count: 5;
+
     display: grid;
 
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns:
+        repeat(
+            var(--palette-count),
+            minmax(0, 1fr)
+        );
 
+    width: 100%;
+    min-width: 0;
     min-height: 360px;
 
     overflow: hidden;
@@ -14,9 +37,17 @@
     background: var(--app-surface);
 
     border: 1px solid var(--app-border);
+
     border-radius: var(--radius-xl);
 
     box-shadow: var(--shadow-md);
+
+    isolation: isolate;
+
+    transition:
+        background-color var(--transition-base),
+        border-color var(--transition-base),
+        box-shadow var(--transition-base);
 }
 
 
@@ -24,35 +55,48 @@
    COLOR CARD
    ========================================================= */
 
-.color-card {
+.palette-color-card {
     position: relative;
 
     display: flex;
     flex-direction: column;
 
+    width: 100%;
     min-width: 0;
+    min-height: 0;
 
     overflow: hidden;
 
-    background: var(--app-surface);
+    background: transparent;
 
-    border-right: 1px solid rgba(255, 255, 255, 0.28);
+    border: 0;
+    border-right: 1px solid var(--app-border);
+
+    border-radius: 0;
+
+    transform: none;
 
     transition:
-        transform var(--transition-base),
-        box-shadow var(--transition-base);
+        background-color var(--transition-fast),
+        box-shadow var(--transition-fast);
 }
 
-.color-card:last-child {
+
+.palette-color-card:last-child {
     border-right: 0;
 }
 
-.color-card:hover {
-    z-index: 2;
 
-    transform: scale(1.012);
+/* =========================================================
+   COLOR CARD HOVER
+   ========================================================= */
 
-    box-shadow: var(--shadow-md);
+.palette-color-card:hover {
+    z-index: 1;
+
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(255, 255, 255, 0.08);
 }
 
 
@@ -60,96 +104,93 @@
    COLOR PREVIEW
    ========================================================= */
 
-.color-card__preview {
+.palette-color-card__preview {
     position: relative;
 
-    flex: 1;
+    flex: 1 1 auto;
 
+    width: 100%;
+    min-width: 0;
     min-height: 270px;
 
-    background: var(--color-gray-200);
+    background:
+        var(
+            --palette-color,
+            var(--color-gray-200)
+        );
 
     cursor: pointer;
 
     transition:
-        filter var(--transition-base),
-        transform var(--transition-base);
+        filter var(--transition-base);
 }
 
-.color-card__preview:hover {
+
+.palette-color-card__preview:hover {
     filter: brightness(1.035);
 }
 
 
 /* =========================================================
-   COLOR CARD CONTENT
+   COLOR INDEX
    ========================================================= */
 
-.color-card__content {
-    display: flex;
+.palette-color-card__index {
+    position: absolute;
+
+    top: var(--space-3);
+    left: var(--space-3);
+
+    z-index: 2;
+
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
 
-    gap: var(--space-3);
+    min-width: 34px;
+    min-height: 28px;
 
-    min-height: 72px;
+    padding:
+        0
+        var(--space-2);
 
-    padding: var(--space-4);
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.28);
 
-    background: var(--app-surface);
+    border-radius: var(--radius-full);
 
-    border-top: 1px solid var(--app-border-light);
-}
+    background:
+        rgba(0, 0, 0, 0.24);
 
-.color-card__information {
-    display: flex;
-    flex-direction: column;
-
-    gap: 0.2rem;
-
-    min-width: 0;
-}
-
-.color-card__hex {
-    overflow: hidden;
-
-    color: var(--app-text);
-
-    font-size: 0.875rem;
-    font-weight: 700;
-
-    letter-spacing: 0.015em;
-
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.color-card__format {
-    color: var(--app-text-muted);
+    color: #FFFFFF;
 
     font-size: 0.6875rem;
-    font-weight: 600;
+    font-weight: 700;
 
-    text-transform: uppercase;
+    letter-spacing: 0.06em;
 
-    letter-spacing: 0.08em;
+    line-height: 1;
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    user-select: none;
 }
 
 
 /* =========================================================
-   COLOR CARD ACTIONS
+   LOCK BUTTON
    ========================================================= */
 
-.color-card__actions {
-    display: flex;
-    align-items: center;
+.palette-color-card__lock {
+    position: absolute;
 
-    flex-shrink: 0;
+    top: var(--space-3);
+    right: var(--space-3);
 
-    gap: var(--space-1);
-}
+    z-index: 3;
 
-.color-card__action {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -159,12 +200,150 @@
 
     padding: 0;
 
-    border: 1px solid transparent;
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.38);
+
+    border-radius: var(--radius-full);
+
+    background:
+        rgba(0, 0, 0, 0.28);
+
+    color: #FFFFFF;
+
+    opacity: 0;
+
+    cursor: pointer;
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    transition:
+        opacity var(--transition-fast),
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+
+.palette-color-card:hover
+.palette-color-card__lock,
+.palette-color-card__lock:focus-visible {
+    opacity: 1;
+}
+
+
+.palette-color-card__lock:hover {
+    background:
+        rgba(0, 0, 0, 0.52);
+
+    border-color:
+        rgba(255, 255, 255, 0.55);
+
+    transform: scale(1.05);
+}
+
+
+.palette-color-card__lock:active {
+    transform: scale(0.98);
+}
+
+
+.palette-color-card__lock:focus-visible {
+    outline: none;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(255, 255, 255, 0.28);
+}
+
+
+/* =========================================================
+   CARD INFORMATION
+   ========================================================= */
+
+.palette-color-card__info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: var(--space-3);
+
+    width: 100%;
+    min-width: 0;
+    min-height: 72px;
+
+    padding: var(--space-4);
+
+    background: var(--app-surface);
+
+    border-top:
+        1px solid
+        var(--app-border-light);
+
+    transition:
+        background-color var(--transition-base),
+        border-color var(--transition-base);
+}
+
+
+/* =========================================================
+   COLOR VALUE
+   ========================================================= */
+
+.palette-color-card__value {
+    display: block;
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    color: var(--app-text);
+
+    font-size: 0.875rem;
+    font-weight: 700;
+
+    letter-spacing: 0.015em;
+
+    line-height: 1.3;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   COPY BUTTON
+   ========================================================= */
+
+.palette-color-card__copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    gap: var(--space-2);
+
+    min-height: 34px;
+
+    padding:
+        0
+        var(--space-3);
+
+    border:
+        1px solid
+        transparent;
+
     border-radius: var(--radius-md);
 
     background: transparent;
 
     color: var(--app-text-muted);
+
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
 
     cursor: pointer;
 
@@ -175,87 +354,63 @@
         transform var(--transition-fast);
 }
 
-.color-card__action:hover {
-    background: #F2F4F8;
+
+.palette-color-card__copy:hover {
+    background: var(--app-surface-soft);
+
+    border-color: var(--app-border);
 
     color: var(--app-text);
 
     transform: translateY(-1px);
 }
 
-.color-card__action:active {
+
+.palette-color-card__copy:active {
     transform: translateY(0);
 }
 
-.color-card__action:focus-visible {
+
+.palette-color-card__copy:focus-visible {
     outline: none;
 
-    border-color: var(--color-primary);
+    border-color: var(--app-border-strong);
 
     box-shadow:
-        0 0 0 3px rgba(99, 91, 255, 0.12);
+        0 0 0 3px
+        var(--focus-ring);
 }
 
-.color-card__action.is-active {
-    background: rgba(99, 91, 255, 0.10);
 
-    color: var(--color-primary);
-}
+/* =========================================================
+   COPIED STATE
+   ========================================================= */
 
-.color-card__action.is-copied {
+.palette-color-card__copy.is-copied {
     background: var(--color-success-light);
+
+    border-color:
+        rgba(18, 183, 106, 0.18);
 
     color: var(--color-success);
 }
 
 
 /* =========================================================
-   LOCK BUTTON
+   SELECTED COLOR
    ========================================================= */
 
-.color-card__lock {
-    position: absolute;
-
-    top: var(--space-3);
-    right: var(--space-3);
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 34px;
-    height: 34px;
-
-    border: 1px solid rgba(255, 255, 255, 0.35);
-
-    border-radius: var(--radius-full);
-
-    background: rgba(23, 25, 35, 0.24);
-
-    color: var(--color-white);
-
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-
-    opacity: 0;
-
-    cursor: pointer;
-
-    transition:
-        opacity var(--transition-fast),
-        background-color var(--transition-fast),
-        transform var(--transition-fast);
+.palette-color-card.is-selected {
+    box-shadow:
+        inset 0 0 0 2px
+        var(--app-text);
 }
 
-.color-card:hover .color-card__lock,
-.color-card__lock.is-visible {
-    opacity: 1;
-}
 
-.color-card__lock:hover {
-    background: rgba(23, 25, 35, 0.42);
-
-    transform: scale(1.05);
+.palette-color-card.is-selected
+.palette-color-card__info {
+    border-top-color:
+        var(--app-text);
 }
 
 
@@ -270,23 +425,33 @@
     gap: var(--space-3);
 }
 
+
 .color-picker-preview {
     flex-shrink: 0;
 
     width: 40px;
     height: 40px;
 
-    border: 1px solid var(--app-border);
+    border:
+        1px solid
+        var(--app-border);
 
     border-radius: var(--radius-md);
 
-    background: var(--color-gray-200);
+    background:
+        var(--color-gray-200);
 
     box-shadow: var(--shadow-xs);
+
+    transition:
+        border-color var(--transition-fast),
+        background-color var(--transition-fast);
 }
+
 
 .color-picker-input {
     flex: 1;
+    min-width: 0;
 }
 
 
@@ -301,6 +466,7 @@
     gap: var(--space-2);
 }
 
+
 .palette-status__icon {
     display: inline-flex;
     align-items: center;
@@ -309,25 +475,44 @@
     width: 24px;
     height: 24px;
 
+    border:
+        1px solid
+        var(--app-border);
+
     border-radius: var(--radius-full);
 
-    background: #F0F1F7;
+    background:
+        var(--app-surface-soft);
 
     color: var(--app-text-muted);
 
     font-size: 0.7rem;
 }
 
-.palette-status.is-success .palette-status__icon {
-    background: var(--color-success-light);
 
-    color: var(--color-success);
+.palette-status.is-success
+.palette-status__icon {
+    background:
+        var(--color-success-light);
+
+    border-color:
+        rgba(18, 183, 106, 0.18);
+
+    color:
+        var(--color-success);
 }
 
-.palette-status.is-error .palette-status__icon {
-    background: var(--color-danger-light);
 
-    color: var(--color-danger);
+.palette-status.is-error
+.palette-status__icon {
+    background:
+        var(--color-danger-light);
+
+    border-color:
+        rgba(240, 68, 56, 0.18);
+
+    color:
+        var(--color-danger);
 }
 
 
@@ -335,13 +520,16 @@
    CONTRAST CONTROLS
    ========================================================= */
 
-.contrast-color-control + .contrast-color-control {
+.contrast-color-control
++ .contrast-color-control {
     margin-top: var(--space-2);
 }
+
 
 .contrast-controls .input-group {
     align-items: stretch;
 }
+
 
 .contrast-controls .form-control-color {
     flex: 0 0 52px;
@@ -349,18 +537,21 @@
 
 
 /* =========================================================
-   CONTRAST PREVIEW STATES
+   CONTRAST PREVIEW
    ========================================================= */
 
 .contrast-preview.is-pass {
     box-shadow:
-        inset 0 0 0 2px rgba(78, 173, 114, 0.35),
+        inset 0 0 0 2px
+        rgba(18, 183, 106, 0.35),
         var(--shadow-md);
 }
 
+
 .contrast-preview.is-fail {
     box-shadow:
-        inset 0 0 0 2px rgba(217, 75, 88, 0.35),
+        inset 0 0 0 2px
+        rgba(240, 68, 56, 0.35),
         var(--shadow-md);
 }
 
@@ -377,16 +568,20 @@
     transition:
         transform var(--transition-fast),
         border-color var(--transition-fast),
-        box-shadow var(--transition-fast);
+        box-shadow var(--transition-fast),
+        background-color var(--transition-fast);
 }
 
+
 .contrast-result-card:hover {
-    border-color: #D6DAE4;
+    border-color:
+        var(--app-border-strong);
 
     box-shadow: var(--shadow-sm);
 
     transform: translateY(-2px);
 }
+
 
 .contrast-result-card::before {
     content: "";
@@ -399,27 +594,25 @@
     width: 100%;
     height: 3px;
 
-    background: var(--app-border);
+    background:
+        var(--app-border);
 
     transition:
         background-color var(--transition-base);
 }
 
+
 .contrast-result-card.is-pass::before {
-    background: var(--color-success);
+    background:
+        var(--color-success);
 }
+
 
 .contrast-result-card.is-fail::before {
-    background: var(--color-danger);
+    background:
+        var(--color-danger);
 }
 
-.contrast-result-card.is-pass .contrast-result-card__status {
-    color: var(--color-success);
-}
-
-.contrast-result-card.is-fail .contrast-result-card__status {
-    color: var(--color-danger);
-}
 
 .contrast-result-card__status {
     display: inline-flex;
@@ -429,6 +622,21 @@
 
     font-weight: 650;
 }
+
+
+.contrast-result-card.is-pass
+.contrast-result-card__status {
+    color:
+        var(--color-success);
+}
+
+
+.contrast-result-card.is-fail
+.contrast-result-card__status {
+    color:
+        var(--color-danger);
+}
+
 
 .contrast-result-card__status-icon {
     font-size: 0.875rem;
@@ -446,30 +654,48 @@
     gap: var(--space-4);
 }
 
+
+.saved-palettes-empty-state.is-hidden,
+.saved-palettes-list.is-hidden {
+    display: none;
+}
+
+
 .saved-palette-card {
     padding: var(--space-4);
 
-    background: var(--app-surface);
+    background:
+        var(--app-surface);
 
-    border: 1px solid var(--app-border);
+    border:
+        1px solid
+        var(--app-border);
 
-    border-radius: var(--radius-lg);
+    border-radius:
+        var(--radius-lg);
 
-    box-shadow: var(--shadow-xs);
+    box-shadow:
+        var(--shadow-xs);
 
     transition:
         border-color var(--transition-fast),
         box-shadow var(--transition-fast),
-        transform var(--transition-fast);
+        transform var(--transition-fast),
+        background-color var(--transition-base);
 }
+
 
 .saved-palette-card:hover {
-    border-color: #D6DAE4;
+    border-color:
+        var(--app-border-strong);
 
-    box-shadow: var(--shadow-sm);
+    box-shadow:
+        var(--shadow-sm);
 
-    transform: translateY(-2px);
+    transform:
+        translateY(-2px);
 }
+
 
 .saved-palette-card__header {
     display: flex;
@@ -481,8 +707,11 @@
     margin-bottom: var(--space-3);
 }
 
+
 .saved-palette-card__name {
     margin: 0;
+
+    min-width: 0;
 
     overflow: hidden;
 
@@ -495,6 +724,7 @@
     white-space: nowrap;
 }
 
+
 .saved-palette-card__actions {
     display: flex;
     align-items: center;
@@ -503,6 +733,7 @@
 
     gap: var(--space-1);
 }
+
 
 .saved-palette-card__action {
     display: inline-flex;
@@ -514,34 +745,52 @@
 
     padding: 0;
 
-    border: 0;
+    border:
+        1px solid
+        transparent;
 
-    border-radius: var(--radius-sm);
+    border-radius:
+        var(--radius-sm);
 
     background: transparent;
 
-    color: var(--app-text-muted);
+    color:
+        var(--app-text-muted);
 
     cursor: pointer;
 
     transition:
         color var(--transition-fast),
         background-color var(--transition-fast),
+        border-color var(--transition-fast),
         transform var(--transition-fast);
 }
 
+
 .saved-palette-card__action:hover {
-    background: #F2F4F8;
+    background:
+        var(--app-surface-soft);
 
-    color: var(--app-text);
+    border-color:
+        var(--app-border);
 
-    transform: translateY(-1px);
+    color:
+        var(--app-text);
+
+    transform:
+        translateY(-1px);
 }
 
-.saved-palette-card__action--delete:hover {
-    background: var(--color-danger-light);
 
-    color: var(--color-danger);
+.saved-palette-card__action--delete:hover {
+    background:
+        var(--color-danger-light);
+
+    border-color:
+        rgba(240, 68, 56, 0.18);
+
+    color:
+        var(--color-danger);
 }
 
 
@@ -552,24 +801,32 @@
 .saved-palette-card__colors {
     display: grid;
 
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns:
+        repeat(
+            5,
+            minmax(0, 1fr)
+        );
 
     height: 56px;
 
     overflow: hidden;
 
-    border-radius: var(--radius-md);
+    border-radius:
+        var(--radius-md);
 
     box-shadow:
-        inset 0 0 0 1px rgba(23, 25, 35, 0.06);
+        inset 0 0 0 1px
+        rgba(0, 0, 0, 0.08);
 }
+
 
 .saved-palette-card__color {
     position: relative;
 
     min-width: 0;
 
-    background: var(--color-gray-200);
+    background:
+        var(--color-gray-200);
 
     cursor: pointer;
 
@@ -578,13 +835,17 @@
         filter var(--transition-fast);
 }
 
+
 .saved-palette-card__color:hover {
     z-index: 1;
 
-    transform: scaleY(1.08);
+    transform:
+        scaleY(1.08);
 
-    filter: brightness(1.04);
+    filter:
+        brightness(1.04);
 }
+
 
 .saved-palette-card__footer {
     display: flex;
@@ -596,10 +857,13 @@
     margin-top: var(--space-3);
 }
 
-.saved-palette-card__date {
-    color: var(--app-text-muted);
 
-    font-size: 0.6875rem;
+.saved-palette-card__date {
+    color:
+        var(--app-text-muted);
+
+    font-size:
+        0.6875rem;
 }
 
 
@@ -611,21 +875,29 @@
     min-height: 46px;
 }
 
+
 #paletteNameInput:focus {
-    border-color: var(--color-primary);
+    border-color:
+        var(--color-gray-900);
 
     box-shadow:
-        0 0 0 4px rgba(99, 91, 255, 0.10);
+        0 0 0 4px
+        var(--focus-ring);
 }
+
 
 #paletteNameInput.is-invalid {
-    border-color: var(--color-danger);
+    border-color:
+        var(--color-danger);
 }
 
-#paletteNameError {
-    margin-top: var(--space-2);
 
-    color: var(--color-danger);
+#paletteNameError {
+    margin-top:
+        var(--space-2);
+
+    color:
+        var(--color-danger);
 }
 
 
@@ -637,26 +909,20 @@
     min-width: 300px;
 }
 
+
 #toastIcon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    color: var(--color-success);
+    color:
+        var(--color-success);
 }
+
 
 #toastMessage {
-    color: var(--app-text-secondary);
-}
-
-
-/* =========================================================
-   VISIBILITY STATES
-   ========================================================= */
-
-.saved-palettes-empty-state.is-hidden,
-.saved-palettes-list.is-hidden {
-    display: none;
+    color:
+        var(--app-text-secondary);
 }
 
 
@@ -672,6 +938,7 @@
     opacity: 0.75;
 }
 
+
 .is-loading::after {
     content: "";
 
@@ -680,47 +947,33 @@
     width: 1rem;
     height: 1rem;
 
-    margin-left: var(--space-2);
+    margin-left:
+        var(--space-2);
 
-    border: 2px solid currentColor;
+    border:
+        2px solid
+        currentColor;
 
-    border-right-color: transparent;
+    border-right-color:
+        transparent;
 
-    border-radius: var(--radius-full);
+    border-radius:
+        var(--radius-full);
 
-    vertical-align: -0.125em;
+    vertical-align:
+        -0.125em;
 
-    animation: color-studio-spin 600ms linear infinite;
+    animation:
+        color-studio-spin
+        600ms linear infinite;
 }
+
 
 @keyframes color-studio-spin {
     to {
-        transform: rotate(360deg);
+        transform:
+            rotate(360deg);
     }
-}
-
-
-/* =========================================================
-   SELECTION STATES
-   ========================================================= */
-
-.color-card.is-selected {
-    box-shadow:
-        inset 0 0 0 2px var(--color-primary);
-}
-
-.saved-palette-card.is-selected {
-    border-color: var(--color-primary);
-
-    box-shadow:
-        0 0 0 3px rgba(99, 91, 255, 0.08);
-}
-
-.color-card.is-disabled,
-.saved-palette-card.is-disabled {
-    opacity: 0.55;
-
-    pointer-events: none;
 }
 
 
@@ -729,11 +982,14 @@
    ========================================================= */
 
 .text-muted-custom {
-    color: var(--app-text-muted) !important;
+    color:
+        var(--app-text-muted) !important;
 }
 
+
 .text-secondary-custom {
-    color: var(--app-text-secondary) !important;
+    color:
+        var(--app-text-secondary) !important;
 }
 
 
@@ -742,13 +998,369 @@
    ========================================================= */
 
 .surface-card {
-    background: var(--app-surface);
+    background:
+        var(--app-surface);
 
-    border: 1px solid var(--app-border);
+    border:
+        1px solid
+        var(--app-border);
 
-    border-radius: var(--radius-lg);
+    border-radius:
+        var(--radius-lg);
 
-    box-shadow: var(--shadow-sm);
+    box-shadow:
+        var(--shadow-sm);
+
+    transition:
+        background-color var(--transition-base),
+        border-color var(--transition-base),
+        box-shadow var(--transition-base);
+}
+
+
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
+body.dark {
+    color-scheme: dark;
+
+    /* -----------------------------------------------------
+       Surfaces
+       ----------------------------------------------------- */
+
+    --app-background: #0A0A0A;
+    --app-background-deep: #050505;
+
+    --app-surface: #111111;
+    --app-surface-raised: #171717;
+    --app-surface-soft: #1D1D1D;
+
+
+    /* -----------------------------------------------------
+       Text
+       ----------------------------------------------------- */
+
+    --app-text: #F5F5F5;
+    --app-text-secondary: #B8B8B8;
+    --app-text-muted: #858585;
+
+
+    /* -----------------------------------------------------
+       Borders
+       ----------------------------------------------------- */
+
+    --app-border: #2A2A2A;
+    --app-border-light: #222222;
+    --app-border-strong: #3A3A3A;
+
+
+    /* -----------------------------------------------------
+       Neutral palette
+       ----------------------------------------------------- */
+
+    --color-white: #FFFFFF;
+    --color-black: #000000;
+
+    --color-gray-50: #111111;
+    --color-gray-100: #171717;
+    --color-gray-200: #222222;
+    --color-gray-300: #303030;
+    --color-gray-400: #707070;
+    --color-gray-500: #858585;
+    --color-gray-600: #A0A0A0;
+    --color-gray-700: #B8B8B8;
+    --color-gray-800: #D4D4D4;
+    --color-gray-900: #F5F5F5;
+
+
+    /* -----------------------------------------------------
+       Focus
+       ----------------------------------------------------- */
+
+    --focus-ring:
+        rgba(255, 255, 255, 0.14);
+
+
+    /* -----------------------------------------------------
+       Shadows
+       ----------------------------------------------------- */
+
+    --shadow-xs:
+        0 1px 2px
+        rgba(0, 0, 0, 0.35);
+
+    --shadow-sm:
+        0 4px 12px
+        rgba(0, 0, 0, 0.32);
+
+    --shadow-md:
+        0 10px 28px
+        rgba(0, 0, 0, 0.42);
+
+    --shadow-lg:
+        0 20px 50px
+        rgba(0, 0, 0, 0.55);
+}
+
+
+/* =========================================================
+   DARK MODE — PALETTE
+   ========================================================= */
+
+body.dark .current-palette {
+    background:
+        var(--app-surface);
+
+    border-color:
+        var(--app-border);
+
+    box-shadow:
+        var(--shadow-md);
+}
+
+
+body.dark .palette-color-card {
+    border-right-color:
+        var(--app-border);
+}
+
+
+body.dark .palette-color-card:hover {
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(255, 255, 255, 0.08);
+}
+
+
+body.dark .palette-color-card__info {
+    background:
+        var(--app-surface);
+
+    border-top-color:
+        var(--app-border);
+}
+
+
+body.dark .palette-color-card.is-selected {
+    box-shadow:
+        inset 0 0 0 2px
+        var(--app-text);
+}
+
+
+body.dark .palette-color-card__copy:hover {
+    background:
+        var(--app-surface-soft);
+
+    border-color:
+        var(--app-border-strong);
+
+    color:
+        var(--app-text);
+}
+
+
+body.dark .palette-color-card__copy.is-copied {
+    background:
+        rgba(18, 183, 106, 0.12);
+
+    border-color:
+        rgba(74, 222, 128, 0.18);
+
+    color:
+        #4ADE80;
+}
+
+
+/* =========================================================
+   DARK MODE — COLOR PICKER
+   ========================================================= */
+
+body.dark .color-picker-preview {
+    border-color:
+        var(--app-border-strong);
+
+    box-shadow:
+        var(--shadow-xs);
+}
+
+
+/* =========================================================
+   DARK MODE — STATUS
+   ========================================================= */
+
+body.dark .palette-status__icon {
+    background:
+        var(--app-surface-soft);
+
+    border-color:
+        var(--app-border);
+
+    color:
+        var(--app-text-muted);
+}
+
+
+body.dark .palette-status.is-success
+.palette-status__icon {
+    background:
+        rgba(18, 183, 106, 0.12);
+
+    border-color:
+        rgba(74, 222, 128, 0.18);
+
+    color:
+        #4ADE80;
+}
+
+
+body.dark .palette-status.is-error
+.palette-status__icon {
+    background:
+        rgba(240, 68, 56, 0.12);
+
+    border-color:
+        rgba(255, 107, 107, 0.18);
+
+    color:
+        #FF6B6B;
+}
+
+
+/* =========================================================
+   DARK MODE — SAVED PALETTES
+   ========================================================= */
+
+body.dark .saved-palette-card {
+    background:
+        var(--app-surface);
+
+    border-color:
+        var(--app-border);
+}
+
+
+body.dark .saved-palette-card:hover {
+    border-color:
+        var(--app-border-strong);
+
+    box-shadow:
+        var(--shadow-sm);
+}
+
+
+body.dark .saved-palette-card__action:hover {
+    background:
+        var(--app-surface-soft);
+
+    border-color:
+        var(--app-border);
+
+    color:
+        var(--app-text);
+}
+
+
+body.dark .saved-palette-card__colors {
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(255, 255, 255, 0.08);
+}
+
+
+body.dark
+.saved-palette-card__action--delete:hover {
+    background:
+        rgba(240, 68, 56, 0.12);
+
+    border-color:
+        rgba(255, 107, 107, 0.18);
+
+    color:
+        #FF6B6B;
+}
+
+
+/* =========================================================
+   DARK MODE — PALETTE NAME
+   ========================================================= */
+
+body.dark #paletteNameInput:focus {
+    border-color:
+        var(--color-gray-800);
+
+    box-shadow:
+        0 0 0 4px
+        var(--focus-ring);
+}
+
+
+/* =========================================================
+   DARK MODE — SURFACE
+   ========================================================= */
+
+body.dark .surface-card {
+    background:
+        var(--app-surface);
+
+    border-color:
+        var(--app-border);
+
+    box-shadow:
+        var(--shadow-sm);
+}
+
+
+/* =========================================================
+   DARK MODE — CONTRAST
+   ========================================================= */
+
+body.dark .contrast-result-card {
+    background:
+        var(--app-surface);
+}
+
+
+body.dark .contrast-result-card:hover {
+    border-color:
+        var(--app-border-strong);
+}
+
+
+body.dark .contrast-result-card.is-pass {
+    background:
+        linear-gradient(
+            145deg,
+            #111111 0%,
+            #101814 100%
+        );
+}
+
+
+body.dark .contrast-result-card.is-fail {
+    background:
+        linear-gradient(
+            145deg,
+            #111111 0%,
+            #181010 100%
+        );
+}
+
+
+body.dark
+.contrast-result-card.is-pass
+.contrast-result-card__status {
+    color:
+        #4ADE80;
+}
+
+
+body.dark
+.contrast-result-card.is-fail
+.contrast-result-card__status {
+    color:
+        #FF6B6B;
 }
 
 
@@ -759,20 +1371,11 @@
 @media (max-width: 991.98px) {
 
     .current-palette {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-
         min-height: 420px;
     }
 
-    .color-card {
-        min-height: 210px;
-    }
 
-    .color-card:nth-child(3n) {
-        border-right: 0;
-    }
-
-    .color-card__preview {
+    .palette-color-card__preview {
         min-height: 210px;
     }
 }
@@ -785,33 +1388,56 @@
 @media (max-width: 767.98px) {
 
     .current-palette {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
 
         min-height: auto;
     }
 
-    .color-card {
+
+    .palette-color-card {
         min-height: 230px;
 
-        border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+        border-right:
+            1px solid
+            var(--app-border);
+
+        border-bottom:
+            1px solid
+            var(--app-border);
     }
 
-    .color-card:nth-child(3n) {
-        border-right: 1px solid rgba(255, 255, 255, 0.28);
-    }
 
-    .color-card:nth-child(2n) {
+    /*
+     * Two-column grid:
+     * every second item is the right edge.
+     */
+    .palette-color-card:nth-child(2n) {
         border-right: 0;
     }
 
-    .color-card__preview {
+
+    /*
+     * Remove bottom border from the last row.
+     */
+    .palette-color-card:nth-last-child(-n + 2) {
+        border-bottom: 0;
+    }
+
+
+    .palette-color-card__preview {
         min-height: 190px;
     }
 
-    .color-card__content {
+
+    .palette-color-card__info {
         min-height: 66px;
 
-        padding: var(--space-3);
+        padding:
+            var(--space-3);
     }
 }
 
@@ -826,27 +1452,81 @@
         grid-template-columns: 1fr;
     }
 
-    .color-card {
+
+    .palette-color-card {
         min-height: 260px;
 
         border-right: 0 !important;
 
-        border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+        border-bottom:
+            1px solid
+            var(--app-border);
     }
 
-    .color-card:last-child {
+
+    .palette-color-card:last-child {
         border-bottom: 0;
     }
 
-    .color-card__preview {
+
+    .palette-color-card__preview {
         min-height: 210px;
     }
 
-    .color-card__lock {
+
+    /*
+     * Touch devices do not have hover, so the lock
+     * control must always remain visible.
+     */
+    .palette-color-card__lock {
         opacity: 1;
     }
 
+
+    .palette-color-card__copy {
+        min-width: 34px;
+
+        padding:
+            0 var(--space-2);
+    }
+
+
+    .palette-color-card__copy span {
+        display: none;
+    }
+
+
+    .palette-color-card__value {
+        font-size: 0.8125rem;
+    }
+
+
     .saved-palette-card__colors {
         height: 48px;
+    }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .current-palette,
+    .palette-color-card,
+    .palette-color-card__preview,
+    .palette-color-card__lock,
+    .palette-color-card__copy,
+    .saved-palette-card,
+    .saved-palette-card__action,
+    .saved-palette-card__color,
+    .contrast-result-card {
+        transition: none;
+    }
+
+
+    .is-loading::after {
+        animation: none;
     }
 }
