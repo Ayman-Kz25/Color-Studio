@@ -296,13 +296,6 @@ function renderNormalTextResult(result) {
         ? "WCAG AA"
         : "WCAG AA / AAA";
   }
-
-  console.log("Normal Text result:", result);
-  console.log("Normal Text DOM:", {
-    result: dom.normalTextResult,
-    status: dom.normalTextStatus,
-    level: dom.normalTextLevel,
-  });
 }
 
 /* =========================================================
