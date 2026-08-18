@@ -1,5 +1,7 @@
 // scripts/ui/paletteUI.js
 
+// scripts/ui/paletteUI.js
+
 import {
   getPaletteState,
   setSelectedColorIndex,
@@ -29,6 +31,10 @@ import {
 } from "./toastUI.js";
 
 import {
+  dom,
+} from "./dom.js";
+
+import {
   MESSAGES,
   PALETTE_TYPES,
   DEFAULT_BASE_COLOR,
@@ -39,10 +45,8 @@ import {
 
 
 /* =========================================================
-   DOM Elements
+   State
    ========================================================= */
-
-let elements = {};
 
 let eventsBound = false;
 
@@ -52,8 +56,6 @@ let eventsBound = false;
    ========================================================= */
 
 export function initializePaletteUI() {
-  cacheElements();
-
   if (!eventsBound) {
     bindEvents();
     eventsBound = true;
@@ -64,95 +66,46 @@ export function initializePaletteUI() {
 
 
 /* =========================================================
-   Cache DOM Elements
-   ========================================================= */
-
-function cacheElements() {
-  elements = {
-    paletteContainer:
-      document.getElementById(
-        "currentPalette",
-      ),
-
-    baseColorInput:
-      document.getElementById(
-        "baseColorInput",
-      ),
-
-    baseColorPicker:
-      document.getElementById(
-        "baseColorPicker",
-      ),
-
-    paletteType:
-      document.getElementById(
-        "paletteTypeSelect",
-      ),
-
-    generateButton:
-      document.getElementById(
-        "generatePaletteButton",
-      ),
-
-    randomizeButton:
-      document.getElementById(
-        "randomizePaletteButton",
-      ),
-
-    resetButton:
-      document.getElementById(
-        "clearPaletteButton",
-      ),
-
-    paletteSize:
-      document.getElementById(
-        "colorCountSelect",
-      ),
-  };
-}
-
-
-/* =========================================================
    Event Binding
    ========================================================= */
 
 function bindEvents() {
-  elements.generateButton?.addEventListener(
+  dom.generatePaletteButton?.addEventListener(
     "click",
     handleGenerate,
   );
 
-  elements.randomizeButton?.addEventListener(
+  dom.randomizePaletteButton?.addEventListener(
     "click",
     handleRandomize,
   );
 
-  elements.resetButton?.addEventListener(
+  dom.clearPaletteButton?.addEventListener(
     "click",
     handleReset,
   );
 
-  elements.baseColorInput?.addEventListener(
+  dom.baseColorInput?.addEventListener(
     "input",
     handleBaseColorInput,
   );
 
-  elements.baseColorPicker?.addEventListener(
+  dom.baseColorPicker?.addEventListener(
     "input",
     handleBaseColorPicker,
   );
 
-  elements.paletteType?.addEventListener(
+  dom.paletteTypeSelect?.addEventListener(
     "change",
     handlePaletteTypeChange,
   );
 
-  elements.paletteSize?.addEventListener(
+  dom.colorCountSelect?.addEventListener(
     "change",
     handlePaletteSizeChange,
   );
 
-  elements.paletteContainer?.addEventListener(
+  dom.currentPalette?.addEventListener(
     "click",
     handlePaletteClick,
   );
@@ -319,8 +272,8 @@ function handleBaseColorInput(event) {
     normalized,
   );
 
-  if (elements.baseColorPicker) {
-    elements.baseColorPicker.value =
+  if (dom.baseColorPicker) {
+    dom.baseColorPicker.value =
       normalized;
   }
 }
@@ -349,8 +302,8 @@ function handleBaseColorPicker(event) {
     normalized,
   );
 
-  if (elements.baseColorInput) {
-    elements.baseColorInput.value =
+  if (dom.baseColorInput) {
+    dom.baseColorInput.value =
       normalized;
   }
 }
@@ -610,7 +563,7 @@ function handleToggleLock(index) {
    ========================================================= */
 
 export function renderPalette() {
-  if (!elements.paletteContainer) {
+  if (!dom.currentPalette) {
     return;
   }
 
@@ -623,13 +576,13 @@ export function renderPalette() {
       palette.colors,
     )
   ) {
-    elements.paletteContainer.innerHTML =
+    dom.currentPalette.innerHTML =
       "";
 
     return;
   }
 
-  elements.paletteContainer.innerHTML =
+  dom.currentPalette.innerHTML =
     "";
 
   palette.colors.forEach(
@@ -643,7 +596,7 @@ export function renderPalette() {
           ),
         );
 
-      elements.paletteContainer.appendChild(
+      dom.currentPalette.appendChild(
         card,
       );
     },
@@ -833,7 +786,7 @@ function updateLockButton(
    ========================================================= */
 
 function updateSelectedColor(index) {
-  elements.paletteContainer
+  dom.currentPalette
     ?.querySelectorAll(
       ".palette-color-card",
     )
@@ -858,26 +811,26 @@ function updateSelectedColor(index) {
 function updatePaletteControls(
   palette,
 ) {
-  if (elements.baseColorInput) {
-    elements.baseColorInput.value =
+  if (dom.baseColorInput) {
+    dom.baseColorInput.value =
       palette.baseColor;
   }
 
-  if (elements.baseColorPicker) {
-    elements.baseColorPicker.value =
+  if (dom.baseColorPicker) {
+    dom.baseColorPicker.value =
       palette.baseColor;
   }
 
-  if (elements.paletteType) {
-    elements.paletteType.value =
+  if (dom.paletteTypeSelect) {
+    dom.paletteTypeSelect.value =
       palette.type;
   }
 
   if (
-    elements.paletteSize &&
+    dom.colorCountSelect &&
     Array.isArray(palette.colors)
   ) {
-    elements.paletteSize.value =
+    dom.colorCountSelect.value =
       String(
         palette.colors.length,
       );
@@ -907,7 +860,7 @@ function syncControlsFromPalette(
    ========================================================= */
 
 function getColorCard(index) {
-  return elements.paletteContainer?.querySelector(
+  return dom.currentPalette?.querySelector(
     `[data-color-index="${index}"]`,
   );
 }
@@ -1025,7 +978,7 @@ function getPaletteTypeLabel(
 
 function getBaseColorFromInput() {
   const inputValue =
-    elements.baseColorInput?.value?.trim();
+    dom.baseColorInput?.value?.trim();
 
   if (
     inputValue &&
@@ -1045,7 +998,7 @@ function getBaseColorFromInput() {
 
 function getSelectedPaletteType() {
   const value =
-    elements.paletteType?.value;
+    dom.paletteTypeSelect?.value;
 
   return isSupportedPaletteType(value)
     ? value

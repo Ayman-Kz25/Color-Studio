@@ -1,16 +1,8 @@
 // scripts/ui/moduleUI.js
 
-import {
-  paletteGenerator,
-  contrastChecker,
-  savedPalettesButton,
-} from "./dom.js";
+import { dom } from "./dom.js";
 
-import {
-  getUIState,
-  setActiveModule,
-} from "../core/state.js";
-
+import { getUIState, setActiveModule } from "../core/state.js";
 
 /* =========================================================
    Module Constants
@@ -22,10 +14,7 @@ const MODULES = Object.freeze({
   SAVED: "saved",
 });
 
-const SUPPORTED_MODULES = Object.freeze(
-  Object.values(MODULES),
-);
-
+const SUPPORTED_MODULES = Object.freeze(Object.values(MODULES));
 
 /* =========================================================
    Initialization
@@ -42,18 +31,13 @@ export function initializeModuleUI() {
   initializeActiveModule();
 }
 
-
 /* =========================================================
    Event Binding
    ========================================================= */
 
 function bindEvents() {
-  savedPalettesButton?.addEventListener(
-    "click",
-    handleSavedPalettesClick,
-  );
+  dom.savedPalettesButton?.addEventListener("click", handleSavedPalettesClick);
 }
-
 
 /* =========================================================
    Saved Palettes
@@ -69,7 +53,6 @@ function handleSavedPalettesClick(event) {
   switchModule(MODULES.SAVED);
 }
 
-
 /* =========================================================
    Initial Module
    ========================================================= */
@@ -77,13 +60,11 @@ function handleSavedPalettesClick(event) {
 function initializeActiveModule() {
   const uiState = getUIState();
 
-  const requestedModule =
-    uiState?.activeModule;
+  const requestedModule = uiState?.activeModule;
 
-  const activeModule =
-    isSupportedModule(requestedModule)
-      ? requestedModule
-      : MODULES.PALETTE;
+  const activeModule = isSupportedModule(requestedModule)
+    ? requestedModule
+    : MODULES.PALETTE;
 
   /*
    * Keep state synchronized when the stored
@@ -93,27 +74,19 @@ function initializeActiveModule() {
     setActiveModule(activeModule);
   }
 
-  switchModule(
-    activeModule,
-    false,
-  );
+  switchModule(activeModule, false);
 }
-
 
 /* =========================================================
    Switch Module
    ========================================================= */
 
-export function switchModule(
-  moduleName,
-  dispatchEvent = true,
-) {
+export function switchModule(moduleName, dispatchEvent = true) {
   if (!isSupportedModule(moduleName)) {
     return false;
   }
 
-  const previousModule =
-    getUIState()?.activeModule;
+  const previousModule = getUIState()?.activeModule;
 
   /*
    * Keep application state as the source
@@ -128,42 +101,28 @@ export function switchModule(
    * Avoid unnecessary module-change events
    * when the module hasn't actually changed.
    */
-  if (
-    dispatchEvent &&
-    previousModule !== moduleName
-  ) {
+  if (dispatchEvent && previousModule !== moduleName) {
     dispatchModuleChangeEvent(moduleName);
   }
 
   return true;
 }
 
-
 /* =========================================================
    Main Sections
    ========================================================= */
 
 function updateMainSections(activeModule) {
-  updateSection(
-    paletteGenerator,
-    activeModule === MODULES.PALETTE,
-  );
+  updateSection(dom.paletteGenerator, activeModule === MODULES.PALETTE);
 
-  updateSection(
-    contrastChecker,
-    activeModule === MODULES.CONTRAST,
-  );
+  updateSection(dom.contrastChecker, activeModule === MODULES.CONTRAST);
 }
-
 
 /* =========================================================
    Update Section
    ========================================================= */
 
-function updateSection(
-  section,
-  isActive,
-) {
+function updateSection(section, isActive) {
   if (!section) {
     return;
   }
@@ -171,62 +130,40 @@ function updateSection(
   /*
    * The active class controls visual state.
    */
-  section.classList.toggle(
-    "active",
-    isActive,
-  );
+  section.classList.toggle("active", isActive);
 
   /*
    * Keep Bootstrap-style d-none synchronized
    * with the actual module state.
    */
-  section.classList.toggle(
-    "d-none",
-    !isActive,
-  );
+  section.classList.toggle("d-none", !isActive);
 
   /*
    * aria-hidden communicates the same state
    * to assistive technologies.
    */
-  section.setAttribute(
-    "aria-hidden",
-    String(!isActive),
-  );
+  section.setAttribute("aria-hidden", String(!isActive));
 }
-
 
 /* =========================================================
    Saved Palettes Button
    ========================================================= */
 
-function updateSavedPalettesButton(
-  activeModule,
-) {
-  if (!savedPalettesButton) {
+function updateSavedPalettesButton(activeModule) {
+  if (!dom.savedPalettesButton) {
     return;
   }
 
-  const isActive =
-    activeModule === MODULES.SAVED;
+  const isActive = activeModule === MODULES.SAVED;
 
-  savedPalettesButton.classList.toggle(
-    "active",
-    isActive,
-  );
+  dom.savedPalettesButton.classList.toggle("active", isActive);
 
   if (isActive) {
-    savedPalettesButton.setAttribute(
-      "aria-current",
-      "page",
-    );
+    dom.savedPalettesButton.setAttribute("aria-current", "page");
   } else {
-    savedPalettesButton.removeAttribute(
-      "aria-current",
-    );
+    dom.savedPalettesButton.removeAttribute("aria-current");
   }
 }
-
 
 /* =========================================================
    Module Validation
@@ -234,47 +171,35 @@ function updateSavedPalettesButton(
 
 function isSupportedModule(moduleName) {
   return (
-    typeof moduleName === "string" &&
-    SUPPORTED_MODULES.includes(moduleName)
+    typeof moduleName === "string" && SUPPORTED_MODULES.includes(moduleName)
   );
 }
-
 
 /* =========================================================
    Custom Module Event
    ========================================================= */
 
-function dispatchModuleChangeEvent(
-  moduleName,
-) {
+function dispatchModuleChangeEvent(moduleName) {
   document.dispatchEvent(
-    new CustomEvent(
-      "colorstudio:modulechange",
-      {
-        detail: {
-          module: moduleName,
-        },
+    new CustomEvent("colorstudio:modulechange", {
+      detail: {
+        module: moduleName,
       },
-    ),
+    }),
   );
 }
-
 
 /* =========================================================
    Public Helpers
    ========================================================= */
 
 export function getActiveModule() {
-  return (
-    getUIState()?.activeModule ||
-    MODULES.PALETTE
-  );
+  return getUIState()?.activeModule || MODULES.PALETTE;
 }
 
 export function showModule(moduleName) {
   return switchModule(moduleName);
 }
-
 
 /* =========================================================
    Public Module Constants
