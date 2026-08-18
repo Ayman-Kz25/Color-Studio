@@ -138,27 +138,46 @@ function handleColorInput(type, value) {
    Swap Colors
    ========================================================= */
 
-function handleSwapColors() {
-  const foreground = getForegroundColor();
-  const background = getBackgroundColor();
+function handleSwapColors(event) {
+  event?.preventDefault();
 
-  const normalizedForeground = normalizeHex(foreground);
+  const foreground = normalizeHex(getForegroundColor());
+  const background = normalizeHex(getBackgroundColor());
 
-  const normalizedBackground = normalizeHex(background);
-
-  if (!normalizedForeground || !normalizedBackground) {
+  if (!foreground || !background) {
     showErrorToast("Please enter valid HEX colors first.");
-
     return;
   }
 
-  syncColorControls("foreground", normalizedBackground);
+  // Swap the values
+  const newForeground = background;
+  const newBackground = foreground;
 
-  syncColorControls("background", normalizedForeground);
+  // Update application state
+  setContrastColors(newForeground, newBackground);
 
-  setContrastColors(normalizedBackground, normalizedForeground);
+  // Update the visible controls
+  syncColorControls("foreground", newForeground);
+  syncColorControls("background", newBackground);
 
-  updateContrast();
+  // Recalculate using the swapped values
+  const result = checkContrast(newForeground, newBackground);
+
+  if (!result || !result.valid) {
+    renderInvalidResult();
+    return;
+  }
+
+  // Update contrast state
+  setContrastState({
+    foreground: result.foreground,
+    background: result.background,
+    ratio: result.ratio,
+    level: result.level || CONTRAST_LEVELS.FAIL,
+  });
+
+  // Render result
+  renderContrastResult(result);
 
   showSuccessToast("Foreground and background swapped");
 }
